@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DMCore | Digital Mastery</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* General Styles */
+    html,body{
+      overflow-x: hidden;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      scroll-behavior: smooth;
+    }
+    a.nav-link {
+      font-weight: 500;
+      color: #333 !important;
+      margin-right: 20px;
+      transition: 0.3s;
+    }
+    a.nav-link:hover {
+      color: #0d6efd !important;
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+      padding: 10px 25px;
+      font-weight: 600;
+      border-radius: 50px;
+      transition: 0.3s;
+    }
+    .btn-primary:hover {
+      background-color: #084298;
+    }
+    /* Hero Section */
+    .hero {
+        background: url('static/img/hero.jpg') no-repeat center center/cover;
+        color: white;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background-size: cover;
+        background-position: center;
+      }
+      
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      color: white;
+    }
+    /* Default styles for larger screens already defined above */
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .hero {
+    height: 210px !important;
+    margin-top: 50px;
+  }
+  .hero h1 {
+    font-size: 14px;
+  }
+
+  .hero p {
+    font-size: 10px;
+    margin-top: 10px;
+  }
+
+  .hero .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+    /* Features */
+   
+   
+
+      
+      
+    /* About Section */
+    .about-img1 {
+        width: 100%;
+        border-radius: 15px;
+      }
+      
+      .about-img2 {
+        width: 60%;
+        bottom: -30px;
+        right: -20px;
+        border: 5px solid white;
+        border-radius: 15px;
+        z-index: 1;
+      }
+      
+      @media (max-width: 768px) {
+        .about-img2 {
+          position: static;
+          margin-top: 20px;
+          width: 100%;
+        }
+      }
+      
+    /* Services */
+    .service-card:hover {
+        background: #0d6efd;
+        color: white;
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
+      }
+      
+      .service-card:hover p {
+        color: white;
+      }
+      
+      .service-card img {
+        width: 48px;
+        height: 48px;
+      }
+      
+    /* Testimonials */
+    .testimonial {
+      background: #f8f9fa;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+    /* Footer */
+    footer {
+      background-color: #0d6efd;
+      color: white;
+      padding: 20px 0;
+    }
+
+
+    @media (max-width: 767.98px) {
+  .features-row-mobile-margin {
+    margin-right: 1rem; /* Adjust the value as needed */
+  }
+}
+
+   
+
+  </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm fixed-top bg-white">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="#">DMCore</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navmenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="login">Login</a></li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero d-flex" id="home">
+  <div class="container">
+    <h1 class="display-4">Empowering Your Digital Future</h1>
+    <p class="lead">With DMCore, unlock limitless possibilities for your business.</p>
+    <a href="#contact" class="btn btn-primary mt-4">Get Started</a>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5" id="features">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold display-5">Our Key Features</h2>
+      <p class="text-muted lead">Unlock the full potential of your business with DMCore’s powerful, tailor-made digital solutions.</p>
+    </div>
+
+    <!-- High Performance Section -->
+    <div class="row align-items-center g-5 mb-5 flex-column-reverse flex-md-row text-center text-md-start features-row-mobile-margin">
+      <div class="col-md-6">
+        <h3 class="fw-bold mb-3">High Performance</h3>
+        <p class="text-muted">Experience lightning-fast digital solutions that deliver a seamless user experience. Our optimized websites and applications load quickly, perform consistently, and scale effortlessly.</p>
+      </div>
+      <div class="col-md-6 d-flex justify-content-center">
+        <img src="static/img/f1.jpg" alt="High Performance" class="img-fluid rounded-4 shadow-lg w-75 w-md-100">
+      </div>
+    </div>
+
+    <!-- Top Security Section -->
+    <div class="row align-items-center g-5 mb-5 text-center text-md-start features-row-mobile-margin">
+      <div class="col-md-6 d-flex justify-content-center order-2 order-md-1">
+        <img src="static/img/f2.jpg" alt="Top Security" class="img-fluid rounded-4 shadow-lg w-75 w-md-100">
+      </div>
+      <div class="col-md-6 order-1 order-md-2">
+        <h3 class="fw-bold mb-3">Top Security</h3>
+        <p class="text-muted">With state-of-the-art security, we protect your data using encryption, secure cloud services, and 24/7 monitoring to keep your business and customers safe.</p>
+      </div>
+    </div>
+
+    <!-- Scalable Solutions Section -->
+    <div class="row align-items-center g-5 text-center text-md-start features-row-mobile-margin">
+      <div class="col-md-6">
+        <h3 class="fw-bold mb-3">Scalable Solutions</h3>
+        <p class="text-muted">Our scalable solutions grow with your business. From startups to enterprises, we provide future-ready infrastructure that adapts to your evolving needs.</p>
+      </div>
+      <div class="col-md-6 d-flex justify-content-center">
+        <img src="static/img/f3.jpg" alt="Scalable Solutions" class="img-fluid rounded-4 shadow-lg w-75 w-md-100">
+      </div>
+    </div>
+  </div>
+</section>
+
+  
+  
+<!-- Services Section -->
+<style>
+    /* Timeline Section */
+    .timeline-section {
+      position: relative;
+      background: #fff;
+    }
+    
+    /* Vertical Line */
+    .timeline-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: orange;
+      z-index: 1;
+    }
+    
+    /* Timeline Dot */
+    .timeline-dot {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      z-index: 2;
+      border-radius: 50%;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    
+    /* Fix for Mobile View */
+    @media (max-width: 768px) {
+      .timeline-line {
+        left: 20px; /* Move the timeline line to the left */
+      }
+      
+      .timeline-dot {
+        left: 20px; /* Align dots with the timeline line */
+        transform: none; /* Prevent shifting */
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+    
+      .col-md-6 {
+        padding-left: 60px; /* Ensure content is properly aligned */
+      }
+    }
+    </style>
+    
+<section class="timeline-section py-5">
+    <div class="container">
+      <h2 class="text-center fw-bold mb-4">Our Creative Services</h2>
+      <p class="text-center mb-5">Get the most of reduction in your team’s operating costs for the whole product which creates amazing UI/UX experiences.</p>
+      <div class="row position-relative">
+        <!-- Vertical Line -->
+        <div class="timeline-line d-none d-md-block"></div>
+  
+        <!-- Card 1 -->
+        <!-- Card 3 - SEO Services -->
+<div class="col-md-6 offset-md-6 mb-5 position-relative">
+    <div class="timeline-dot bg-warning text-white">01</div>
+    <div class="card shadow px-4 py-4 border-0">
+      <h5 class="fw-bold mb-2 text-warning">SEO Optimization</h5>
+      <p class="mb-3">Enhance your website's visibility with our expert SEO services. We implement data-driven strategies to improve your rankings, boost organic traffic, and increase conversions.</p>
+      <a href="#" class="text-decoration-none fw-semibold text-warning">View Details →</a>
+    </div>
+  </div>
+  
+  <!-- Card 4 - SEM Services -->
+  <div class="col-md-6 mb-5 position-relative">
+    <div class="timeline-dot bg-danger text-white">02</div>
+    <div class="card shadow px-4 py-4 border-0">
+      <h5 class="fw-bold mb-2 text-danger">SEM</h5>
+      <p class="mb-3">Drive instant visibility and targeted traffic with our SEM solutions. From Google Ads to PPC campaigns, we create high-performing ad strategies that deliver measurable ROI.</p>
+      <a href="#" class="text-decoration-none fw-semibold text-danger">View Details →</a>
+    </div>
+  </div>
+  
+  
+        <!-- Card 3 -->
+        <div class="col-md-6 offset-md-6 mb-5 position-relative">
+          <div class="timeline-dot bg-warning text-white">03</div>
+          <div class="card shadow px-4 py-4 border-0">
+            <h5 class="fw-bold mb-2 text-warning">ERP Development</h5>
+            <p class="mb-3">Comprehensive ERP development solutions to streamline your business processes. Custom-built, scalable, and efficient systems to enhance productivity and growth.</p>
+            <a href="#" class="text-decoration-none fw-semibold text-warning">View Details →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  
+  
+<style>
+  @media (max-width: 767.98px) {
+  .banner-section {
+    height: 220px !important; /* Reduce height */
+  }
+
+  .banner-section h1 {
+    font-size: 12px !important; /* Smaller heading */
+  }
+
+  .banner-section p {
+    font-size: 10px !important; /* Smaller paragraph */
+  }
+
+  .banner-section .btn {
+    font-size: 10px !important; /* Smaller button */
+    padding: 0.5rem 1rem !important;
+  }
+  .banner-overlay-box {
+    padding: 1.5rem !important;   /* Reduce padding */
+    width: 100%;                  /* Optional: make it full width */
+    max-width: 90%;               /* Optional: limit max width */
+    margin: 0 auto;               /* Center it */
+  }
+}
+
+</style>
+
+  <!-- Banner Section -->
+  <section class="position-relative text-white banner-section" style="background: url('static/img/banner.jpg') center/cover no-repeat; height: 80vh;">
+    <div class="container h-100 d-flex align-items-center justify-content-center">
+      <div class="bg-dark bg-opacity-75 p-5 rounded-4 text-center shadow-lg banner-overlay-box">
+        <h1 class="display-4 fw-bold">Welcome to Our Creative Studio</h1>
+        <p class="lead mt-3">Delivering innovative digital solutions with design and technology at the core.</p>
+        <a href="#" class="btn btn-primary btn-lg mt-4">Explore More</a>
+      </div>
+    </div>
+  </section>
+  
+  
+
+
+
+
+
+
+
+<!-- About Section -->
+<section class="py-5 bg-light" id="about">
+    <div class="container">
+      <div class="row g-5 align-items-center">
+        <!-- Left Column with Two Images -->
+        <div class="col-lg-6 position-relative">
+          <img src="static/img/ab1.jpg" class="img-fluid rounded shadow about-img1" alt="Tech">
+          
+        </div>
+  
+        <!-- Right Column with Content -->
+        <div class="col-lg-6">
+          <h2 class="fw-bold mb-3">About <span class="text-primary">DMCore</span></h2>
+          <p class="text-muted">DMCore is your trusted partner in digital transformation. We specialize in designing powerful web solutions, creating dynamic user experiences, and building strategic campaigns that scale.</p>
+          <p class="text-muted">Our team of experts leverages modern tools and industry insights to turn your vision into reality. From branding to backend, DMCore has you covered.</p>
+          <a href="#contact" class="btn btn-primary mt-3">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+<section class="py-5" id="services">
+    <div class="container text-center">
+      <h2 class="fw-bold mb-5">Other Services</h2>
+      <div class="row g-4">
+        
+        <!-- SEO -->
+        
+        <!-- Content Marketing -->
+        <div class="col-md-4">
+          <div class="service-card p-4 shadow-sm h-100 rounded">
+            <div class="icon mb-3">
+              <img src="https://img.icons8.com/fluency/48/content.png" alt="Content Icon">
+            </div>
+            <h5 class="fw-bold mb-2">Content Marketing</h5>
+            <p class="text-muted">Craft powerful stories and articles that connect with your audience and drive conversions.</p>
+          </div>
+        </div>
+  
+        <!-- Email Marketing -->
+        <div class="col-md-4">
+          <div class="service-card p-4 shadow-sm h-100 rounded">
+            <div class="icon mb-3">
+              <img src="https://img.icons8.com/fluency/48/mail.png" alt="Email Icon">
+            </div>
+            <h5 class="fw-bold mb-2">Email Campaigns</h5>
+            <p class="text-muted">Nurture your leads and retain customers through strategic and automated email marketing.</p>
+          </div>
+        </div>
+  
+        <!-- Analytics -->
+        <div class="col-md-4">
+          <div class="service-card p-4 shadow-sm h-100 rounded">
+            <div class="icon mb-3">
+              <img src="https://img.icons8.com/fluency/48/combo-chart.png" alt="Analytics Icon">
+            </div>
+            <h5 class="fw-bold mb-2">Analytics & Insights</h5>
+            <p class="text-muted">Measure performance and gain insights with detailed analytics and custom reports.</p>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  </section>
+  
+  
+  <style>
+    @media (max-width: 576px) {
+      #testimonials .card {
+        margin-right: 30px; /* Adjust the value as needed */
+      }
+    }
+  </style>
+  
+<!-- Testimonials Section -->
+<section class="py-5 bg-light" id="testimonials">
+  <div class="container text-center">
+    <h2 class="mb-5 fw-bold">What Our Clients Say</h2>
+    <div class="row g-4 d-flex justify-content-center">
+      
+      <!-- Testimonial 1 -->
+      <div class="col-12 col-sm-10 col-md-6">
+        <div class="card border-0 shadow-sm p-4 h-100 text-center">
+          <img src="static/img/b1.jpg" alt="Sarah Williams" class="rounded-circle mx-auto d-block mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+          <p class="text-muted">"DMCore transformed our online presence! Sales went up by 300% after the new website launch."</p>
+          <h6 class="fw-bold mt-3">Sarah Williams</h6>
+          <small class="text-primary">Marketing Manager</small>
+        </div>
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div class="col-12 col-sm-10 col-md-6">
+        <div class="card border-0 shadow-sm p-4 h-100 text-center">
+          <img src="static/img/b2.jpg" alt="James Peterson" class="rounded-circle mx-auto d-block mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+          <p class="text-muted">"A professional, creative, and dedicated team. Highly recommended for digital projects!"</p>
+          <h6 class="fw-bold mt-3">James Peterson</h6>
+          <small class="text-primary">CEO, Startup Hub</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  
+
+
+<!-- Blog Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Latest Insights</h2>
+        <p class="text-muted">Stay updated with trends, tips, and tech news from our expert team.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <img src="static/img/blog3.jpg" class="card-img-top" alt="Blog Image" st>
+            <div class="card-body">
+              <h5 class="card-title">How to Optimize Your Website for Speed</h5>
+              <p class="card-text text-muted">Page load time directly affects your SEO and user experience. Learn how to improve it.</p>
+              <a href="#" class="text-primary fw-semibold">Read More →</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <img src="static/img/blog2.jpg" class="card-img-top" alt="Blog Image">
+            <div class="card-body">
+              <h5 class="card-title">UI/UX Design Trends to Watch in 2025</h5>
+              <p class="card-text text-muted">Discover the evolving styles and practices shaping digital design this year.</p>
+              <a href="#" class="text-primary fw-semibold">Read More →</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <img src="static/img/blog3.jpg" class="card-img-top" alt="Blog Image">
+            <div class="card-body">
+              <h5 class="card-title">Mastering Google Ads for Lead Generation</h5>
+              <p class="card-text text-muted">An effective PPC campaign can change your business—here's how to run one.</p>
+              <a href="#" class="text-primary fw-semibold">Read More →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+<style>
+  @media (max-width: 576px) {
+    #contact .col-md-6 {
+      margin-right: 30px; /* Adjust value as needed */
+    }
+  }
+  </style>
+  
+<!-- Contact Section -->
+<section class="py-5" id="contact">
+  <div class="container">
+    <h2 class="text-center mb-5 fw-bold">Get In Touch</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form>
+          <div class="mb-3">
+            <input type="text" class="form-control" placeholder="Your Name">
+          </div>
+          <div class="mb-3">
+            <input type="email" class="form-control" placeholder="Your Email">
+          </div>
+          <div class="mb-3">
+            <textarea class="form-control" rows="5" placeholder="Your Message"></textarea>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Send Message</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}
+<!-- Footer -->
+<!-- Fixed Footer -->
+<footer class="bg-white text-black py-4">
+  <div class="container">
+    <div class="row text-center text-md-start">
+      <!-- About Section -->
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-bold">About Us</h5>
+        <p>We are a results-driven digital marketing agency specializing in SEO, social media, PPC, and content strategy. Helping brands grow and thrive online through smart and creative digital solutions.</p>
+      </div>
+
+      <!-- Services -->
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-bold">Our Services</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-black text-decoration-none">SEO Optimization</a></li>
+          <li><a href="#" class="text-black text-decoration-none">Social Media Marketing</a></li>
+          <li><a href="#" class="text-black text-decoration-none">Content Marketing</a></li>
+          <li><a href="#" class="text-black text-decoration-none">PPC Advertising</a></li>
+          <li><a href="#" class="text-black text-decoration-none">Web Design</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact / Newsletter -->
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-bold">Get In Touch</h5>
+        <p class="mb-2">Have a project in mind or want to grow your online presence? Let’s talk!</p>
+        <p class="mb-1">Email: <a href="mailto:info@digitalboost.com" class="text-black">info@digitalboost.com</a></p>
+        <p>Phone: <a href="tel:+919876543210" class="text-black">+91 98765 43210</a></p>
+      </div>
+    </div>
+    <hr>
+    <div class="text-center">
+      <small>&copy; 2025 Digital Boost Agency. All rights reserved.</small>
+    </div>
+  </div>
+</footer>
+
+
+  
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

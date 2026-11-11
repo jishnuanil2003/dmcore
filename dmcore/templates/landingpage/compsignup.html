@@ -1,0 +1,263 @@
+{% extends "landingpage/home.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    body{
+        background: url('static/img/log.jpg') no-repeat center center/cover;
+    }
+    
+    .registration-form {
+  max-width: 800px;
+  margin-top: 7%;
+  margin-bottom: 10px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .registration-form {
+    margin-top: 5rem; /* Adjust as needed */
+  }
+}
+    .registration-form h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+    .form-control {
+      border-radius: 10px;
+    }
+    .btn-custom {
+      border-radius: 10px;
+      background-color: #007bff;
+      color: white;
+      font-weight: 600;
+    }
+    .btn-custom:hover {
+      background-color: #0056b3;
+    }
+   
+    
+        
+  </style>
+
+<div class="container registration-form">
+
+    <h2>Company Registration</h2>
+    <form method="POST" action="{% url 'registerbusiness'%}">
+        {% csrf_token %}
+      <!-- Row 1: First Name, Last Name -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="first_name" class="form-label">First Name</label>
+          <input type="text" class="form-control" id="first_name" name="first_name" required>
+        </div>
+        <div class="col-md-6">
+          <label for="last_name" class="form-label">Last Name</label>
+          <input type="text" class="form-control" id="last_name" name="last_name" required>
+        </div>
+      </div>
+
+      <!-- Row 2: Company Name, Company ID -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="company_name" class="form-label">Company Name</label>
+          <input type="text" class="form-control" id="company_name" name="company_name" required>
+        </div>
+        <div class="col-md-6">
+          <label for="company_id_suffix" class="form-label">Company Identifier ID</label>
+          <div class="input-group">
+              <span class="input-group-text" id="prefix">COMPAN-</span>
+              <input type="text" class="form-control" id="company_id_suffix" name="company_id_suffix" required>
+          </div>
+          <small id="companyError" class="text-danger"></small>
+      </div>
+      <!-- Hidden field to hold the full ID before submission -->
+      <input type="hidden" name="company_id" id="company_id">
+      
+      </div>
+      <script>
+        $(document).ready(function () {
+            $("form").on("submit", function () {
+                let suffix = $("#company_id_suffix").val().trim();
+                $("#company_id").val("COMPAN-" + suffix);
+            });
+        });
+    </script>
+    
+
+      <!-- Row 3: Contact No., Email -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="contact_no" class="form-label">Contact Number</label>
+          <input type="tel" class="form-control" id="contact_no" name="contact_no" required>
+          <small id="contactError" class="text-danger"></small>
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">Email Address</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+          <small id="emailError" class="text-danger"></small>
+        </div>
+      </div>
+
+      <!-- Row 4: Location, Website URL -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="location" class="form-label">Location</label>
+          <input type="text" class="form-control" id="location" name="location" required>
+        </div>
+        <div class="col-md-6">
+          <label for="website_url" class="form-label">Website URL</label>
+          <input type="url" class="form-control" id="website_url" name="website_url">
+        </div>
+      </div>
+
+      <!-- Row 5: Username, Password -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" readonly required>
+          <div class="form-text text-muted mt-1">
+            <i class="fas fa-info-circle me-1 text-info"></i> Use email as username
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+          <div id="passwordError" class="text-danger"></div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary px-5" id="submitBtn" disabled>Register</button>
+
+      </div>
+    </form>
+  </div>
+  <script>
+    $(document).ready(function () {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        let validEmail = false, validContact = false, validCompany = false;
+    
+        // Email Validation
+        // Inside $(document).ready(...)
+$("#email").on("input", function () {
+    const email = $(this).val();
+    if (emailRegex.test(email)) {
+        $.ajax({
+            url: "{% url 'check_email' %}",
+            data: { 'email': email },
+            success: function (data) {
+                if (data.exists) {
+                    validEmail = false;
+                    $("#email").addClass("is-invalid");
+                    $("#emailError").text("Email already exists.");
+                } else {
+                    validEmail = true;
+                    $("#email").removeClass("is-invalid").addClass("is-valid");
+                    $("#emailError").text("");
+                    $("#username").val(email);
+                }
+                toggleSubmit();
+            }
+        });
+    } else {
+        validEmail = false;
+        $("#email").addClass("is-invalid");
+        $("#emailError").text("Enter a valid Gmail address.");
+        toggleSubmit();
+    }
+});
+
+$("#contact_no").on("input", function () {
+    const contact = $(this).val();
+    if (/^\d{10}$/.test(contact)) {
+        validContact = true;
+        $(this).removeClass("is-invalid").addClass("is-valid");
+        $("#contactError").text("");
+    } else {
+        validContact = false;
+        $(this).addClass("is-invalid");
+        $("#contactError").text("Contact number must be exactly 10 digits.");
+    }
+    toggleSubmit();
+});
+
+$("#company_id_suffix").on("input", function () {
+  const suffix = $(this).val().trim();
+  const fullCompanyId = "COMPAN-" + suffix;
+  $("#company_id").val(fullCompanyId);  // Set hidden field
+
+  if (suffix.length > 2) {
+      $.ajax({
+          url: "{% url 'check_company_id' %}",
+          data: { 'company_id': fullCompanyId },
+          success: function (data) {
+              if (data.exists) {
+                  validCompany = false;
+                  $("#company_id_suffix").addClass("is-invalid");
+                  $("#companyError").text("Company ID already exists.");
+              } else {
+                  validCompany = true;
+                  $("#company_id_suffix").removeClass("is-invalid").addClass("is-valid");
+                  $("#companyError").text("");
+              }
+              toggleSubmit();
+          }
+      });
+  } else {
+      validCompany = false;
+      $("#company_id_suffix").addClass("is-invalid");
+      $("#companyError").text("Enter a valid Company ID.");
+      toggleSubmit();
+  }
+});
+
+
+
+let validPassword = false;
+
+$("#password").on("input", function () {
+    const password = $(this).val();
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+
+    if (passwordRegex.test(password)) {
+        validPassword = true;
+        $(this).removeClass("is-invalid").addClass("is-valid");
+        $("#passwordError").text("");
+    } else {
+        validPassword = false;
+        $(this).addClass("is-invalid").removeClass("is-valid");
+        $("#passwordError").text("Password must have 1 capital letter, 1 number, 1 special character, and be at least 8 characters long.");
+    }
+
+    toggleSubmit();
+});
+
+
+
+
+
+
+function toggleSubmit() {
+  if (validEmail && validContact && validCompany && validPassword) {
+      $("#submitBtn").prop("disabled", false);
+  } else {
+      $("#submitBtn").prop("disabled", true);
+  }
+}
+
+
+
+    
+});
+    </script>
+    
+  {% endblock content %}

@@ -1,0 +1,40 @@
+@import url(./colour.css);
+
+.modal-content {
+    border: none;
+}
+
+.modal-header, .modal-footer {
+    border: none;
+}
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}
+
+table td{
+    align-content: center;
+    justify-content: center;
+}
+
+.search_colm{
+  width: 25%;
+}
+
+.table_en_sm{
+  min-width: 100px;
+}
+.table_en_md{
+  min-width: 190px;
+}
+.table_en_lg{
+  min-width: 500px;
+}
+
+@media (max-width: 768px) {
+  .search_colm{
+    width: 100%;
+  }
+}

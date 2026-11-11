@@ -1,0 +1,41 @@
+@import url(./colour.css);
+
+.table_en_sm{
+  min-width: 100px;
+}
+.table_en_lsm{
+  min-width: 150px;
+}
+.table_en_md{
+  min-width: 190px;
+}
+.table_en_lmd{
+  min-width: 250px;
+}
+.table_en_lg{
+  min-width: 300px;
+}
+.table_en_xl{
+  min-width: 500px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #fff;
+}
+
+textarea:read-only,
+input:read-only {
+  background-color: #212529;
+  color: #ccc;
+}
+
+#searchInput::placeholder{
+  color: white !important;
+}
+
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}

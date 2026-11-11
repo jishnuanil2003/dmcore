@@ -1,0 +1,118 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Employees</p>
+    </div>
+  </div>
+
+<div class="container-fluid mt-3 comn_table_bg">
+  <h4 class="text-white mb-4">Data Executives</h4>
+  <!-- <h4 class="text-white mb-4">Data Executives (<span class="text-white">{{ employees|length }}</span>)</h4> -->
+
+  <!-- Search Bar -->
+  <div class="input-group w-auto mb-3">
+    <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  <!-- Table -->
+  {% if employees %}
+    <div class="table-responsive" id="tableWrapper">
+      <table class="table table-dark table-bordered table-hover" id="targetTable">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Employee Id</th>
+            <th>Employee Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Register Date</th>
+            <th>Department</th>
+            <th>Designation</th>
+            <th>Active Status</th>
+            <th>Account Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in employees %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td class="table_en_lsm">{{ emp.employee_code }}</td>
+            <td class="table_en_md">{{ emp.name }}</td>
+            <td class="table_en_sm">{{ emp.email }}</td>
+            <td class="table_en_sm">{{ emp.contact_number }}</td>
+            <td class="table_en_lsm">{{ emp.created_at }}</td>
+            <td class="table_en_lsm">{{ emp.department.name }}</td>
+            <td class="table_en_lsm">{{ emp.designation.name }}</td>
+            <td class="table_en_lsm">
+              <span class="{% if emp.login.active_status %}text-success{% else %}text-danger{% endif %}">
+                {% if emp.login.active_status %} Active {% else %} Inactive {% endif %}
+              </span>
+            </td>
+            <td class="table_en_lsm">
+              <span class="{% if emp.login.is_staff %}text-success{% else %}text-danger{% endif %}">
+                {% if emp.login.is_staff %} Approved {% else %} Pending {% endif %}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div id="noResultsMessage" class="text-white text-center mt-3" style="display: none;">
+      <h6>No matching employees found.</h6>
+    </div>
+
+  {% else %}
+    <div class="text-white text-center mt-4">
+      <h5>No employee found.</h5>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearSearch");
+    const rows = document.querySelectorAll("#targetTable tbody tr");
+    const tableWrapper = document.getElementById("tableWrapper");
+    const noMsg = document.getElementById("noResultsMessage");
+
+    function filterRows() {
+      const term = searchInput.value.toLowerCase();
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const match = row.textContent.toLowerCase().includes(term);
+        row.style.display = match ? "" : "none";
+        if (match) visibleCount++;
+      });
+
+      if (visibleCount === 0) {
+        tableWrapper.style.display = "none";
+        noMsg.style.display = "block";
+      } else {
+        tableWrapper.style.display = "block";
+        noMsg.style.display = "none";
+      }
+    }
+
+    searchInput.addEventListener("keyup", filterRows);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      filterRows();
+    });
+  });
+</script>
+
+
+{% endblock %}

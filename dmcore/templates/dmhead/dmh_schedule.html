@@ -1,0 +1,557 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% block content %}
+
+<style>
+        body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+    
+    input[type="checkbox"] {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #0d6efd;
+        border-radius: 3px;
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        background-color: white;
+    }
+
+    input[type="checkbox"]:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    input[type="checkbox"]::after {
+        content: "✔";
+        font-size: 12px;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+    }
+
+    input[type="checkbox"]:checked::after {
+        display: block;
+    }
+
+    @media (max-width: 576px) {
+        #myDayTable1 td {
+            min-width: 250px;
+            word-break: break-word;
+        }
+    }
+      #main-content {
+    margin-top: 10px !important; /* Only if truly needed */
+  }
+      @media (max-width: 576px) {
+        #main-content {
+            margin-top: 70px !important; 
+        }
+    }
+
+</style>
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast align-items-center text-white {% if message.tags == 'error' %}bg-danger{% else %}bg-success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="main-content">
+    <br><br>
+    <div class="container mt-4" style="background-color: #333333;">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap pt-3 pb-1">
+            <h3 class="me-3" style="color: white;">My Schedule List</h3>
+            <div class="row g-2">
+                <div class="col-12 col-sm-auto">
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+                        <i class="fa-solid fa-calendar-plus"></i> Schedule My Day
+                    </button>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button class="btn btn-secondary w-100" id="todayScheduleBtn">
+                        <i class="fa-solid fa-calendar-day"></i> Today's Schedule
+                    </button>
+                </div>
+                <div class="col-12 col-sm-auto">
+                        <input type="text" name="search" id="searchInput" class="form-control" placeholder="Search..." value="{{ request.GET.search }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <form method="GET" class="d-flex align-items-center flex-wrap mt-3 gap-2">
+            <div class="d-flex flex-wrap gap-2 w-100">
+                <div class="col-12 col-md-auto col-lg-3">
+                    <input type="date" name="start_date" class="form-control w-100" value="{{ start_date|default_if_none:'' }}">
+                </div>
+                <div class="col-12 col-md-auto col-lg-3">
+                    <input type="date" name="end_date" class="form-control w-100" value="{{ end_date|default_if_none:'' }}">
+                </div>
+                <div class="col-12 col-md-auto">
+                    <button type="submit" class="btn w-100 h-100 d-flex justify-content-center align-items-center" style="border: 1px solid #0d6efd; background-color: transparent;">
+                        <i class="fa-solid fa-magnifying-glass" style="color: #0d6efd;"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Schedule Table -->
+        <div class="row mt-4 pb-3">
+            <div class="col-md-12 col-sm-12 mt-2">
+                <h6 class="text-primary">Task List</h6>
+                <div class="table-responsive ">
+                    <table class="table table-striped table-dark" id="myDayTable1">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Task / Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody">
+                            {% if schedules %}
+                                {% for schedule in schedules %}
+                                    <tr class="schedule-row" data-schedule-id="{{ schedule.id }}">
+                                        <td class="{% if schedule.schedule_status == 'completed' %}text-decoration-line-through{% endif %}" ...>
+                                            <input type="checkbox" class="schedule-checkbox" data-schedule-id="{{ schedule.id }}"
+                                                {% if schedule.schedule_status == 'completed' %}checked{% endif %}>
+                                            {{ schedule.schedule_date | date:"d-m-Y" }} <br> {{ schedule.start_time |time:"h:i A" }} to {{ schedule.end_time |time:"h:i A" }}
+                                        </td>
+                                        <td class="{% if schedule.schedule_status == 'completed' %}text-decoration-line-through{% endif %}" ...>
+                                            {{ schedule.schedule_head }} <br> {{ schedule.todo_content }}
+                                        </td>
+
+                                        <td style="min-width: 180px;">
+                                            <button class="btn btn-primary btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#editScheduleModal" onclick="editSchedule('{{ schedule.id }}')"                                            >
+                                                <i class="fa-solid fa-pen-to-square mt-1"></i> Edit
+                                            </button>                                            
+                                            
+                                            <a href="{% url 'dmh_delete_schedule' schedule.id %}" onclick="return confirm('Are you sure you want to delete this schedule?')">
+                                                <button class="btn btn-danger btn-sm mt-1">
+                                                    <i class="fa-solid fa-trash"></i> Delete
+                                                </button>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No schedules for today</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- add Modal -->
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> 
+      <div class="modal-content bg-dark">
+        <div class="modal-header">
+          <h5 class="modal-title text-light" id="scheduleModalLabel">Schedule My Day</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" >
+          <form action="{% url 'dmh_add_my_schedule' %}" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="date" class="form-label text-light">Date</label>
+              <input type="date" class="form-control" id="date" name="date" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label for="startTime" class="form-label text-light">Start Time</label>
+                <input type="time" class="form-control" id="startTime" name="startTime" required>
+              </div>
+              <div class="col-md-6">
+                <label for="endTime" class="form-label text-light">End Time</label>
+                <input type="time" class="form-control" id="endTime" name="endTime" required>
+              </div>
+            </div>
+
+             <!-- Two Text Inputs on One Line (Auto-Filled with Selected Time) -->
+             <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="autoStartTime"  readonly>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="autoEndTime" readonly>
+                </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="shedule" class="form-label text-light">Name</label>
+              <input type="text" class="form-control" id="shedule" name="shedule" placeholder="Enter schedule name" required>
+            </div>
+            <div class="mb-3"> 
+              <label for="description" class="form-label text-light">Description</label>
+              <textarea class="form-control" id="description" name="description" rows="4" placeholder="Add a brief description" required></textarea>
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="d-flex gap-2 w-100">
+                    <button type="reset" class="btn btn-light w-100">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> Clear
+                    </button>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                    <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark"></i> Close
+                    </button>
+                </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> 
+      <div class="modal-content bg-dark">
+        <div class="modal-header">
+          <h5 class="modal-title text-light" id="editScheduleModalLabel">Edit Schedule</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="" id="editScheduleForm" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="editScheduleId" name="schedule_id"> <!-- Hidden ID field -->
+  
+            <div class="mb-3">
+              <label for="editDate" class="form-label text-light">Date</label>
+              <input type="date" class="form-control" id="editDate" name="date" required>
+            </div>
+  
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label for="editStartTime" class="form-label text-light">Start Time</label>
+                <input type="time" class="form-control" id="editStartTime" name="startTime" required>
+              </div>
+              <div class="col-md-6">
+                <label for="editEndTime" class="form-label text-light">End Time</label>
+                <input type="time" class="form-control" id="editEndTime" name="endTime" required>
+              </div>
+            </div>
+  
+            <!-- Auto-filled read-only fields -->
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="editAutoStartTime" readonly>
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="editAutoEndTime" readonly>
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="editName" class="form-label text-light">Name</label>
+              <input type="text" class="form-control" id="editName" name="shedule" placeholder="Enter schedule name" required>
+            </div>
+  
+            <div class="mb-3">
+              <label for="editDescription" class="form-label text-light">Description</label>
+              <textarea class="form-control" id="editDescription" name="description" rows="4" placeholder="Add a brief description" required></textarea>
+            </div>
+  
+            <div class="d-flex justify-content-center">
+                <div class="d-flex gap-2 w-100">
+                    <button type="reset" class="btn btn-light w-100">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> Clear
+                    </button>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fa-solid fa-check"></i> Update
+                    </button>
+                    <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark"></i> Close
+                    </button>
+                </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+  <script>
+    function formatTimeTo12Hour(time) {
+        if (!time) return ""; // Handle empty input
+        let [hour, minute] = time.split(":");
+        hour = parseInt(hour);
+        let period = hour >= 12 ? "PM" : "AM";
+        hour = hour % 12 || 12;
+        hour = hour < 10 ? "0" + hour : hour;
+        return `${hour}:${minute} ${period}`;
+    }
+    
+    function attachTimeListeners(startId, endId, autoStartId, autoEndId) {
+        const startInput = document.getElementById(startId);
+        const endInput = document.getElementById(endId);
+        const autoStart = document.getElementById(autoStartId);
+        const autoEnd = document.getElementById(autoEndId);
+    
+        if (startInput && autoStart) {
+            startInput.addEventListener("input", function () {
+                autoStart.value = formatTimeTo12Hour(this.value);
+            });
+        }
+    
+        if (endInput && autoEnd) {
+            endInput.addEventListener("input", function () {
+                autoEnd.value = formatTimeTo12Hour(this.value);
+            });
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        // Add modal
+        attachTimeListeners("startTime", "endTime", "autoStartTime", "autoEndTime");
+        
+        // Edit modal
+        attachTimeListeners("editStartTime", "editEndTime", "editAutoStartTime", "editAutoEndTime");
+    });
+    </script>
+
+
+
+
+<script>
+    document.getElementById("todayScheduleBtn").addEventListener("click", function() {
+        window.location.href = "{% url 'dmh_schedule' %}"; // Reload page without filters
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function updateRowAppearance(checkbox) {
+            let row = checkbox.closest("tr");  
+            let cells = row.querySelectorAll("td");  // ✅ Get all cells in the row
+    
+            if (checkbox.checked) {
+                cells.forEach(cell => {
+                    cell.classList.add("text-decoration-line-through");
+                    cell.style.color = "red";  // ✅ Apply red color to all columns
+                });
+            } else {
+                cells.forEach(cell => {
+                    cell.classList.remove("text-decoration-line-through");
+                    cell.style.color = "";  // ✅ Reset styling
+                });
+            }
+        }
+    
+        // ✅ Apply styles on page load (for filtered results)
+        document.querySelectorAll(".schedule-checkbox").forEach(checkbox => {
+            updateRowAppearance(checkbox);
+    
+            checkbox.addEventListener("change", function () {
+                let scheduleId = this.dataset.scheduleId;
+                let isChecked = this.checked;
+    
+                // ✅ Update entire row UI before sending request
+                updateRowAppearance(this);
+    
+                // ✅ Send AJAX request to update database
+                fetch("{% url 'dmh_update_schedule_status' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: JSON.stringify({ schedule_id: scheduleId, is_checked: isChecked }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        // ❌ Revert UI if request fails
+                        this.checked = !isChecked;
+                        updateRowAppearance(this);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    this.checked = !isChecked;
+                    updateRowAppearance(this);
+                });
+            });
+        });
+    });
+    </script>
+
+<script>
+function editSchedule(scheduleId) {
+    // Convert to number if needed
+    const id = parseInt(scheduleId);
+
+    fetch(`/get_schedule_details/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("editScheduleId").value = data.id;
+            document.getElementById("editDate").value = data.schedule_date;
+            document.getElementById("editStartTime").value = data.start_time;
+            document.getElementById("editEndTime").value = data.end_time;
+            document.getElementById("editName").value = data.schedule_head;
+            document.getElementById("editDescription").value = data.todo_content;
+            document.getElementById("editScheduleForm").action = `/dmh_edit_schedule/${data.id}/`;
+
+            function formatTo12Hour(timeStr) {
+                const [hourStr, minuteStr] = timeStr.split(":");
+                let hour = parseInt(hourStr);
+                const minutes = minuteStr.padStart(2, '0');
+                const ampm = hour >= 12 ? "PM" : "AM";
+                hour = hour % 12 || 12; // Convert to 12-hour format
+                return `${hour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+            }
+
+            document.getElementById("editAutoStartTime").value = formatTo12Hour(data.start_time);
+            document.getElementById("editAutoEndTime").value = formatTo12Hour(data.end_time);
+        })
+        .catch(error => {
+            console.error('Error fetching schedule data:', error);
+        });
+}
+
+
+</script>
+
+
+
+
+<script>
+let timeout = null;
+
+// Triggered on input change with debounce
+document.getElementById('searchInput').addEventListener('input', function(event) {
+    const query = event.target.value.trim();
+
+    if (query.length === 0) {
+        window.location.reload();  // Reload to show today's schedule
+        return;
+    }
+
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        searchSchedules(query);
+    }, 300);  // Debounce time
+});
+
+// Fetch schedule results based on query
+function searchSchedules(query) {
+    fetch(`/dmh_schedule_search/?search=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            displaySearchResults(data);
+        })
+        .catch(error => {
+            console.error('Error fetching search results:', error);
+            showError();
+        });
+}
+
+// Update the table with search results
+function displaySearchResults(data) {
+    const scheduleTableBody = document.getElementById('scheduleTableBody');
+    scheduleTableBody.innerHTML = '';  // Clear old results
+
+    if (data.length === 0) {
+        const noResultsRow = document.createElement('tr');
+        noResultsRow.innerHTML = '<td colspan="3" class="text-center">No results found.</td>';
+        scheduleTableBody.appendChild(noResultsRow);
+        return;
+    }
+
+    data.forEach(schedule => {
+        const row = document.createElement('tr');
+        row.classList.add('schedule-row');
+        row.setAttribute('data-schedule-id', schedule.id);
+
+        row.innerHTML = `
+            <td class="${schedule.schedule_status === 'completed' ? 'text-decoration-line-through' : ''}">
+                <input type="checkbox" class="schedule-checkbox" data-schedule-id="${schedule.id}"
+                    ${schedule.schedule_status === 'completed' ? 'checked' : ''}>
+                ${formatDate(schedule.schedule_date)} <br> ${formatTime(schedule.start_time)} to ${formatTime(schedule.end_time)}
+            </td>
+            <td class="${schedule.schedule_status === 'completed' ? 'text-decoration-line-through' : ''}">
+                ${schedule.schedule_head} <br> ${schedule.todo_content}
+            </td>
+            <td style="min-width: 180px;">
+                <button class="btn btn-primary btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#editScheduleModal"
+                    onclick="editSchedule('${schedule.id}')">
+                    <i class="fa-solid fa-pen-to-square mt-1"></i> Edit
+                </button>
+                <a href="/dmh_delete_schedule/${schedule.id}" onclick="return confirm('Are you sure you want to delete this schedule?')">
+                    <button class="btn btn-danger btn-sm mt-1">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </a>
+            </td>
+        `;
+        scheduleTableBody.appendChild(row);
+    });
+}
+
+// Format date to dd-mm-yyyy
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');  // Month is 0-indexed
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+
+// Format time to HH:MM AM/PM
+function formatTime(timeString) {
+    const time = new Date(`1970-01-01T${timeString}`);
+    let hours = time.getHours();
+    let minutes = time.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;  // Convert to 12-hour format
+    minutes = String(minutes).padStart(2, '0');
+    return `${hours}:${minutes} ${ampm}`;
+}
+
+// Display error row
+function showError() {
+    const scheduleTableBody = document.getElementById('scheduleTableBody');
+    const errorRow = document.createElement('tr');
+    errorRow.innerHTML = '<td colspan="3" class="text-center text-danger">Failed to load schedules. Please try again later.</td>';
+    scheduleTableBody.appendChild(errorRow);
+}
+</script>
+
+{% endblock %}
+

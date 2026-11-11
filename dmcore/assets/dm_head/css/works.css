@@ -1,0 +1,60 @@
+@import url(./colour.css);
+
+.container-fluid {
+    color: #fff;
+}
+
+.work-card {
+    width: 100%;
+    background: #222222;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+    border: 1px solid var(--primary-color);
+}
+
+.work-card i {
+    font-size: 18px;
+}
+.work-card h5 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.work-card p {
+    font-size: 13px;
+    color: #a7a7a7;
+}
+
+#employeeSelect {
+    background: #1e1f26;
+    color: #d2d2d2;
+    border: 1px solid #2c2d34;
+}
+
+#employeeSelect:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+#searchBtn {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+#searchBtn:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+h3, h5 {
+    color: #fff;
+}
+
+@media (max-width: 767px) {
+    #employeeSelect {
+        width: 100%;
+    }
+}

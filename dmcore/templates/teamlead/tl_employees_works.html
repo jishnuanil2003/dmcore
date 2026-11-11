@@ -1,0 +1,76 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+
+{% block title %}Employee Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/works.css' %}">
+<link rel="stylesheet" href="{% static 'teamlead/css/tl_employees_works.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb text-white">
+    <li class="breadcrumb-item">
+      <a href="{% url 'tl_employees_section' %}" class="text-decoration-none text-white">Dashboard</a>
+    </li>
+    <li class="breadcrumb-item active text-white-50" aria-current="page">Employee Works</li>
+  </ol>
+</nav>
+
+<div class="container-fluid mt-3 comn_table_bg">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <h3 class="text-light">List Of Works</h3>
+            <p class="small">
+                A list of works that employee work on for different clients
+            </p>
+        </div>
+
+        <!-- // dropdown, search -->
+        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-start mt-2 mt-md-0">
+            <div class="d-flex gap-2">
+                <select class="form-select form-select-sm" id="clientSelect">
+                    <option value="">--- select client ---</option>
+                    {% for c in clients %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+                
+                <button class="btn btn-outline-primary btn-sm" id="searchBtn">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- // cards -->
+    <div class="row mt-4">
+        <!-- // In Progress -->
+        <div class="col-12 col-md-6">
+            <h5 class="text-light">In Progress</h5>
+
+            <div id="inProgressContainer" class="mt-3">
+                <!-- // filled from js -->
+            </div>
+        </div>
+
+        <!-- // Completed -->
+        <div class="col-12 col-md-6">
+            <h5 class="text-light">Completed</h5>
+
+            <div id="completedContainer" class="mt-3">
+                <!--// filled from js -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.TL_WORKS_SEARCH_URL = "{% url 'tl_works_search' %}";
+    window.TL_WORKS_SEARCH_MULTI_URL = "{% url 'tl_works_search_multi' %}";
+    window.TL_ID = "{{ name.id }}";
+</script>
+<script src="{% static 'teamlead/js/tl_employees_works.js' %}"></script>
+
+{% endblock %}

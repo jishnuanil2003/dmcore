@@ -1,0 +1,461 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+
+{% block content %}
+<style>
+  /* Dark Theme Styles to match admin.html */
+  .card {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card-header {
+    background-color: #333333 !important;
+    border-bottom: 1px solid #444;
+    color: white !important;
+  }
+  
+  .list-group-item {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+  }
+  
+  .table {
+    color: white;
+    background-color: #333333;
+  }
+  
+  .table td {
+    border-color: #444;
+    background-color: #333333 !important;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #3a3a3a !important;
+  }
+  
+  .badge {
+    color: white !important;
+  }
+  
+  .bg-primary {
+    background-color: #4a5568 !important; /* Dark blue-gray */
+  }
+  
+  .bg-success {
+    background-color: #2d6a4f !important; /* Dark green */
+  }
+  
+  .bg-warning {
+    background-color: #b88b4a !important; /* Dark orange */
+    color: white !important;
+  }
+  
+  .form-control, .form-select {
+    background-color: #444;
+    color: white;
+    border: 1px solid #555;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #555;
+    color: white;
+    border-color: #666;
+    box-shadow: 0 0 0 0.25rem rgba(100, 100, 100, 0.25);
+  }
+  
+  .current-date {
+    font-size: 1.1rem; /* Increased font size */
+    opacity: 0.9; /* Increased opacity for better visibility */
+    margin-top: 5px;
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-weight: 500; /* Added slight weight */
+  }
+  
+  .complaint-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+  }
+  
+  .employee-name {
+    font-weight: bold;
+    color: #b8c2cc;
+  }
+  
+  .complaint-type {
+    font-weight: bold;
+  }
+  
+  .date-range {
+    font-size: 0.85rem;
+    color: #adb5bd;
+  }
+  
+  .card-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: none;
+  }
+  
+  .equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .equal-height-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .action-icons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-icons button {
+    background: transparent;
+    border: none;
+    color: #adb5bd;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  
+  .action-icons button:hover {
+    color: white;
+  }
+  
+  .resolve-icon {
+    color: #2d6a4f;
+  }
+  
+  .reject-icon {
+    color: #e74c3c;
+  }
+  
+  .status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+  
+  .status-pending {
+    background-color: #b88b4a;
+  }
+  
+  .status-resolved {
+    background-color: #2d6a4f;
+  }
+  
+  .status-rejected {
+    background-color: #e74c3c;
+  }
+  
+  /* Hide sections by default */
+  #complaintActionsContent, #viewComplaintsContent {
+    display: none;
+  }
+  
+  .btn-toggle {
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-toggle:hover {
+    background-color: #5a6678;
+  }
+  
+  .priority-high {
+    color: #e74c3c;
+  }
+  
+  .priority-medium {
+    color: #f39c12;
+  }
+  
+  .priority-low {
+    color: #2ecc71;
+  }
+
+  .circle-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  .circle-icon-btn:hover {
+    background-color: #5a6678;
+    transform: translateY(-2px);
+  }
+
+
+</style>
+
+<div class="row equal-height-row mt-2 p-2">
+  <div class="col-md-4 equal-height-col mb-3">
+    <!-- View Complaints Section -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">View Complaints</h5>
+           <button class="circle-icon-btn" id="btnShowViewComplaints">
+        <i class="fas fa-arrow-right"></i>
+      </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>View and search submitted complaints</p>
+      </div>
+    </div>
+    
+    <!-- Complaint Actions Section -->
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Complaint Actions</h5>
+            <button class="circle-icon-btn" id="btnShowComplaintActions">
+        <i class="fas fa-arrow-right"></i>
+      </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Review and resolve team complaints</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Complaint Form - Larger -->
+  <div class="col-md-8 equal-height-col mb-3">
+
+    <!-- View Complaints Section Content (Initially Visible) -->
+<div class="card shadow-sm" id="viewComplaintsContent">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">View Complaints</h5>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive" style='white-space: nowrap;'>
+      <table class="table table-bordered table-dark">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Complaint</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+    
+<!-- Complaints Action Section Content (Initially Hidden) -->
+<div class="card shadow-sm" id="complaintActionsContent" style="display: none;">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Complaints Action</h5>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <!-- Action Form -->
+    <form id="complaintActionForm">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="complaintSelector" class="form-label">Select Complaint</label>
+        <select class="form-select" id="complaintSelector" name="complaint_id" required>
+          <option value="">-- Select Complaint --</option>
+          {% for complaint in complaints %}
+            <option value="{{ complaint.id }}">{{ complaint.compaint_head }} </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="actionTaken" class="form-label">Action Taken</label>
+        <textarea class="form-control" id="actionTaken" name="action_text" rows="4" placeholder="Describe the action taken" required></textarea>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary" id="submitActionBtn">
+          <i class="bi bi-file-check"></i> Submit Action
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+    
+  </div>
+</div>
+
+<script>
+  // Wait for the DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get references to all buttons and content sections
+    const btnShowViewComplaints = document.getElementById('btnShowViewComplaints');
+    const btnShowComplaintActions = document.getElementById('btnShowComplaintActions');
+    
+    const viewComplaintsContent = document.getElementById('viewComplaintsContent');
+    const complaintActionsContent = document.getElementById('complaintActionsContent');
+    
+    // Function to show only the selected section
+    function showOnlySection(sectionToShow) {
+      // Hide all sections first
+      viewComplaintsContent.style.display = 'none';
+      complaintActionsContent.style.display = 'none';
+      
+      // Show the selected section
+      sectionToShow.style.display = 'flex';
+    }
+    
+    // Set up event listeners for buttons
+    btnShowViewComplaints.addEventListener('click', function() {
+      showOnlySection(viewComplaintsContent);
+      // Refresh complaints when viewing
+      loadComplaints();
+    });
+    
+    btnShowComplaintActions.addEventListener('click', function() {
+      showOnlySection(complaintActionsContent);
+    });
+    
+    // By default, show the view complaints content
+    showOnlySection(viewComplaintsContent);
+  });
+</script>
+
+<!--//////////////////////////////////// complaint action //////////////////////////////////////////////-->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $('#complaintActionForm').on('submit', function (e) {
+      e.preventDefault();
+
+      const complaintId = $('#complaintSelector').val();
+      const actionText = $('#actionTaken').val();
+      const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+      $.ajax({
+        url: '{% url "teamlead_submit_complaint_action" %}',
+        method: 'POST',
+        data: {
+          'complaint_id': complaintId,
+          'action_text': actionText,
+          'csrfmiddlewaretoken': csrfToken,
+        },
+        success: function (response) {
+          if (response.status === 'success') {
+            alert('Action submitted successfully!');
+            $('#complaintActionForm')[0].reset(); // Clear form
+            
+            // Refresh the complaints table automatically
+            loadComplaints();
+            
+          } else {
+            alert('Error: ' + response.message);
+          }
+        },
+        error: function () {
+          alert('An unexpected error occurred.');
+        }
+      });
+    });
+  });
+</script>
+
+<!--////////////////////////////////// view complaint ///////////////////////////////////////////////-->
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// Function to load complaints - made it reusable
+function loadComplaints() {
+    const tableBody = $("table tbody");
+    
+    $.ajax({
+        url: "{% url 'teamlead_view_complaints' %}",
+        type: "POST",
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        },
+        success: function(response) {
+            tableBody.empty();
+
+            if (response.complaints && response.complaints.length > 0) {
+                response.complaints.forEach(complaint => {
+                    let row = `
+                      <tr>
+                        <td>${complaint.date}</td>
+                        <td>
+                          <div class="d-flex">
+                            <div class="me-3 d-flex align-items-start">
+                              <button class="btn btn-warning">
+                                <i class="fas fa-file-alt fa-2x text-light mt-1"></i>
+                              </button>
+                            </div>
+                            <div class="w-100">
+                              <div class="d-flex justify-content-between">
+                                <strong>${complaint.head}</strong>
+                                <span class="text-light small">${complaint.time_ago}</span>
+                              </div>
+                              <div><small>${complaint.content}</small></div>
+                            </div>
+                          </div>
+                          <br>
+                          <div class='ps-2' >${complaint.action_html}</div>
+                        </td>
+                      </tr>
+                      `;
+
+
+                    tableBody.append(row);
+                });
+            } else {
+                tableBody.append(`
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            <i class="fas fa-inbox fa-2x text-muted mb-2"></i><br>
+                            No complaints found
+                        </td>
+                    </tr>
+                `);
+            }
+        },
+        error: function(err) {
+            console.error("Failed to load complaints", err);
+        }
+    });
+}
+
+$(document).ready(function() {
+    // Load complaints on page load
+    loadComplaints();
+});
+</script>
+
+{% endblock content %}

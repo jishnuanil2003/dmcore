@@ -1,0 +1,933 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+
+{% block content %}
+<style>
+        body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+    /* Custom styles for leave management dashboard */
+    .dashboard-heading {
+        color: #d3d3d3;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    
+    .action-btn {
+    padding: 6px 14px;
+    font-weight: 500;
+    border-radius: 50px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    transition: 0.3s ease;
+}
+
+.all-leave-btn {
+    border: 2px solid #007bff; /* Bootstrap Blue */
+    color: #007bff;
+}
+
+.all-leave-btn:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.apply-leave-btn {
+    border: 2px solid #28a745; /* Bootstrap Green */
+    color: #28a745;
+}
+
+.apply-leave-btn:hover {
+    background-color: #28a745;
+    color: #fff;
+}
+
+    
+    .search-box {
+        background-color: #222;
+        border: 1px solid #444;
+        color: #fff;
+        border-radius: 4px;
+        padding: 6px 12px;
+        width: 100%;
+        max-width: 180px;
+    }
+    
+    .date-input {
+        background-color: #222;
+        border: 1px solid #444;
+        color: #fff;
+        border-radius: 4px;
+        padding: 6px 12px;
+        width: 100%;
+        max-width: 150px;
+    }
+    
+    .search-btn {
+        background-color: #085dc0;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 10px;
+    }
+    
+   
+    .status-badge {
+    padding: 4px 10px;
+    border-radius: 3px;
+    
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: 9px;
+}
+
+.status-pending {
+    border: 1px solid #ffc107; /* Yellow outline */
+    color: #ffc107;
+    background-color: transparent;
+}
+
+    
+    .status-approved {
+         border: 1px solid #28a745;
+        color: #28a745;
+         background-color: transparent;
+    }
+    
+    .status-rejected {
+        border: 1px solid #dc3545;
+        color:#dc3545;
+        background-color: transparent;
+    }
+    
+    .reason-text {
+        color: #6c6cfd;
+        font-size: 12px;
+    }
+    
+    .leave-container {
+        background-color: #121212;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    /* Modal styles */
+    .modal-content {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        color: #d3d3d3;
+    }
+    
+    .form-control {
+        background-color: #222;
+        border: 1px solid #444;
+        color: #fff;
+    }
+    
+    .form-check-input:checked {
+        background-color: #085dc0;
+        border-color: #085dc0;
+    }
+    
+    .modal-button {
+        border-radius: 20px;
+        padding: 6px 16px;
+    }
+    
+    /* Enhanced responsive adjustments */
+    @media (max-width: 1200px) {
+        .date-controls {
+            margin-top: 15px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .top-controls {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .action-controls {
+            margin-top: 15px;
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .button-group {
+            margin-bottom: 10px;
+        }
+        
+        .search-control {
+            width: 100%;
+            max-width: 180px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .action-controls {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .search-control {
+            margin-top: 10px;
+            max-width: 100%;
+        }
+        
+        .search-box {
+            max-width: 100%;
+        }
+        
+        .button-group {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .action-btn {
+            flex: 1;
+            text-align: center;
+            margin: 0 5px;
+        }
+        
+        .date-controls {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .date-input {
+            max-width: calc(50% - 25px);
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .leave-container {
+            padding: 15px 10px;
+        }
+        
+        .dashboard-heading {
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .date-controls {
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+        
+        .date-input {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .search-btn {
+            width: 100%;
+        }
+        
+        /* Make the table scrollable horizontally */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        /* Modal responsive fixes */
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        
+        .modal-body {
+            padding: 1rem;
+        }
+        
+        /* Form buttons on small screens */
+        .form-buttons {
+            flex-direction: column;
+        }
+        
+        .form-buttons .btn {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+    }
+  
+.download-box {
+    display: inline-block;
+    padding: 4px 6px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    color: #007bff;
+    font-size: 12px;
+    line-height: 1;
+    text-align: center;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+
+.download-box i {
+    font-size: 14px;
+}
+.table{
+    margin-top: 10px;
+}
+</style>
+
+<div class="container-fluid px-0" >
+    <!-- Breadcrumb Navigation -->
+    <div class="d-flex mb-3"  style="margin-top:20px;">
+        <span style="color: #a0a0a0; font-size: 14px;">Dashboard / My Leave List</span>
+    </div>
+    
+    <!-- Leave Management Container -->
+    <div class="leave-container" style="background-color: #333333;">
+        <!-- Header Section with controls optimized for responsive layout -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap top-controls">
+            <h5 class="dashboard-heading mb-0">My Applied Leave List</h5>
+            
+            <div class="d-flex align-items-center gap-3 flex-wrap action-controls">
+    <div class="button-group d-flex gap-2">
+        <button class="btn all-leave-btn action-btn">
+            <i class="fa fa-calendar-alt"></i> All Leave
+        </button>
+        <button class="btn apply-leave-btn action-btn">
+           <i class="fa fa-calendar-alt"></i> Apply Leave
+        </button>
+    </div>
+
+{% if messages %}
+<div class="container mt-5 messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show auto-hide-toast mt-3" role="alert">
+        <div class="alert-content">
+            {% if message.tags == 'success' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            {% elif message.tags == 'warning' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            {% else %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<style>
+    .messages-container {
+        position: fixed;
+        top: 30px;  /* Increased from 20px */
+        right: 20px;
+        z-index: 1100;
+        max-width: 400px;
+    }
+    
+    .alert {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;  /* Slightly increased padding */
+        margin-bottom: 15px;  /* Increased from 10px */
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .alert-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-grow: 1;
+    }
+    
+    .alert-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;  /* Small adjustment for vertical alignment */
+    }
+    
+    .alert-success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border-left: 4px solid #22c55e;
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-left: 4px solid #0ea5e9;
+    }
+    
+    .alert-warning {
+        background-color: #fefce8;
+        color: #854d0e;
+        border-left: 4px solid #facc15;
+    }
+    
+    .alert-danger, .alert-error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .btn-close {
+        padding: 0.5rem;
+        opacity: 0.7;
+        margin-top: -4px;  /* Better alignment with text */
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Auto-hide animation */
+    .auto-hide-toast {
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease;
+    }
+    
+    .auto-hide-toast.hide {
+        opacity: 0;
+        transform: translateX(20%);
+    }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select all alert messages with the class 'auto-hide-toast'
+    const alerts = document.querySelectorAll('.auto-hide-toast');
+
+    alerts.forEach(alert => {
+      // Set a timeout to hide the alert after 5 seconds (5000ms)
+      setTimeout(() => {
+        alert.classList.add('hide'); // Add the 'hide' class for fade-out animation
+        setTimeout(() => alert.remove(), 500); // Remove the alert from the DOM after fade-out
+      }, 5000);
+    });
+  });
+</script>
+              <form method="get" action="{% url 'myleave' %}">
+    <input type="text" class="search-box" placeholder="Search here..." name="q" id="search-box" value="{{ query|default_if_none:'' }}" onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
+</form>
+
+
+            </div>
+        </div>
+        
+        <!-- Filter Section (date inputs and search) -->
+        <div class="d-flex align-items-center gap-2 flex-wrap date-controls">
+            <input type="date" class="date-input" id="from_date_filter">
+<input type="date" class="date-input" id="to_date_filter">
+
+            <button class="btn search-btn" id="filter_btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        
+        <!-- Leave Table -->
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered table-dark text-white">
+    <thead class="thead-dark">
+                    <tr>
+                        <th>Status</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Leave Type</th>
+                        <th>Reason</th>
+                        <th>Approved/Rejected Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in leaves %}
+                    <tr>
+                        <td>
+                            {% with status=leave.status|upper %}
+                            <span class="status-badge {% if status == 'APPROVED' %}status-approved{% elif status == 'PENDING' %}status-pending{% elif status == 'REJECTED' %}status-rejected{% endif %}">
+                                {{ status|title }}
+                            </span>
+                            {% endwith %}
+                        </td>
+                        <td>{{ leave.start_date|date:"F d, Y" }}</td>
+                        <td>{{ leave.end_date|date:"F d, Y" }}</td>
+                        <td>{{ leave.leave_type }}</td>
+                       <td>
+    <div>{{ leave.reason }}</div>
+
+    {% if leave.request_file %}
+        <div>
+            <a href="{{ leave.request_file.url }}" download class="download-box" aria-label="Download">
+    <i class="fas fa-download"></i>
+</a>
+
+
+
+
+
+</a>
+
+        </div>
+    {% else %}
+        <div class="text-warning">Leave request file is pending</div>
+    {% endif %}
+</td>
+
+                        <td>
+                            {% if leave.status_changed_date %}
+                                {{ leave.status_changed_date|date:"F d, Y" }}
+                            {% else %}
+                                Data not available
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">No leave applications found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Application Modal -->
+<div class="modal fade" id="leaveApplyModal" tabindex="-1" aria-labelledby="leaveApplyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: #1e1e1e; border: 1px solid #333;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="leaveApplyModalLabel" style="color: #d3d3d3;">Leave Apply Form</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="leaveApplyForm" method="post" action="{% url 'apply-leave' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <label for="fromDate" class="form-label" style="color: #a0a0a0;">From Date *</label>
+              <input type="date" class="form-control" id="fromDate" name="start_date" required 
+                     style="background-color: #222; border: 1px solid #444; color: #fff;">
+            </div>
+            <div class="col-md-6">
+              <label for="toDate" class="form-label" style="color: #a0a0a0;">To Date *</label>
+              <input type="date" class="form-control" id="toDate" name="end_date" required
+                     style="background-color: #222; border: 1px solid #444; color: #fff;">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label" style="color: #a0a0a0;">Leave Type</label>
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="leave_type" id="halfDay" value="Half Day">
+                <label class="form-check-label" for="halfDay" style="color: #d3d3d3;">
+                  Half Day
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="leave_type" id="fullDay" value="Full Day" checked>
+                <label class="form-check-label" for="fullDay" style="color: #d3d3d3;">
+                  Full Day
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="leaveReason" class="form-label" style="color: #a0a0a0;">Leave for ?</label>
+            <textarea class="form-control" id="leaveReason" name="reason" rows="3"
+                     style="background-color: #222; border: 1px solid #444; color: #fff;"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="requestForm" class="form-label" style="color: #a0a0a0;">Request Form</label>
+            <input class="form-control" type="file" id="requestForm" name="request_file"
+                   style="background-color: #222; border: 1px solid #444; color: #fff;">
+          </div>
+          
+          <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap form-buttons">
+            <button type="button" id="clearBtn" class="btn" style="background-color: #333; color: white; border-radius: 20px; padding: 6px 16px;">
+              <i class="fas fa-undo-alt"></i> Clear
+            </button>
+            <button type="submit" class="btn" style="background-color: #085dc0; color: white; border-radius: 20px; padding: 6px 16px;">
+              <i class="fas fa-check"></i> Apply Leave
+            </button>
+            <button type="button" class="btn" data-bs-dismiss="modal" style="background-color: #dc3545; color: white; border-radius: 20px; padding: 6px 16px;">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+    // Filter button click handler
+    const filterBtn = document.getElementById('filter_btn');
+    if (filterBtn) {
+        filterBtn.addEventListener('click', filterLeaves);
+    }
+    
+    // Search box input handler with debounce
+    const searchBox = document.querySelector('.search-box');
+    if (searchBox) {
+        let debounceTimeout;
+        searchBox.addEventListener('input', function() {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                searchLeaves(this.value);
+            }, 500); // Wait 500ms after typing stops
+        });
+    }
+    
+    // Apply Leave button click handler
+    const applyLeaveBtn = document.querySelector('.apply-leave-btn');
+    if (applyLeaveBtn) {
+        applyLeaveBtn.addEventListener('click', function() {
+            const leaveApplyModal = new bootstrap.Modal(document.getElementById('leaveApplyModal'));
+            leaveApplyModal.show();
+        });
+    }
+    
+    // All Leave button click handler (reset filters)
+    const allLeaveBtn = document.querySelector('.all-leave-btn');
+    if (allLeaveBtn) {
+        allLeaveBtn.addEventListener('click', function() {
+            // Clear search box
+            const searchBox = document.querySelector('.search-box');
+            if (searchBox) {
+                searchBox.value = '';
+            }
+            
+            // Clear date filters
+            const fromDateFilter = document.getElementById('from_date_filter');
+            const toDateFilter = document.getElementById('to_date_filter');
+            if (fromDateFilter) fromDateFilter.value = '';
+            if (toDateFilter) toDateFilter.value = '';
+            
+            // Reload all leaves
+            window.location.reload();
+        });
+    }
+    
+    // Clear button for the leave application form
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            const leaveForm = document.getElementById('leaveApplyForm');
+            leaveForm.reset();
+        });
+    }
+    
+    // Date range validation
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    
+    if (fromDate && toDate) {
+        fromDate.addEventListener('change', function() {
+            toDate.min = this.value;
+            
+            // If to_date is already set and now invalid, reset it
+            if (toDate.value && toDate.value < this.value) {
+                toDate.value = this.value;
+            }
+        });
+        
+        // Set min date to today for from_date
+        const today = new Date().toISOString().split('T')[0];
+        fromDate.min = today;
+        if (!fromDate.value) {
+            toDate.disabled = true;
+        }
+        
+        fromDate.addEventListener('input', function() {
+            if (this.value) {
+                toDate.disabled = false;
+            } else {
+                toDate.disabled = true;
+            }
+        });
+    }
+    
+    // Initialize date picker for filter dates
+    initializeDatepickers();
+});
+
+// Function to initialize date pickers
+function initializeDatepickers() {
+    // This assumes you're using a date picker library
+    // If you're using jQuery UI or another library, initialize here
+    // For example with flatpickr:
+    
+    // If you have flatpickr
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr('#from_date_filter', {
+            dateFormat: 'd-m-Y'
+        });
+        
+        flatpickr('#to_date_filter', {
+            dateFormat: 'd-m-Y'
+        });
+    }
+    
+    // If not using any library, you can add a simple date format validation
+    
+}
+
+// Function to filter leaves by date range
+function filterLeaves() {
+    const fromDateRaw = document.getElementById('from_date_filter').value;
+    const toDateRaw = document.getElementById('to_date_filter').value;
+
+    const fromDate = formatDateToDMY(fromDateRaw);
+    const toDate = formatDateToDMY(toDateRaw);
+
+    // Optional: validate empty
+    if (!fromDate && !toDate) {
+        alert('Please select at least one date to filter.');
+        return;
+    }
+
+    fetch(`/filter/?from_date=${fromDate}&to_date=${toDate}`, {
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to fetch leaves');
+        return response.json();
+    })
+    .then(data => updateLeaveTable(data.leaves))
+    .catch(error => {
+        console.error('Error:', error);
+        const leaveTable = document.querySelector('.table tbody');
+        leaveTable.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+    });
+}
+
+
+// Function to update the table with leaves data
+function updateLeaveTable(leaves) {
+    const leaveTable = document.querySelector('.table tbody');
+    leaveTable.innerHTML = '';  // Clear the current table content
+
+    leaves.forEach(leave => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${leave.leave_type}</td>
+            <td>${leave.reason}</td>
+            <td>${leave.start_date}</td>
+            <td>${leave.end_date}</td>
+            <td>${leave.status}</td>
+            <td>${leave.status_changed_date}</td>
+        `;
+        leaveTable.appendChild(row);
+    });
+}
+
+// Function to setup pagination controls directly below the table
+function setupPagination(hasNext, hasPrevious, totalPages, currentPage, query) {
+    const paginationControls = document.querySelector('.pagination-controls');
+    paginationControls.innerHTML = '';  // Clear existing pagination controls
+
+    // Previous button
+    if (hasPrevious) {
+        const prevPageBtn = document.createElement('button');
+        prevPageBtn.textContent = 'Previous';
+        prevPageBtn.onclick = () => searchLeaves(query, currentPage - 1);
+        paginationControls.appendChild(prevPageBtn);
+    }
+
+    // Page info
+    const pageInfo = document.createElement('span');
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    paginationControls.appendChild(pageInfo);
+
+    // Next button
+    if (hasNext) {
+        const nextPageBtn = document.createElement('button');
+        nextPageBtn.textContent = 'Next';
+        nextPageBtn.onclick = () => searchLeaves(query, currentPage + 1);
+        paginationControls.appendChild(nextPageBtn);
+    }
+}
+
+
+// Function to fetch all leaves (e.g., if search query is empty)
+function fetchLeaves() {
+    const leaveTable = document.querySelector('.table tbody');
+    leaveTable.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading leaves...</td></tr>';
+
+    // Make AJAX request to fetch all leaves
+    fetch('/all-leaves/')  // Assuming you have a view that returns all leaves
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateLeaveTable(data.leaves);  // Function to update the table with all leaves
+        })
+        .catch(error => {
+            console.error('Error fetching all leaves:', error);
+            leaveTable.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading data. Please try again.</td></tr>';
+        });
+}
+
+// Function to update the table with the leaves data
+function updateLeaveTable(leaves) {
+    const leaveTable = document.querySelector('.table tbody');
+    leaveTable.innerHTML = '';  // Clear current table content
+
+    leaves.forEach(leave => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${leave.leave_type}</td>
+            <td>${leave.reason}</td>
+            <td>${leave.start_date}</td>
+            <td>${leave.end_date}</td>
+            <td>${leave.status}</td>
+            <td>${leave.status_changed_date}</td>
+        `;
+        leaveTable.appendChild(row);
+    });
+}
+
+
+// Function to update leave table with new data
+function updateLeaveTable(leaves) {
+    const leaveTable = document.querySelector('.table tbody');
+    
+    if (!leaves || leaves.length === 0) {
+        leaveTable.innerHTML = '<tr><td colspan="6" class="text-center py-4">No leave applications found</td></tr>';
+        return;
+    }
+
+    let tableContent = '';
+    leaves.forEach(leave => {
+        let statusClass = '';
+        switch(leave.status.toUpperCase()) {
+            case 'APPROVED':
+                statusClass = 'status-approved';
+                break;
+            case 'PENDING':
+                statusClass = 'status-pending';
+                break;
+            case 'REJECTED':
+                statusClass = 'status-rejected';
+                break;
+        }
+
+        const fileSection = leave.request_file_url
+            ? `<div><a href="${leave.request_file_url}" download class="download-box" aria-label="Download"><i class="fas fa-download"></i></a></div>`
+            : `<div class="text-warning">Leave request file is pending</div>`;
+
+        // Check if status_changed_date is truthy, else show fallback text
+        const statusChangedDate = leave.status_changed_date ? leave.status_changed_date : 'Data not available';
+
+        tableContent += `
+            <tr>
+                <td><span class="status-badge ${statusClass}">${leave.status}</span></td>
+                <td>${leave.start_date}</td>
+                <td>${leave.end_date}</td>
+                <td>${leave.leave_type}</td>
+                <td>
+                    <div>${leave.reason}</div>
+                    ${fileSection}
+                </td>
+                <td>${statusChangedDate}</td>
+            </tr>
+        `;
+    });
+
+    leaveTable.innerHTML = tableContent;
+}
+
+
+
+
+function searchLeaves(query) {
+    const leaveTable = document.querySelector('.table tbody');
+    leaveTable.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Searching...</td></tr>';
+
+    fetch(`/filter/?search=${encodeURIComponent(query)}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            updateLeaveTable(data.leaves);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            leaveTable.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+        });
+}
+function formatDateToDMY(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}-${m}-${y}`;
+  }
+
+  document.getElementById('filter_btn').addEventListener('click', () => {
+    const fromDateRaw = document.getElementById('from_date_filter').value;
+    const toDateRaw = document.getElementById('to_date_filter').value;
+
+    const fromDate = formatDateToDMY(fromDateRaw);
+    const toDate = formatDateToDMY(toDateRaw);
+
+    if (!fromDate && !toDate) {
+      alert('Please select at least one date to filter.');
+      return;
+    }
+
+    // Example fetch call (adjust URL and logic to your app)
+    fetch(`/filter/?from_date=${fromDate}&to_date=${toDate}`, {
+      credentials: 'same-origin'  // send cookies for auth
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Update your table here with data
+      console.log(data);
+    })
+    .catch(err => {
+      console.error('Fetch error:', err);
+    });
+  });
+
+
+</script>
+
+
+
+</script>
+{% endblock content %}

@@ -1,0 +1,96 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+
+<!-- Styling -->
+<style>
+    .table th,
+.table td {
+    white-space: nowrap;
+}
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+
+</style>
+
+<div class="row mt-4" style="background-color: #333333;border-radius: 15px;">
+    <h4 class="text-white text-center w-100 mt-3">Leaves</h4>
+    
+    <form method="get" class="row g-3 text-white align-items-end mb-3 px-3">
+    <div class="col-md-4">
+        <label for="employeeSelect" class="form-label">Filter by Employee</label>
+        <select name="employee_id" id="employeeSelect" class="form-select">
+            <option value="">All Employees</option>
+            {% for emp in department_employees %}
+                <option value="{{ emp.id }}" {% if emp.id|stringformat:"s" == selected_employee %}selected{% endif %}>{{ emp.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="fromDate" class="form-label">From Date</label>
+        <input type="date" name="from_date" id="fromDate" class="form-control" value="{{ from_date }}">
+    </div>
+    <div class="col-md-3">
+        <label for="toDate" class="form-label">To Date</label>
+        <input type="date" name="to_date" id="toDate" class="form-control" value="{{ to_date }}">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Filter</button>
+    </div>
+</form>
+
+  <div class="table-responsive p-3">
+            <table class="table table-striped table-bordered table-dark text-white">
+                <thead>
+                    <tr>
+                        <th>No </th>
+                        <th>Employee ID</th>
+                        <th>Employee name</th>
+                        <th>Designation</th>
+                        <th>Days</th>
+                        <th>From date</th>
+                        <th>To date</th>
+                        <th>Leave type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for l in leave %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>EMPOOOO</td>
+             <td>{{ l.employee.name }}</td>
+            <td><i class="fas fa-user me-1 text-secondary"></i>{{ l.employee.designation.name}}</td>
+            <td><span class="border border-danger text-danger px-2 py-1 rounded">{{ l.number_of_days }}</span></td>
+
+           
+            <td>{{ l.start_date }}</td>
+            <td>{{ l.end_date }}</td>
+            <td>{{ l.leave_type }}</td>
+            <td>
+    {% if l.status == 'Pending' %}
+        <span class="badge bg-warning text-dark">Pending</span>
+    {% elif l.status == 'approved' %}
+        <span class="badge bg-success text-white">{{ l.status }}</span>
+    {% elif l.status == 'R+rejected' %}
+        <span class="badge bg-danger text-white">{{ l.status }}</span>
+    {% else %}
+        <span class="badge bg-secondary text-white">{{ l.status }}</span>
+    {% endif %}
+</td>
+
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" class="text-center text-white">No leaves found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+            </table>
+        </div>
+</div>
+
+
+{% endblock content %}

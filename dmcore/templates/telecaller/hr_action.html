@@ -1,0 +1,238 @@
+{% extends "telecaller/telecallersidebar.html" %}
+
+{% block content %}
+
+<!-- Styling -->
+<style>
+    @media (max-width: 576px) {
+        .btn-mobile-margin {
+            margin-top: 5px; /* Adjust as needed */
+        }
+        .sidebar-card {
+            width: 100%; /* Ensure the card takes full width on small screens */
+            margin: 0 auto; /* Center the card */
+        }
+    }
+    .action-content {
+        font-size: 0.9rem;
+        color: #ccc;
+    }
+    .action-head {
+        font-size: 0.8rem;
+        color: #aaa;
+    }
+</style>
+{% if messages %}
+<div class="container mt-5 messages-container">  <!-- Increased mt-3 to mt-5 -->
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show auto-hide-toast mt-3" role="alert">  <!-- Added mt-3 here -->
+        <div class="alert-content">
+            {% if message.tags == 'success' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            {% elif message.tags == 'warning' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            {% else %}  <!-- info and default -->
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+       
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .messages-container {
+        position: fixed;
+        top: 30px;  /* Increased from 20px */
+        right: 20px;
+        z-index: 1100;
+        max-width: 400px;
+    }
+    
+    .alert {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;  /* Slightly increased padding */
+        margin-bottom: 15px;  /* Increased from 10px */
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .alert-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-grow: 1;
+    }
+    
+    .alert-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;  /* Small adjustment for vertical alignment */
+    }
+    
+    .alert-success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border-left: 4px solid #22c55e;
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-left: 4px solid #0ea5e9;
+    }
+    
+    .alert-warning {
+        background-color: #fefce8;
+        color: #854d0e;
+        border-left: 4px solid #facc15;
+    }
+    
+    .alert-danger, .alert-error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .btn-close {
+        padding: 0.5rem;
+        opacity: 0.7;
+        margin-top: -4px;  /* Better alignment with text */
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Auto-hide animation */
+    .auto-hide-toast {
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease;
+    }
+    
+    .auto-hide-toast.hide {
+        opacity: 0;
+        transform: translateX(20%);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide alerts after 5 seconds
+        const alerts = document.querySelectorAll('.auto-hide-toast');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add('hide');
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
+            }, 5000);
+        });
+    });
+</script>
+{% endif %}
+
+<div class="row mt-4" style="background-color: #333333; border-radius: 15px;">
+    <h4 class="text-white text-center w-100 m-0 p-2 mt-4">Action Taken Records</h4>
+    
+    <div class="row p-3">  <!-- New row container for both elements -->
+        <!-- New Action Received Card -->
+        <div class="col-12 col-md-3 mb-3 mb-md-0">  <!-- Added mb-md-0 to remove bottom margin on medium+ screens -->
+            <div class="card p-3 h-100 sidebar-card bg-dark text-white" 
+                 onclick="showView('table')" 
+                 style="cursor: pointer; width: 100%;max-height: 130px; max-width: 280px; margin: 0 auto;">
+                <h5 class="d-flex align-items-center justify-content-between text-white">
+                    Action Received
+                    <span class="d-inline-flex align-items-center justify-content-center" 
+                          style="width: 26px; height: 24px; background-color: #14532d; border-radius: 6px;">
+                        <i class="fas fa-arrow-up-right-from-square text-success" style="font-size: 12px;"></i>
+                    </span>
+                </h5>
+                <p class="text-white">To view Action</p>
+            </div>
+        </div>
+        
+        <!-- Table -->
+        <div class="col-12 col-md-9">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-dark text-white">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Reason for action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for action in actions %}
+                        <tr>
+                            <td>{{ action.action_date|date:"d-m-Y" }}</td>
+                            <td>
+                                <div class="fw-bold d-flex flex-column">
+                                    <!-- Top Section with Icon and Header -->
+                                    <div class="d-flex align-items-center mb-1">
+                                        <div class="d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px; border-radius: 4px; margin-right: 6px;">
+                                            <i class="fas fa-file-alt text-warning fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <div class="d-flex align-items-center">
+                                                <span>{{ action.act_head }}</span>
+                                                <p class="mb-0 ms-1 small"> ({{ action.employee.name }})</p>
+                                            </div>
+                                            <div class="action-content small">{{ action.act_reason }}</div>
+                                        </div>
+                                    </div>
+                                
+                                    <!-- Action Taken Info -->
+                                    <div class="action-head small text-gray">
+                                        Action Taken by <strong>{{ action.from_name }}</strong> on 
+                                        {{ action.action_date }}
+                                    </div>
+                                
+                                    <!-- Action Content -->
+                                    <div class="action-content text-gray">
+                                        {{ action.act_content }}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center">No action records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

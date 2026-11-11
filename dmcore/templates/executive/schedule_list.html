@@ -1,0 +1,135 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="container my-4">
+  <div class="card bg-dark text-white shadow">
+    <div class="card-body">
+      <h2 class="card-title mb-4">Scheduled Task List</h2>
+
+      <div class="row mb-4 g-3">
+        <div class="col-md-8">
+          <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-3">
+              <label for="from_date" class="form-label">From Date</label>
+              <input type="date" name="from_date" id="from_date" value="{{ from_date }}" class="form-control">
+            </div>
+            <div class="col-sm-3">
+              <label for="to_date" class="form-label">To Date</label>
+              <input type="date" name="to_date" id="to_date" value="{{ to_date }}" class="form-control">
+            </div>
+            <div class="col-sm-1">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search"></i> 
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="col-md-2">
+          <form method="get">
+            <label for="status_filter" class="form-label">Filter by Schedule</label>
+            <select name="status_filter" id="status_filter" class="form-select" onchange="this.form.submit()">
+              <option value="All" {% if status_filter == 'All' %}selected{% endif %}>All</option>
+              <option value="Upcoming" {% if status_filter == 'Upcoming' %}selected{% endif %}>Upcoming schedules</option>
+              <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed schedules</option>
+            </select>
+          </form>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-dark table-striped table-bordered align-middle">
+          <thead class="table-dark text-light">
+            <tr>
+              <th scope="col" class="date-column">Date</th>
+              <th scope="col" class="time-column">Time</th>
+              <th scope="col">Scheduled Task</th>
+              <th scope="col" class="status-column">Task Status</th>
+              <th scope="col" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sched in schedules %}
+              <tr>
+                <td class="table_ex_sm">{{ sched.schedule_date }}</td>
+                <td class="table_ex_sm">{{ sched.start_time|time:"g:i a" }} - {{ sched.end_time|time:"g:i a" }}</td>
+                <td>
+                  <strong>{{ sched.schedule_head }}</strong><br>
+                  <small>{{ sched.todo_content }}</small>
+                </td>
+                <td class="status-column">
+                  {% if sched.schedule_status == 'Completed' %}
+                    <span class="badge bg-success">Completed</span>
+                  {% else %}
+                    <span class="badge  text-white">Pending</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <div class="btn-group" role="group" aria-label="Actions">
+                    <a href="{% url 'edit_employee_schedule' sched.id %}" class="btn btn-sm btn-outline-primary me-2">
+                      <i class="fas fa-pen-to-square"></i>
+                    </a>
+                    <a href="{% url 'delete_employee_schedule' sched.id %}" class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Are you sure you want to delete this schedule?');">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No schedules found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    .table_ex_sm {
+      min-width: 100px !important;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    td, th {
+      font-size: 12px !important;
+      padding: 8px 5px;
+    }
+
+    thead th {
+      font-size: 14px !important;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .btn-group .btn {
+      width: 48%;
+    }
+  }
+</style>
+
+{% endblock %}
+
+

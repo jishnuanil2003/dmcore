@@ -1,0 +1,153 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}DM Work{% endblock %}
+
+{% block content %}
+
+<!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 20px; right: 10px; z-index: 99;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- /Messages -->
+
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/colour.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/dmwork.css' %}">
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container mt-3 ">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'task_list' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Task We Provide</h5>
+                        <i class="fa-solid fa-users text-danger"></i>
+                    </div>
+                    <p>List of services or assignments that we offer to our client.</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'register_client' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Register Client</h5>
+                        <i class="fas fa-user-plus p-2 text-success"></i>
+                    </div>
+                    <p>Add a new client or customer to our system or platform.</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'register_work' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Register Work</h5>
+                        <i class="fas fa-plus p-2 text-success"></i>
+                        <!-- <i class="fas fa-clipboard-list p-2 text-success"></i> -->
+                    </div>
+                    <p>Set up a new task, project, or assignment for a client.</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'allocate_work_page' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Allocate Work</h5>
+                        <i class="fas fa-calendar-check p-2 text-success"></i>
+                        <!-- <i class="fas fa-clipboard-list p-2 text-success"></i> -->
+                    </div>
+                    <p>Set up a new task, project, or assignment for a client.</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'pendingworks' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Pending Works</h5>
+                        <i class="fa-solid fa-business-time text-warning"></i>
+                    </div>
+                    <p>Works that are yet to be require further attention within the application</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'workprogress' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Work Progress</h5>
+                        <i class="fa-solid fa-arrow-trend-up text-warning"></i>
+                    </div>
+                    <p>Track and monitor the ongoing status and development of tasks, or works</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'dm_week_pro' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Weekly Progress</h5>
+                        <i class="fa-solid fa-chart-line text-primary"></i>
+                    </div>
+                    <p>Track and monitor the ongoing status and development of tasks, or works</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'dm_mon_pro' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Monthly Progress</h5>
+                        <i class="fa-solid fa-square-poll-vertical text-white"></i>
+                    </div>
+                    <p>Track and monitor the ongoing status and development of tasks, or works</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'dm_completedwork' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Completed Works</h5>
+                        <i class="fa-solid fa-square-check text-success"></i>
+                    </div>
+                    <p>Access tasks, works that have been successfully finished</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card card-common">
+                <a href="{% url 'tl_individual_works_page' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">Team Lead Individual works</h5>
+                        <i class="fa-solid fa-user-check text-success"></i>
+                    </div>
+                    <p>Access tasks, works that have been successfully finished by team lead</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,551 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+    .leads-page-wrapper {
+        background-color: #121212;
+        min-height: 100vh;
+        padding: 15px; 
+    }
+
+    .leads-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .page-title { 
+        color: #ffffff; 
+        font-size: 1.5rem; 
+        font-weight: 600; 
+        margin-bottom: 5px; 
+    }
+    .sub-title { 
+        color: #b0b0b0; 
+        font-size: 0.85rem; 
+        margin-bottom: 20px; 
+    }
+
+    .filter-label { 
+        color: #ffffff; 
+        font-size: 0.85rem; 
+        margin-bottom: 8px; 
+        display: block; 
+    }
+
+    .form-control, .form-select {
+        background-color: #ffffff !important;
+        border: 1px solid #ced4da !important;
+        color: #333 !important;
+        border-radius: 4px;
+        height: 38px;
+    }
+
+    .export-container {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .btn-export-icon {
+        height: 38px;
+        flex: 1; 
+        max-width: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        border: 1px solid #444;
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    .btn-excel { 
+        border-color: #1D6F42; 
+        color: #1D6F42; 
+    }
+    .btn-pdf { 
+        border-color: #E01E22; 
+        color: #E01E22; 
+    }
+    .btn-print { 
+        border-color: #FFC107; 
+        color: #FFC107; 
+    }
+
+    .btn-clear-filters {
+        background: transparent;
+        border: 1px solid #ffffff;
+        color: #ffffff;
+        height: 38px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .table-wrapper { 
+        background-color: #262626; 
+        border-radius: 4px; 
+        margin-top: 20px; 
+    }
+    .custom-table { 
+        margin-bottom: 0; 
+        border: 1px solid #333; 
+    }
+    .custom-table thead th { 
+        background-color: #1a1a1a; 
+        color: #ffffff; 
+        padding: 12px; 
+        font-size: 0.9rem; 
+    }
+    .custom-table tbody td { 
+        background-color: #262626; 
+        color: #e0e0e0; 
+        border-bottom: 1px solid #333; 
+        padding: 12px; 
+        font-size: 0.9rem; 
+    }
+
+    .search-box {
+        background: #1a1a1a !important;
+        border: 1px solid #444 !important;
+        color: white !important;
+    }
+    .search-box::placeholder {
+        color: #dfdfdf !important; 
+        opacity: 0.8;                     
+    }
+
+    .detail-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 15px;
+        height: 100%;
+        transition: transform 0.2s;
+    }
+    .detail-card label {
+        display: block;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.7rem;
+    }
+    .text-info {
+        color: #0dcaf0 !important;
+    }
+
+    .timeline-simple { 
+        margin-top: 10px; 
+    }
+    .timeline-item { 
+        border-left: 2px solid #0dcaf0; 
+        padding-left: 20px; 
+        padding-bottom: 20px; 
+        position: relative; 
+    }
+    .timeline-item::before { 
+        content: ''; 
+        position: absolute; 
+        left: -7px; top: 0; 
+        width: 12px; 
+        height: 12px; 
+        background: #0dcaf0; 
+        border-radius: 50%; 
+        box-shadow: 0 0 8px rgba(13, 202, 240, 0.5); 
+    }
+
+    @media (max-width: 768px) {
+        .page-title { font-size: 1.25rem; }
+        .leads-container { padding: 15px; }
+        .btn-export-icon { max-width: none; }
+    }
+
+    @media print {
+        body * { visibility: hidden; }
+        .table-wrapper, .table-wrapper * { 
+            visibility: visible; 
+        }
+        .table-wrapper { 
+            position: absolute; 
+            left: 0; 
+            top: 0;
+            width: 100%; 
+        }
+        body { 
+            background: white !important; 
+        }
+        .custom-table th:last-child, .custom-table td:last-child { 
+            display: none !important; 
+        }
+    }
+
+    .custom-modal-dark { 
+        background-color: #1a1d21 !important; 
+        border: 1px solid #343a40; 
+        border-radius: 12px; 
+    }
+</style>
+
+<div class="leads-container">
+    <h2 class="page-title">Confused Leads ({{ total_confused }})</h2>
+    <p class="sub-title">Executive: <strong>{{ executive.name }}</strong></p>
+
+    <div class="filter-section mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-4">
+                <form id="filterForm" method="GET" class="row g-2">
+                    <input type="hidden" name="per_page" value="{{ per_page }}">
+                    
+                    <div class="col-6">
+                        <label class="filter-label">From Date</label>
+                        <input type="date" name="from_date" id="fromDate" value="{{ from_date|default:'' }}" class="form-control" onchange="this.form.submit()">
+                    </div>
+                    <div class="col-6">
+                        <label class="filter-label">To Date</label>
+                        <input type="date" name="to_date" id="toDate" value="{{ to_date|default:'' }}" class="form-control" onchange="this.form.submit()">
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="filter-label">&nbsp;</label>
+                    <button type="button" onclick="clearAllFilters()" class="btn btn-secondary w-100">
+                        <i class="fas fa-undo me-1"></i> Clear
+                    </button>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="filter-label">Export</label>
+                <div class="export-container">
+                    <button type="button" onclick="exportToExcel()" class="btn-export-icon btn-excel"><i class="fas fa-file-excel"></i></button>
+                    <button type="button" onclick="exportToPDF()" class="btn-export-icon btn-pdf"><i class="fas fa-file-pdf"></i></button>
+                    <button type="button" onclick="window.print()" class="btn-export-icon btn-print"><i class="fas fa-print"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="data-nav-ui d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div class="d-flex search-group w-100" style="max-width: 300px;">
+            <input type="text" id="tableSearch" 
+                class="form-control form-control-sm search-box" 
+                placeholder="Search leads..." 
+                onkeyup="filterTable()">
+            <button class="btn btn-sm btn-light ms-1" 
+                    onclick="document.getElementById('tableSearch').value=''; filterTable();">
+                Clear
+            </button>
+        </div>
+        <div class="d-flex align-items-center text-white small rows-nav">
+            <span>Show</span>
+            <select name="per_page" form="filterForm" class="form-select form-select-sm mx-2" style="width: 75px; background-color: #fff !important; color: #000 !important;" onchange="document.getElementById('filterForm').submit()">
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            </select>
+            <span>rows</span>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Lead Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Reason</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="leadTableBody">
+                    {% for entry in confused_leads %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:confused_leads.start_index }}</td>
+                        <td>{{ entry.lead.name }}</td>
+                        <td>{{ entry.lead.email|default:"N/A" }}</td>
+                        <td>{{ entry.lead.contact }}</td>
+                        <td>{{ entry.reason }}</td>
+                        <td class="text-center">
+                            <button type="button" 
+                                    class="btn btn-sm btn-success" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#convertLeadModal"
+                                    onclick="openConvertModal('{{ entry.lead.id }}', '{{ entry.id }}', '{{ entry.lead.name|escapejs }}', '{{ entry.lead.email|escapejs }}', '{{ entry.lead.contact|escapejs }}', '{{ entry.lead.source|escapejs }}', '{{ entry.lead.lead_category.id }}')"> 
+                                <i class="fas fa-sync-alt me-1"></i> Convert 
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No confused leads found for this executive.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3 px-3">
+        <div class="text-white small">
+            Showing {{ confused_leads.start_index|default:0 }} to {{ confused_leads.end_index|default:0 }} of {{ total_confused }} records
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                {% if confused_leads.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ confused_leads.previous_page_number }}&per_page={{ per_page }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ confused_leads.number }}</span>
+                </li>
+
+                {% if confused_leads.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ confused_leads.next_page_number }}&per_page={{ per_page }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="convertLeadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white shadow-lg border-0" style="background: #1a1d21; border-radius: 15px;">
+            <div class="modal-header border-secondary" style="background: rgba(255,255,255,0.03);">
+                <h5 class="modal-title d-flex align-items-center">
+                    <div class="icon-box-sm bg-success-soft me-2">
+                        <i class="fas fa-user-edit text-success"></i>
+                    </div>
+                    <span>Correct Lead Information</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form action="{% url 'admindash_convert_confused_lead' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <input type="hidden" name="lead_id" id="modal_lead_id">
+                    <input type="hidden" name="confused_entry_id" id="modal_confused_id">
+                    <input type="hidden" name="exec_id" value="{{ executive.id }}">
+                    <input type="hidden" name="client_id" value="{{ client.id }}">
+
+                    <div class="row g-3">
+                       <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-light">Lead Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-info">
+                                    <i class="fas fa-user-tie"></i>
+                                </span>
+                                <input type="text" 
+                                    name="name" id="edit_name" class="form-control bg-dark text-white border-secondary focus-info"  placeholder="Enter lead name" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-light">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-info"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="email" id="edit_email" class="form-control bg-dark text-white border-secondary focus-info">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-light">Contact Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-info"><i class="fas fa-phone"></i></span>
+                                <input type="text" name="contact" id="edit_contact" class="form-control bg-dark text-white border-secondary focus-info" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-light">Source</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-info"><i class="fas fa-share-nodes"></i></span>
+                                <input type="text" name="source" id="edit_source" class="form-control bg-dark text-white border-secondary focus-info">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary" style="background: rgba(255,255,255,0.03);">
+                    <button type="button" class="btn btn-link text-white-50 text-decoration-none btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4 shadow-sm">
+                        <i class="fas fa-check-circle me-1"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function clearAllFilters() {
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    const tableSearch = document.getElementById('tableSearch'); 
+    
+    if (fromDate) fromDate.value = "";
+    if (toDate) toDate.value = "";
+    if (tableSearch) tableSearch.value = "";
+    window.location.href = window.location.pathname;
+}
+</script>
+
+<script>
+function getExportTable() {
+    const table = document.querySelector(".custom-table");
+    const clone = table.cloneNode(true);
+    const rows = clone.querySelectorAll('tr');
+
+    const originalRows = table.querySelectorAll('tr');
+
+    rows.forEach((row, index) => {
+        const originalRow = originalRows[index];
+
+        if (originalRow && originalRow.style.display === "none") {
+            row.remove();
+            return; 
+        }
+
+        if (row.cells.length > 0) {
+            row.deleteCell(-1); 
+        }
+    });
+
+    return clone;
+}
+function exportToExcel() {
+    const table = getExportTable();
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Leads" });
+    const ws = wb.Sheets["Leads"];
+
+    const wscols = [
+        { wch: 6 },  
+        { wch: 25 }, 
+        { wch: 30 }, 
+        { wch: 20 }, 
+        { wch: 15 }
+    ];
+    ws['!cols'] = wscols;
+
+    Object.keys(ws).forEach(cell => {
+        if (cell.replace(/[0-9]/g, '') === 'D') { 
+            ws[cell].t = 's'; 
+        }
+    });
+
+    XLSX.writeFile(wb, "Confused_Leads.xlsx");
+}
+
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt', 'a4'); 
+    
+    const executiveName = "{{ executive.name }}";
+    const title = "Confused_Leads - Executive: " + executiveName;
+
+    doc.setFontSize(16);
+    doc.setTextColor(40);
+    doc.text(title, 40, 30);
+    
+    doc.autoTable({ 
+        html: getExportTable(), 
+        startY: 50,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 5 },
+        columnStyles: {
+            3: { cellWidth: 'auto' } 
+        }
+    });
+    
+    doc.save("Confused_Leads.pdf");
+}
+</script>
+
+<script>
+    function populateLeadModal(name, email, phone, telecaller) {
+    document.getElementById('modalLeadName').innerText = "Details for: " + name;
+    document.getElementById('detName').innerText = name;
+    document.getElementById('detEmail').innerText = email || "N/A";
+    document.getElementById('detPhone').innerText = phone;
+    document.getElementById('detTelecaller').innerText = telecaller;
+    const collapses = document.querySelectorAll('.collapse');
+    collapses.forEach(c => {
+        const bsCollapse = bootstrap.Collapse.getInstance(c);
+        if(bsCollapse) bsCollapse.hide();
+    });
+}
+</script>
+
+
+
+<script>
+function openConvertModal(leadId, confusedId, name, email, contact, source, categoryId) {
+    document.getElementById('modal_lead_id').value = leadId;
+    document.getElementById('modal_confused_id').value = confusedId;
+    
+    document.getElementById('edit_name').value = name;
+    
+    if (email === 'None' || email === 'N/A' || email === '') {
+        document.getElementById('edit_email').value = '';
+    } else {
+        document.getElementById('edit_email').value = email;
+    }
+    
+    document.getElementById('edit_contact').value = contact;
+    document.getElementById('edit_source').value = source;
+    
+    const catSelect = document.getElementById('edit_category');
+    if (catSelect) {
+        catSelect.value = categoryId;
+    }
+}
+</script>
+
+
+<script>
+function filterTable() {
+    const input = document.getElementById("tableSearch");
+    const filter = input.value.toLowerCase();
+    const tbody = document.getElementById("leadTableBody");
+    const rows = tbody.getElementsByTagName("tr");
+
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].cells.length <= 1) continue;
+
+        let rowMatch = false;
+        const cells = rows[i].getElementsByTagName("td");
+
+        for (let j = 1; j <= 4; j++) {
+            if (cells[j]) {
+                const cellText = cells[j].textContent || cells[j].innerText;
+                if (cellText.toLowerCase().indexOf(filter) > -1) {
+                    rowMatch = true;
+                    break;
+                }
+            }
+        }
+
+        rows[i].style.display = rowMatch ? "" : "none";
+    }
+}</script>
+
+{% endblock content %}

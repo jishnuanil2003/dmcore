@@ -1,0 +1,320 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #12151e; 
+        color: white;
+    }
+
+    .dashboard-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        padding: 2rem;
+        justify-content: center; 
+        text-align: center;
+    }
+
+    {% comment %} ========== {% endcomment %}
+
+    
+    .card {
+      background-color: #333333;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+
+    .card h2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .card h2 .new {
+      color: red;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      background-color: #2c2c2e;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      color: #ccc;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      color: #bbb;
+      border-bottom: 1px solid #333;
+    }
+
+    tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+
+    .btn-view, .btn-accept {
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .btn-view {
+      background-color: #1a73e8;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-accept {
+      background-color: #00c851;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      table {
+        font-size: 14px;
+      }
+
+      .btn-view, .btn-accept {
+        font-size: 12px;
+        padding: 4px 8px;
+      }
+    }
+
+    {% comment %} ======== {% endcomment %}
+   
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #12151e; 
+        color: white;
+    }
+    .container {
+      max-width: 100%;
+      margin: auto;
+      padding: 20px;
+      background-color: #333333;
+      border-radius: 10px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #b5cfff;
+    }
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+      
+    }
+    .form-group input[type="date"]{
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      
+      color:white;
+      background-color:rgb(95, 95, 95);
+    }
+    
+    .input-block label{
+        padding-bottom:10px;
+    }
+    input[type="text"] {
+      flex-grow: 1;
+      max-width: 1010px;
+      background-color:rgb(95, 95, 95);
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background-color: #2a2a2a;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #444;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+    }
+    ::placeholder {
+      color: #999;
+    }
+
+
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="success-alert">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+    <div class="container">
+        <h5 class="mb-4" style="color:rgb(124, 124, 124);">Daily Work Details - <span style="color:rgb(255, 255, 255);">{{task.client_task.task_name}}</span></h5>
+        
+        <div class="form-group">
+            <div class="input-block ">
+                <label for="from_date">From Date</label><br>
+                <input type="date" id="from_date" placeholder="From date">
+            </div>
+            <div class="input-block">
+                <label for="to_date">To Date</label><br>
+                <input type="date" id="to_date" placeholder="To date">
+            </div>
+        </div>
+
+        <input type="text" id="searchInput" placeholder="Search by Date or Title...">
+
+           
+    
+    
+    <div class="table-container">
+      <div class="table-container">
+        <table id="workTable">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>File</th>
+                <th>Target Achieved</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for detail in task_details %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ detail.collect_date }}</td>
+                <td>{{ detail.title }}</td>
+                <td>{{ detail.description }}</td>
+                <td>
+                  {% if detail.file %}
+                    <a href="{{ detail.file.url }}" target="_blank">View File</a>
+                  {% else %}
+                    No file
+                  {% endif %}
+                </td>
+                
+                <td>{{ detail.achieved_target }}</td>
+
+                <td>
+                {% if detail.status == 1 %}
+                    <span class="badge bg-success">Verified</span>
+                {% else %}
+                    <span class="badge bg-warning">Pending</span>
+                {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No details available for this task.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% comment %} <script>
+      document.getElementById("searchInput").addEventListener("keyup", function () {
+          let input = this.value.toLowerCase();
+          let rows = document.querySelectorAll("#workTable tbody tr");
+
+          rows.forEach(function (row) {
+              let date = row.cells[1].innerText.toLowerCase();
+              let title = row.cells[2].innerText.toLowerCase();
+
+              if (date.includes(input) || title.includes(input)) {
+                  row.style.display = "";
+              } else {
+                  row.style.display = "none";
+              }
+          });
+      });
+    </script> {% endcomment %}
+
+    <script>
+      function filterTable() {
+          const searchInput = document.getElementById("searchInput").value.toLowerCase();
+          const fromDateValue = document.getElementById("from_date").value;
+          const toDateValue = document.getElementById("to_date").value;
+          const rows = document.querySelectorAll("#workTable tbody tr");
+
+          rows.forEach(function(row) {
+              const dateText = row.cells[1].innerText.trim(); // Format: YYYY-MM-DD
+              const titleText = row.cells[2].innerText.toLowerCase();
+
+              let showRow = true;
+
+              // ✅ Check if date is in range
+              if (fromDateValue || toDateValue) {
+                  const rowDate = new Date(dateText);
+                  const fromDate = fromDateValue ? new Date(fromDateValue) : null;
+                  const toDate = toDateValue ? new Date(toDateValue) : null;
+
+                  if (fromDate && rowDate < fromDate) {
+                      showRow = false;
+                  }
+                  if (toDate && rowDate > toDate) {
+                      showRow = false;
+                  }
+              }
+
+              // ✅ Text search filter
+              if (searchInput && !titleText.includes(searchInput) && !dateText.includes(searchInput)) {
+                  showRow = false;
+              }
+
+              row.style.display = showRow ? "" : "none";
+          });
+      }
+
+      // ✅ Bind search and date filters
+      document.getElementById("searchInput").addEventListener("keyup", filterTable);
+      document.getElementById("from_date").addEventListener("change", filterTable);
+      document.getElementById("to_date").addEventListener("change", filterTable);
+      </script>
+  </div>
+    
+
+
+{% endblock %}

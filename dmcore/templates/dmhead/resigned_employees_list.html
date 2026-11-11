@@ -1,0 +1,125 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% load static %}
+{% block title %}Resigned Employees List{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/resigned_employees.css' %}">
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb text-white">
+    <li class="breadcrumb-item">
+      <a href="{% url 'employees' %}" class="text-decoration-none text-white">Dashboard </a>
+    </li>
+    <li class="breadcrumb-item active text-white-50" aria-current="page">Resigned Employees List</li>
+  </ol>
+</nav>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <div class="mb-3">
+    <input type="text" id="searchInput" class="form-control bg-dark text-white w-100" placeholder="Search here...">
+  </div>
+
+  <div class="table-responsive">
+    <table id="resignedEmployeeTable"
+           class="table table-dark table-bordered table-striped align-middle text-center">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th class="table_en_lsm">Employee ID</th>
+          <th class="table_en_md">Employee Name</th>
+          <th class="table_en_md">Email</th>
+          <th class="table_en_sm">Phone</th>
+          <th class="table_en_sm">Register Date</th>
+          <th class="table_en_lsm">Department</th>
+          <th class="table_en_md">Designation</th>
+          <th class="table_en_sm">Active Status</th>
+          <th class="table_en_sm">Account Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if resigned_list %}
+          {% for emp in resigned_list %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ emp.employee_code|default:"-" }}</td>
+            <td class="text-start">
+              <i class="fa-solid fa-user me-2"></i>
+              {{ emp.name|default:"-" }}
+            </td>
+            <td>{{ emp.email|default:"-" }}</td>
+            <td>{{ emp.contact_number|default:"-" }}</td>
+            <td>
+              {% if emp.created_at %}
+                {{ emp.created_at|date:"M d, Y" }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ emp.department.name|default:"-" }}</td>
+            <td>
+              {% if emp.designation.name == "Digital_Marketing_Head" %}
+                  Digital Marketing Head
+              {% elif emp.designation.name == "Team_Lead" %}
+                  Team Lead
+              {% elif emp.designation.name == "Data_Manager" %}
+                  Data Manager
+              {% else %}
+                  {{ emp.designation.name|default:"-" }}
+              {% endif %}
+            </td>
+            <td>
+              {% if emp.active_status|lower == "approved" %}
+                <i class="fa-regular fa-circle-check text-success"></i>
+              {% else %}
+                <i class="fa-regular fa-circle-xmark text-danger"></i>
+              {% endif %}
+            </td>
+            <td>
+              {% if emp.verification_status %}
+                <i class="fa-solid fa-user-check text-success"></i>
+              {% else %}
+                <i class="fa-solid fa-user-slash text-danger"></i>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10" class="text-center py-4">
+              No resigned employees found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("searchInput");
+  const table = document.getElementById("resignedEmployeeTable");
+  const rows = table.querySelectorAll("tbody tr");
+
+  function filterRows() {
+    const term = (searchInput.value || "").toLowerCase();
+    rows.forEach(function (row) {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(term) ? "" : "none";
+    });
+  }
+
+  searchInput.addEventListener("keyup", filterRows);
+});
+</script>
+{% endblock %}

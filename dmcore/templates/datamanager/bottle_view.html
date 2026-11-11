@@ -1,0 +1,171 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.page-wrapper{
+    padding:25px;
+}
+
+.table-card{
+    background:rgba(18,25,48,.95);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 8px 25px rgba(0,0,0,.35);
+}
+
+.card-header-custom{
+    background:rgba(255,255,255,.06);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    padding:18px 25px;
+}
+
+.card-header-custom h4{
+    color:#fff;
+    margin:0;
+    font-weight:600;
+}
+
+.table{
+    margin-bottom:0;
+}
+
+.table thead th{
+    background:#0f172a;
+    color:#fff;
+    border:none;
+    padding:14px;
+    font-size:14px;
+}
+
+.table tbody td{
+    background:transparent;
+    color:#dce3f1;
+    border-color:#24304d;
+    padding:14px;
+    vertical-align:middle;
+}
+
+.table tbody tr:hover{
+    background:rgba(255,255,255,.03);
+}
+
+.btn-action{
+    width:35px;
+    height:35px;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:5px;
+}
+
+.empty-data{
+    text-align:center;
+    padding:50px 20px;
+    color:#9aa4bf;
+}
+
+@media(max-width:768px){
+    .page-wrapper{
+        padding:15px;
+    }
+
+    .table-responsive{
+        font-size:13px;
+    }
+}
+
+.alert{
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.alert-success{
+    background:#113826;
+    border:1px solid #1f7a4d;
+    color:#b8ffd5;
+}
+
+.alert-danger{
+    background:#3a1218;
+    border:1px solid #842029;
+    color:#ffb3bd;
+}
+</style>
+
+<div class="page-wrapper">
+    {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+    <div class="table-card">
+
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h4>
+                <i class="fas fa-wine-bottle me-2"></i>
+                Bottle List
+            </h4>
+
+
+        </div>
+
+        {% if bottles %}
+        <div class="table-responsive">
+            <table class="table align-middle" style="white-space: nowrap;">
+                <thead>
+                    <tr>
+                        <th width="8%">#</th>
+                        <th>Bottle Name</th>
+                        <th width="20%">Created Date</th>
+                        <th width="18%">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for bottle in bottles %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ bottle.name }}</td>
+                        <td>{{ bottle.created_at|date:"d-m-Y" }}</td>
+                        <td>
+
+                            <a href="{% url 'bottle_edit' bottle.id %}"
+                               class="btn btn-outline-warning btn-sm btn-action">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <a href="{% url 'bottle_delete' bottle.id %}"
+                               class="btn btn-outline-danger btn-sm btn-action"
+                               onclick="return confirm('Delete this bottle?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-data">
+            <i class="fas fa-wine-bottle fa-3x mb-3"></i>
+            <h5>No Bottles Found</h5>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

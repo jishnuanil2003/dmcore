@@ -1,0 +1,383 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a></li>
+    <li class="breadcrumb-item active text-white-50" aria-current="page">Allocation Lead</li>
+  </ol>
+</nav>
+
+<div class="container-fluid mt-3 comn_table_bg">
+  <h4 class="text-white mb-4">Allocation Leads (<span class="text-white">{{ not_allocated }}</span>)</h4>
+  
+  <div class="row g-3 mb-3 p-3 border-bottom">
+     <div class="col-md-2">
+       <select id="clientSelect" class="form-select">
+         <option value="" selected disabled>Select Client</option>
+         <option value="">All</option>
+         {% for client in clients %}
+         <option value="{{ client.id }}">{{ client.client_name }}</option>
+         {% endfor %}
+       </select>
+     </div>
+     <div class="col-md-2">
+       <select id="categorySelect" class="form-select">
+         <option value="" disabled selected>Select Category</option>
+         <option value="">All</option>
+       </select>
+     </div>
+     <div class="col-md-2">
+       <select id="executiveSelect" class="form-select">
+         <option value="" disabled selected>Select Executive</option>
+         <option value="">All</option>
+         {% for e in executives %}
+         <option value="{{ e.id }}">{{ e.name }}</option>
+         {% endfor %}
+       </select>
+     </div>
+     <div class="col-md-2">
+       <input type="date" id="startDate" class="form-control">
+     </div>
+     <div class="col-md-2">
+       <input type="date" id="endDate" class="form-control">
+     </div>
+     <div class="col-md-2">
+       <select id="statusSelect" class="form-select">
+         <option value="" selected>- Select Status -</option>
+         <option value="Not Allocated">Not Allocated</option>
+         <option value="Allocated">Allocated</option>
+         <option value="Closed">Closed</option>
+       </select>
+     </div>
+     <div class="col-md-2">
+       <select id="hrFilter" class="form-select">
+         <option value="" selected disabled>- Select HR -</option>
+         {% for h in hrs %}
+         <option value="{{ h.id }}">{{ h.name }}</option>
+         {% endfor %}
+       </select>
+     </div>
+     <div class="col-md-2">
+       <button id="clearFilters" class="btn btn-outline-light w-100">Clear Filters</button>
+     </div>
+   </div>
+
+  <div class="d-flex mb-3">
+    <span class="text-white me-2 mt-1">Selected: <span id="selectedCount">0</span></span>
+
+    <select id="selectHrAllocate" class="form-select w-auto me-2 bg-dark text-white">
+      <option value="">Select Hr</option>
+      {% for h in hrs %}
+      <option value="{{ h.id }}">{{ h.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-success" id="allocateBtn">Allocate</button>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <label class="text-white me-2">Show</label>
+      <select id="rowCount" class="form-select d-inline-block w-auto bg-dark text-white">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+      </select>
+      <label class="text-white ms-2">rows</label>
+    </div>
+
+    <div class="input-group w-auto mb-3 print-hide">
+      <input type="text" id="searchInput" class="form-control bg-dark text-white" placeholder="Search...">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive" id="tableWrapper">
+    <table id="allocationLeadsTable" class="table table-dark table-striped table-hover">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th><input type="checkbox" id="selectAll"></th>
+          <th>Add Date</th>
+          <th>Name</th>
+          <th>Email Id</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in leads %}
+        <tr
+          data-client-id="{% if not entry.is_google_form %}{{ entry.row.lead.work.client.id }}{% endif %}"
+          data-category-id="{% if not entry.is_google_form %}{{ entry.row.lead.lead_category.id }}{% endif %}"
+          data-added="{{ entry.row.lead.added_date|date:'Y-m-d' }}"
+          data-status="{{ entry.row.lead_status|lower }}"
+          data-hr="{{ entry.hr_id }}"
+          data-executive-id="{{ entry.exec_id }}"
+          data-allocated="{{ entry.is_allocated|yesno:'1,0' }}"
+        >
+          <td>{{ forloop.counter }}</td>
+          <td>
+           <input type="checkbox" class="form-check-input"
+                 data-lead-id="{{ entry.row.lead.id }}"
+                 data-source="{% if entry.is_google_form %}google{% else %}databank{% endif %}"
+                 {% if entry.is_allocated %}disabled readonly hidden {% endif %}>
+          </td>
+          <td class="table_en_lsm">{{ entry.row.generated_date|date:"d M Y" }}</td>
+          <td class="table_en_lsm">{{ entry.row.lead.name }}</td>
+          <td class="table_en_lsm">{{ entry.row.lead.email }}</td>
+          <td class="table_en_lsm">{{ entry.row.lead.contact }}</td>
+          <td class="table_en_lsm">{{ entry.row.lead_status }}</td>
+          <td>
+            <button
+                class="btn btn-sm btn-outline-info"
+                onclick="openLeadDetails({{ entry.row.lead.id }}, {% if entry.is_google_form %}true{% else %}false{% endif %})"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#leadDetailsOffcanvas">
+                +
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+
+    </table>
+  </div>
+
+  <div id="noDataMessage" class="text-white text-center mt-3" style="display: none;">
+    <h5>No data found for the selected filters.</h5>
+  </div>
+</div>
+
+
+<!--* offcanvas -->
+<div class="offcanvas offcanvas-end wide-canvas bg-dark text-white" tabindex="-1" id="leadDetailsOffcanvas">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title text-white">Lead Tracker</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body text-white">
+    <div class="row">
+
+      <div class="col-md-6 border-end">
+        <h6 class="mb-2">Lead Details</h6>
+        <p><i class="bi bi-person"></i> <span id="leadName">-</span></p>
+        <p><i class="bi bi-envelope"></i> <span id="leadEmail">-</span></p>
+        <p><i class="bi bi-telephone"></i> <span id="leadContact">-</span></p>
+
+        <hr>
+        <h6 class="mb-2">Client Details</h6>
+        <p><i class="bi bi-person"></i> <span id="clientName">-</span></p>
+        <p><i class="bi bi-card-text"></i> <span id="clientInfo">-</span></p>
+
+        <hr>
+        <h6 class="mb-2">Lead More Details</h6>
+        <div id="leadExtraDetails">
+          <!--? dynamic field filled by js -->
+        </div>
+      </div>
+
+      <div class="col-md-6 ps-3">
+        <h6 class="mb-3">Activity Panel</h6>
+
+        <div class="mb-4">
+            <strong>Lead Collected By</strong>
+            <div id="collectedByTrack">
+                <!-- dynamic -->
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <strong>Followup Track</strong>
+            <div id="followupTrack">
+                <!-- dynamic -->
+            </div>
+        </div>
+
+        <div>
+            <strong>History Track</strong>
+            <div id="historyTrack">
+                <!-- dynamic -->
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--* Toast -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+  <div id="allocationToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="allocationToastMessage">
+        Success
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<script>
+function openLeadDetails(leadId, isGoogleForm){
+
+    let url = isGoogleForm
+        ? `/get-google-form-lead-details/${leadId}/`
+        : `/get-lead-tracker-details/${leadId}/`;
+
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+
+        document.getElementById('leadName').innerText =
+            data.lead.name || '-';
+
+        document.getElementById('leadEmail').innerText =
+            data.lead.email || '-';
+
+        document.getElementById('leadContact').innerText =
+            data.lead.contact || '-';
+
+        document.getElementById('clientName').innerText =
+            data.client.name || '-';
+
+        document.getElementById('clientInfo').innerText =
+            data.client.category || '-';
+
+        let extraHtml = '';
+
+        data.extra_details.forEach(item => {
+
+            extraHtml += `
+                <div class="mb-2">
+                    <strong>${item.field_name}</strong><br>
+                    <span>${item.field_data}</span>
+                </div>
+            `;
+
+        });
+
+        document.getElementById('leadExtraDetails').innerHTML =
+            extraHtml || '<p>No additional details available</p>';
+
+        let collectedHtml='';
+
+        if(data.collected_by){
+
+            collectedHtml=`
+                <div class="timeline-item mb-3 border-start border-success ps-3">
+
+                    <strong>${data.collected_by.employee}</strong><br>
+
+                    <small>
+                        Collected Date :
+                        ${data.collected_by.date}
+                    </small><br>
+
+                    <small>
+                        Collected Time :
+                        ${data.collected_by.time}
+                    </small>
+
+                </div>
+            `;
+
+        }else{
+
+            collectedHtml='<p>No collection details available</p>';
+
+        }
+
+        document.getElementById('collectedByTrack').innerHTML=collectedHtml;
+
+        let historyHtml='';
+
+        if(data.allocation.allocated_on!='-'){
+
+            historyHtml+=`
+                <div class="timeline-item mb-3 border-start ps-3">
+
+                    <strong>Lead Allocated</strong><br>
+
+                    <small>
+                        Allocated On :
+                        ${data.allocation.allocated_on} ,
+                        ${data.allocation.allocated_time}
+                    </small><br>
+
+                    <small>
+                        Allocated To :
+                        ${data.allocation.allocated_to}
+                    </small>
+
+                </div>
+            `;
+
+        }
+
+        document.getElementById('historyTrack').innerHTML=historyHtml;
+
+    });
+
+}
+</script>
+
+
+<div class="modal fade" id="googleLeadModal">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+
+            <div class="modal-header">
+                <h5>Allocate Google Form Leads</h5>
+                <button class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <label>Collection For</label>
+
+                <select id="googleLeadCategory"
+                        class="form-select">
+
+                    <option value="">Select Category</option>
+
+                    {% for c in categories %}
+                    <option value="{{ c.id }}">
+                        {{ c.collection_for }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn btn-success"
+                        id="googleLeadSubmit">
+                    Continue
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="{% static 'datamanager/js/allocationleads.js' %}"></script>
+{% endblock content %}

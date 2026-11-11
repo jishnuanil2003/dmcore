@@ -1,0 +1,173 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+
+<div class="row mt-4 p-2" style="background-color: #333333; border-radius: 15px;">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="text-white text-center w-100 m-0">Designation</h3>
+      <button class="btn btn-outline-light btn-sm position-absolute end-0 me-4" data-bs-toggle="modal" data-bs-target="#addDesignationModal">
+        <i class="fas fa-plus"></i> 
+      </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-dark">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Department</th>
+                <th>Name</th>
+                
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for des in designations %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ des.department.name }}</td>
+                
+                <td>{{ des.name }}</td>
+                <td>
+                  <div class="d-flex flex-wrap gap-2">
+      
+                  <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editDesignationModal{{ des.id }}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+          
+          
+                  <a href="{% url 'delete_designation' des.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this designation?')">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </div>
+                </td>
+              </tr>
+          
+            
+              <div class="modal fade" id="editDesignationModal{{ des.id }}" tabindex="-1" aria-labelledby="editDesignationModalLabel{{ des.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                  <div class="modal-content text-white bg-dark">
+                    <div class="modal-header border-0">
+                      <h5 class="modal-title" id="editDesignationModalLabel{{ des.id }}">Edit Designation</h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{% url 'edit_designation' des.id %}">
+                      {% csrf_token %}
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label class="form-label">Select Department</label>
+                          <select name="department" class="form-select" required>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if dept.id == des.department.id %}selected{% endif %}>{{ dept.name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Designation</label>
+                            <select name="designation_name" class="form-select" required>
+                              {% for value, label in pos %}
+                                <option value="{{ value }}" {% if value == des.name %}selected{% endif %}>{{ label }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          
+                        <div class="mb-3">
+                          <label class="form-label">Description</label>
+                          <textarea name="description" class="form-control" rows="3">{{ des.description }}</textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-success">Update</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              {% empty %}
+          <tr>
+            <td colspan="5" class="text-center">No departments available.</td>
+          </tr>
+          
+              {% endfor %}
+            </tbody>
+          </table>
+          
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="addDesignationModal" tabindex="-1" aria-labelledby="addDesignationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content text-white bg-dark">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="addDesignationModalLabel">Add Designation</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="department" class="form-label">Select Department</label>
+              <select name="department" id="department" class="form-select" required>
+                <option value="" selected disabled>-- Choose Department --</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="dashboard_id" class="form-label">Allocate Dashboard Role</label>
+              <select name="dashboard_id" id="dashboard_id" class="form-select">
+                <option value="" selected disabled>-- Choose Role --</option>
+                {% for value, label in all_positions %}
+                  {% if value != "Admin" %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="designation_name" class="form-label">Choose Designation</label>
+              <select name="designation_name" id="designation_name" class="form-select">
+                <option value="" selected disabled>-- Choose Role --</option>
+                {% for value, label in pos %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea name="description" class="form-control" rows="4" placeholder="Optional..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="submit" class="btn btn-success">Save Designation</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const modalsToReset = ['addDeptModal', 'addDesignationModal'];
+  
+      modalsToReset.forEach(function (modalId) {
+        const modal = document.getElementById(modalId);
+  
+        if (modal) {
+          modal.addEventListener('hidden.bs.modal', function () {
+            const form = modal.querySelector('form');
+            if (form) {
+              form.reset();
+            }
+          });
+        }
+      });
+    });
+  </script>
+  
+{% endblock content %}

@@ -1,0 +1,123 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% block content %}
+<style>
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
+<div class="main-content">
+    <div class="container-fluid mt-4 mb-4">
+         <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="/teamlead" class="text-secondary">Dashboard</a> /
+            <a href="{% url 'tl_employees_section' %}" class="text-secondary">Employee Section</a> /
+            <a class="text-light">Employees Action Taken</a>
+        </h5>
+        <div class="container-fluid" style="background-color: #333333;padding-top: 22px;padding-bottom: 22px;padding-left: 25px;padding-right: 25px;margin-top: 33px;border-radius: 20px;">
+            <h5 class="text-light"><b>Action Taken</b></h5>
+            <form method="GET" class="mt-4">
+                <div class="row">
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="employee-id" class="form-label text-light">Employee</label>
+                            <select name="employee_id" id="employee-id" class="form-control">
+                                <option value="">-- Select Employee --</option>
+                                {% for a in allocation %}
+                                    <option value="{{a.employee.id}}" {% if request.GET.employee_id == a.employee.id|stringformat:"s" %}selected{% endif %}>{{a.employee.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="from-date" class="form-label text-light">From Date</label>
+                            <input type="date" class="form-control" id="from-date" name="from_date" value="{{ request.GET.from_date }}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="to-date" class="form-label text-light">To Date</label>
+                            <input type="date" class="form-control" id="to-date" name="to_date" value="{{ request.GET.to_date }}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4"style="display: flex;align-items: end;">
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-dark"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 10%;">No</th>
+                            <th scope="col" style="width: 10%;min-width: 122px;">Employee Id</th>
+                            <th scope="col" style="width: 10%;min-width: 144px;">Employee Name</th>
+                            <th scope="col" style="width: 10%;">Designation</th>
+                            <th scope="col" style="width: 10%;">Date</th>
+                            <th scope="col" style="width: 10%;">Reason</th>
+                            <th scope="col" style="width: 10%;min-width: 111px;">Action Head</th>
+                            <th scope="col" style="width: 10%;min-width: 133px;">Action Conent</th>
+                            <th scope="col" style="width: 10%;min-width: 111px;">Taken By</th>
+                            <th scope="col" style="width: 10%;text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if action %}
+                            {% for a in action %}
+                                <tr>
+                                    <td style="width: 10%;">
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        EMP0000
+                                    </td>
+                                    <td style="width: 10%;">
+                                        <i class="fa-solid fa-user" style="margin-right: 10px;"></i>{{ a.employee.name }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        {{ a.employee.designation.name }}
+                                    </td>
+                                    <td style="width: 10%;min-width: 111px;">
+                                        {{ a.action_date }}
+                                    </td>
+                                    <td style="width: 10%;min-width: 111px;">
+                                        {{ a.act_reason }}
+                                    </td>
+                                     <td style="width: 10%;">
+                                        {{ a.act_head }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        {{ a.act_content }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        {{ a.from_name }}
+                                    </td>
+                                    <td style="width: 10%;text-align: center;min-width: 122px;">
+                                        {% if a.status == 'pending' %} <button class="btn btn-outline-warning btn-sm">Pending</button>
+                                        {% elif a.status == 'completed' %} <button class="btn btn-outline-success btn-sm">Action Taken</button>
+                                        {% elif a.status == 'cancelled' %} <button class="btn btn-outline-danger btn-sm">Cancelled</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" style="text-align: center;">No action taken found!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>                        
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

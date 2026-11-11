@@ -1,0 +1,82 @@
+{% extends "executive/executivesidebar.html" %}
+
+{% block content %}
+<div class="container mt-4 text-white">
+      {% if messages %}
+    {% for message in messages %}
+        <div class="success-alert">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+    {% endfor %}
+{% endif %}
+    <div class="card bg-dark text-white shadow-lg">
+        <div class="card-body">
+            <h2 class="mb-4">Edit Schedule</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="schedule_date" class="form-label">Schedule Date</label>
+                    <input type="date" name="schedule_date" id="schedule_date" class="form-control" value="{{ schedule.schedule_date|date:'Y-m-d' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="schedule_head" class="form-label">Schedule Heading</label>
+                    <input type="text" name="schedule_head" id="schedule_head" class="form-control" value="{{ schedule.schedule_head }}">
+                </div>
+                <div class="mb-3">
+                    <label for="todo_content" class="form-label">Task Description</label>
+                    <textarea name="todo_content" id="todo_content" class="form-control">{{ schedule.todo_content }}</textarea>
+                </div>
+
+        
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" name="start_time" id="start_time" class="form-control" value="{{ schedule.start_time|time:'H:i' }}" onchange="updateTimes()">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" name="end_time" id="end_time" class="form-control" value="{{ schedule.end_time|time:'H:i' }}" onchange="updateTimes()">
+                    </div>
+                </div>
+
+    
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_time_display" class="form-label">Start Time Selected</label>
+                        <input type="time" id="start_time_display" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_time_display" class="form-label">End Time Selected</label>
+                        <input type="time" id="end_time_display" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-secondary">Update Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateTimes() {
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+
+        document.getElementById('start_time_display').value = startTime;
+        document.getElementById('end_time_display').value = endTime;
+
+ 
+        if (startTime && endTime && startTime >= endTime) {
+            alert('End time must be after start time.');
+            document.getElementById('end_time').value = '';
+            document.getElementById('end_time_display').value = '';
+        }
+    }
+
+ 
+    window.onload = updateTimes;
+</script>
+{% endblock %}

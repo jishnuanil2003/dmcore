@@ -1,0 +1,183 @@
+{% extends 'executive/executivesidebar.html' %}
+{% block content %}
+<style>
+  body {
+    background-color: #12151e; 
+    color: #ffffff; /* Optional: sets default text color */
+  }
+
+  #main-content {
+    margin-top: -40px !important; /* Only if truly needed */
+  }
+      @media (max-width: 576px) {
+        #main-content {
+            margin-top: 0px !important; 
+        }
+    }
+</style>
+</head>
+<body>
+
+<br>
+
+        <!-- Bootstrap Toast Container -->
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="toast align-items-center text-white {% if message.tags == 'error' %}bg-danger{% else %}bg-success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    
+
+
+<!-- Main Content -->
+<div class="main-content">
+    <br><br>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="p-3 border mt-2" style="background-color: #333333 !important;border: none !important;border-radius: 12px;">
+                    <a href="{% url 'executive_action_taken' %}" style="text-decoration: none;"><h3 class="text-light">Action Taken &nbsp; <i class="fa-solid fa-arrow-up-right-from-square"></i></h3></a>
+                    <p style="color: rgb(192, 192, 192);">All action details taken against you.</p>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="p-3 border mt-2" style="background-color: #333333 !important;border: none !important;border-radius: 5px;">
+                    <h4 class="d-flex justify-content-between align-items-center text-light">
+                        View Actions
+                       </h4>
+                   
+                       <div class="table-responsive mt-3">
+                           <table class="table table-bordered table-dark table-striped">
+                               <thead>
+                                   <tr>
+                                       <th>Date</th>
+                                       <th>Reason for Action</th>
+               
+                                   </tr>
+                               </thead>
+                               <tbody id="feedbackTableBody">
+                                {% if actions %}
+                                    {% for action in actions %}
+                                    <tr>
+                                        <!-- Complaint Date -->
+                                        <td>{{ action.action_date|date:"Y-m-d" }}</td>
+                            
+                                        <!-- Complaint Details -->
+                                        <td>
+                                            <div class="d-flex w-100">
+                                                <!-- File Icon -->
+                                                <div class="me-3">
+                                                    <i class="fa fa-file fa-2x text-primary"></i>
+                                                </div>
+                            
+                                                <!-- Complaint Info Wrapper -->
+                                                <div class="flex-grow-1">
+                                                    <!-- Full-width Info Box -->
+                                                    <div class="pb-2" style="border-bottom: 1px solid rgb(154, 154, 154); width: 100%;">
+                                                        <strong class="d-block">{{ action.act_head }}</strong>
+                                                        <span>{{ action.act_content }}</span>
+                                                    </div>
+                            
+                                                    <!-- Status Below -->
+                                                    <div class="mt-2">
+                                                        <h6>
+                                                            Action taken by <span style="font-weight: bold;">{{ action.from_name }}</span> on 
+                                                            <span style="font-style: italic;">({{ action.action_date }})</span>
+                                                        </h6>
+                                                        <p>{{ action.act_reason }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center">No actions</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                                                           
+                           </table>
+                       </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Ensure userActiveStatus is correctly handled as a string
+        const userActiveStatus = "{{ data_manager.active_status|yesno:'true,false' }}".trim();
+        const statusDot = document.getElementById('status-dot');
+
+        if (userActiveStatus === "true") {
+            // User is active, show green dot
+            statusDot.classList.add('green-dot');
+            statusDot.classList.remove('red-dot');
+        } else {
+            // User is not active, show red dot
+            statusDot.classList.add('red-dot');
+            statusDot.classList.remove('green-dot');
+        }
+    });
+</script>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarToggle = document.getElementById("sidebarToggle");
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.querySelector(".main-content");
+            const textElements = document.querySelectorAll("#sidebar .nav-link span, #sidebar .profile-section p, #sidebar h6");
+        
+            function toggleSidebar() {
+                sidebar.classList.toggle("collapsed");
+                mainContent.classList.toggle("collapsed");
+        
+                if (window.innerWidth >= 992) {
+                    if (sidebar.classList.contains("collapsed")) {
+                        sidebar.style.width = "60px";
+                        textElements.forEach(el => {
+                            el.style.opacity = "0";
+                            el.style.visibility = "hidden"; // Hide text immediately
+                        });
+                    } else {
+                        sidebar.style.width = "250px";
+                        textElements.forEach(el => {
+                            el.style.visibility = "visible"; // Show text immediately
+                            el.style.opacity = "1"; // Fade in text
+                        });
+                    }
+                } else {
+                    if (sidebar.classList.contains("collapsed")) {
+                        sidebar.style.width = "0";
+                    } else {
+                        sidebar.style.width = "250px";
+                    }
+                }
+            }
+        
+            sidebarToggle.addEventListener("click", toggleSidebar);
+        }); 
+        
+    </script> -->
+
+</body>
+{% endblock %}

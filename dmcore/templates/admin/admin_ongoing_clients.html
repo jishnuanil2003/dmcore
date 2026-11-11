@@ -1,0 +1,59 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+{% block title %}Ongoing Clients{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/admin_ongoing_clients.css' %}">
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a> / 
+      <a href="{% url 'admin_works' %}" class="text-decoration-none text-white">Works</a> / 
+    <a href="{% url 'admin_clients' %}" class="text-decoration-none text-white">Clients</a> / Ongoing</p>
+    </div>
+  </div>
+
+<div class="comn_table_bg p-3 mb-3">
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <h5 class="mb-0 text-white">Clients</h5>
+    <span class="text-warning fw-semibold">Ongoing*</span>
+  </div>
+
+  <div class="row g-2">
+    <div class="col-12 col-md-4">
+      <select id="clientSelect" class="form-select form-select-sm" disabled>
+        <option value="" selected>Select client</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="admin-oc-cards mb-3">
+  <button class="admin-oc-card active" data-section="registered">Registered Works</button>
+  <button class="admin-oc-card" data-section="client_tasks">Client Tasks</button>
+  <button class="admin-oc-card" data-section="assigned">Assigned Works</button>
+  <button class="admin-oc-card" data-section="ongoing">Ongoing Works</button>
+  <button class="admin-oc-card" data-section="completed">Completed Works</button>
+</div>
+
+<div id="sectionMount"></div>
+
+<script>
+  window.__OC = {
+    dropdownUrl: "{% url 'admin_api_ongoing_clients_dropdown' %}",
+    registeredWorksUrl: "{% url 'admin_api_oc_registered_works' %}",
+    clientTasksUrl: "{% url 'admin_api_oc_client_tasks' %}",
+    assignedWorksUrl: "{% url 'admin_api_oc_assigned_works' %}",
+    ongoingWorksUrl: "{% url 'admin_api_oc_ongoing_works' %}",
+    completedWorksUrl: "{% url 'admin_api_oc_completed_works' %}",
+  };
+</script>
+
+<script src="{% static 'admin/js/admin_ongoing_clients_base.js' %}"></script>
+<script src="{% static 'admin/js/oc_registered_works.js' %}"></script>
+<script src="{% static 'admin/js/oc_client_tasks.js' %}"></script>
+<script src="{% static 'admin/js/oc_assigned_works.js' %}"></script>
+<script src="{% static 'admin/js/oc_ongoing_works.js' %}"></script>
+<script src="{% static 'admin/js/oc_completed_works.js' %}"></script>
+{% endblock %}

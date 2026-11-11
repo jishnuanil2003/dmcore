@@ -1,0 +1,60 @@
+@import url(./colour.css);
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}
+
+.edit-task-icon,
+.delete-task-icon {
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+}
+
+.edit-task-icon {
+    color: #6c757d;
+}
+
+.edit-task-icon:hover {
+    color: #0d6efd;
+}
+
+.delete-task-icon {
+    color: #dc3545;
+}
+
+.delete-task-icon:hover {
+    color: #a71d2a;
+}
+
+.add-category-btn {
+    margin-left: 10px;
+}
+
+.add-field-link {
+    margin-left: 10px;
+    cursor: pointer;
+    text-decoration: underline;
+    color: #198754;
+}
+
+.add-field-link:hover {
+    color: #0f5132;
+}
+/* @media (max-width: 768px) { */
+  .table_en_sm{
+    min-width: 80px;
+  }
+  .table_en_lsm{
+    min-width: 140px;
+  }
+  .table_en_md{
+    min-width: 190px;
+  }
+  .table_en_lg{
+    min-width: 400px;
+  }
+/* } */

@@ -1,0 +1,325 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}DM Work{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #12151e; 
+            color: white;
+        }
+    .main-card{
+            background-color: #2d3031;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            color: white;
+            max-height: 100%;
+            margin-top: 20px;
+            max-width: 1400px;
+        }
+        .card-head h4{
+            font-weight: 600;
+        }
+        .table th{
+            text-wrap: nowrap;
+        }
+        .td-name{
+            text-wrap: nowrap;
+        }
+        .date{
+            text-wrap: nowrap;
+        }
+
+
+        .task-card {
+    background-color: #414445;
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    height: 320px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+.row.equal-height {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.equal-height > .col {
+    display: flex;
+}
+
+.equal-height > .col > .task-card {
+    flex-grow: 1;
+    width: 100%;
+}
+
+
+.placeholder-light::placeholder {
+    color: #ccc; 
+    opacity: 1; 
+}
+</style>
+
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/allocate_work.css' %}">
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="" class="text-decoration-none text-white">Dashboard</a>
+         / Client Task details</p>
+    </div>
+</div>
+
+<div class="container mt-4 comn_table_bg">
+
+        <div class="container-fluid mx-auto">
+            <div class="main-card">
+                <p>Task: {{task.task_name}}</p>
+                <div class="progress">
+                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" style="width: {{task_progress}}%;">
+                        {{task_progress}}%
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+<div class="container-fluid mt-5"> 
+        <p>Task Assign To</p>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 equal-height">
+        
+        {% if tl %}
+            {% for i in tl %}
+       
+            <div class="col">
+                <div class="task-card">
+                    <h4>{{ i.team_lead.name }} 
+                        <span class="text-success" style="font-size: 14px; font-weight: bold;">{{ i.progress }}%</span>
+                    </h4> 
+                    <p class="date">Start on: {{ i.from_date }}</p>
+                    <p class="date">Due on: {{ i.due_date }}</p>
+                    <p>Target: {{ i.target }}</p>
+                    <p>Achieved Target: {{ i.target_achieved }}</p>
+                    <p>About Task: {{ i.description }}</p>
+                </div>
+            </div>
+
+       
+            {% for j in executive %}
+                {% if j.work_assign.id == i.id %}
+                <div class="col">
+                    <div class="task-card">
+                        <h5>{{ j.executive.name }} 
+                            <span class="text-success" style="font-size: 13px; font-weight: bold;">{{ j.progress }}%</span>
+                        </h5>
+                        <p class="date">Start on: {{ j.start_date }}</p>
+                        <p class="date">Due on: {{ j.due_date }}</p>
+                        <p>Target: {{ j.target }}</p>
+                        <p>Achieved Target: {{ j.target_achieved }}</p>
+                        <p>TeamLead: {{ i.team_lead.name }}</p>
+                        <p>About Task: {{ j.description }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+            {% endfor %}
+        {% endif %}
+        </div>
+    </div>
+
+
+     
+
+        <div class="container-fluid mx-auto">
+            <div class="main-card">
+                <div class="card-head"><p>Task Details Section</p></div>
+                <div class="card-filter"> 
+
+            <form method="GET" class="row g-2 mb-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label text-white">Employee Name</label>
+
+                    <select name="executive" id="employeeFilter" class="form-select">
+                        <option value="">Select Employee</option>
+
+                        {% for name in employee_names %}
+                            <option value="{{ name }}"
+                                {% if request.GET.executive == name %}selected{% endif %}>
+                                {{ name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-white">Date</label>
+                    <input type="date" name="from" class="form-control" value="{{ request.GET.from }}">
+                </div>
+
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-outline-primary mt-4">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label text-white">Search</label>
+                    <input type="text" id="searchInput2" class="form-control bg-dark text-white placeholder-light" placeholder="Search here..">
+                </div>
+
+               
+            </form>
+
+            </div>
+
+            <div class="card-table">
+                <div class="table-responsive">  
+                    <table class="table table-bordered table-striped table-dark align-middle text-nowrap" id="taskDetails" style="text-align: center;">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Collected By</th>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Data</th>
+                                <th>File</th>
+                                <th>Achieved</th>
+                                <th>Verified/Unverified</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if tad %}
+                                {% for k in tad %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>
+                                            {% if k.task_assign %}
+                                                {{ k.task_assign.executive.name }}
+                                            {% elif k.work_assign %}
+                                                {{ k.work_assign.team_lead.name }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="date">{{ k.collect_date }}</td>
+                                        <td>{{ k.title }}</td>
+                                        <td>{{ k.description }}</td>
+                                        <td>
+                                            {% if k.file %}
+                                                <a href="{{ k.file.url }}" class="btn btn-outline-primary btn-sm" download>Download</a>
+                                            {% else %}
+                                                <button class="btn btn-outline-danger btn-sm">X</button>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-warning btn-sm">{{ k.achieved_target }}</button>
+                                        </td>
+                                        <td>
+                                            {% if k.status == 0 %}
+                                                <i class="fa-solid fa-circle-xmark text-danger"></i> Unverified
+                                            {% else %}
+                                                <i class="fa-solid fa-circle-check text-success"></i> Verified
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                             
+                                <tr class="no-data-row">
+                                    <td colspan="8" class="text-center text-danger py-4">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> No details found
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+            </div>
+          </div>
+        
+
+
+    </div>
+
+
+
+
+
+    
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput2 = document.getElementById("searchInput2");
+    const table = document.getElementById("taskDetails");
+    const rows = table.getElementsByTagName("tr");
+
+  
+    const noDataRow = document.createElement("tr");
+    noDataRow.innerHTML = `
+        <td colspan="8" class="text-center text-danger py-4">
+            <i class="fa-solid fa-triangle-exclamation"></i> No details found
+        </td>`;
+    noDataRow.style.display = "none";
+    table.querySelector("tbody").appendChild(noDataRow);
+
+ 
+    searchInput2.addEventListener("keyup", function () {
+        const filter = searchInput2.value.toLowerCase();
+        let visibleCount = 0;
+
+
+        for (let i = 1; i < rows.length - 1; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName("td");
+            let match = false;
+
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+
+            if (match) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        }
+
+   
+        if (visibleCount === 0) {
+            noDataRow.style.display = "";
+        } else {
+            noDataRow.style.display = "none";
+        }
+    });
+});
+</script>
+
+{% endblock %}

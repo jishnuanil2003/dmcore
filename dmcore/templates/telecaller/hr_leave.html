@@ -1,0 +1,414 @@
+{% extends "telecaller/telecallersidebar.html" %}
+
+{% block content %}
+<style>
+  .badge-rejected {
+      background-color: #dc3545; /* Bootstrap red */
+      color: #fff; /* Ensure white text for visibility */
+      padding: 0.35em 0.6em;
+      border-radius: 0.35rem;
+  }
+</style>
+{% if messages %}
+<div class="container mt-5 messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show auto-hide-toast mt-3" role="alert">
+        <div class="alert-content">
+            {% if message.tags == 'success' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            {% elif message.tags == 'warning' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            {% else %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<style>
+    .messages-container {
+        position: fixed;
+        top: 30px;  /* Increased from 20px */
+        right: 20px;
+        z-index: 1100;
+        max-width: 400px;
+    }
+    
+    .alert {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;  /* Slightly increased padding */
+        margin-bottom: 15px;  /* Increased from 10px */
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .alert-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-grow: 1;
+    }
+    
+    .alert-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;  /* Small adjustment for vertical alignment */
+    }
+    
+    .alert-success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border-left: 4px solid #22c55e;
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-left: 4px solid #0ea5e9;
+    }
+    
+    .alert-warning {
+        background-color: #fefce8;
+        color: #854d0e;
+        border-left: 4px solid #facc15;
+    }
+    
+    .alert-danger, .alert-error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .btn-close {
+        padding: 0.5rem;
+        opacity: 0.7;
+        margin-top: -4px;  /* Better alignment with text */
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Auto-hide animation */
+    .auto-hide-toast {
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease;
+    }
+    
+    .auto-hide-toast.hide {
+        opacity: 0;
+        transform: translateX(20%);
+    }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select all alert messages with the class 'auto-hide-toast'
+    const alerts = document.querySelectorAll('.auto-hide-toast');
+
+    alerts.forEach(alert => {
+      // Set a timeout to hide the alert after 5 seconds (5000ms)
+      setTimeout(() => {
+        alert.classList.add('hide'); // Add the 'hide' class for fade-out animation
+        setTimeout(() => alert.remove(), 500); // Remove the alert from the DOM after fade-out
+      }, 5000);
+    });
+  });
+</script>
+<div class="row mt-4" style="background-color: #333333; border-radius: 15px;">
+  <div class="col-12">
+    <!-- Heading, Search, All Leave, and Add Icon in One Line -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center px-3 py-3 gap-4" style="margin-top: 10px; margin-right: 15px;">
+      <h4 class="text-white mb-0 me-auto">Apply Leave</h4>
+      
+      <div class="position-relative" style="max-width: 250px;">
+        <input type="text" id="searchInput" onkeyup="filterTable()" class="form-control ps-5 py-2"
+          style="font-size: 14px; background-color: #f5f5f5; border-radius: 2px; height: 36px; padding-left: 40px;"
+          placeholder="Search here...">
+        <i class="fas fa-search position-absolute"
+          style="left: 15px; top: 50%; transform: translateY(-50%); color: #555; font-size: 14px;"></i>
+      </div>
+    
+      <button type="button" class="btn btn-outline-primary rounded-pill" onclick="window.location.href='{% url 'hr_leave' %}'">
+        <i class="fas fa-calendar-alt me-1"></i> All Leave
+      </button>
+    
+      <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#applyLeaveModal">
+        <i class="fas fa-plus"></i>
+      </button>
+
+    </div>
+    <div class="row align-items-end mb-3 py-2 text-white g-2">
+      <div class="col-6 col-md-3">
+          <label for="fromDate" class="form-label text-white">From Date</label>
+          <input type="date" class="form-control" id="fromDate" name="from_date">
+      </div>
+      <div class="col-6 col-md-3">
+          <label for="toDate" class="form-label text-white">To Date</label>
+          <input type="date" class="form-control" id="toDate" name="to_date">
+      </div>
+      <div class="col-12 col-md-1 mt-2 mt-md-0">
+          <button type="submit" class="btn btn-primary w-100" style="height: 38px;">
+              <i class="bi bi-search"></i>
+          </button>
+      </div>
+  </div>
+   
+    <!-- Table -->
+    <div class="table-responsive p-3">
+      <div class="table-responsive">
+        <table id="leaveRecordTable" class="table table-striped table-bordered table-dark text-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Leave Type</th>
+                    <th>Reason & File</th>
+                    <th style="color: #fff;">Approved/Rejected Date</th>
+                    <th style="color: #fff;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if all_leaves %}
+                    {% for leave in all_leaves %}
+                    <tr class="{% cycle 'even' 'odd' %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ leave.start_date|date:"F j, Y" }}</td>
+                        <td>{{ leave.end_date|date:"F j, Y" }}</td>
+                        <td>{{ leave.leave_type }}</td>
+                        <td>
+                            {{ leave.reason }}
+                            {% if leave.request_file %}
+                                <br>
+                                <a href="{{ leave.request_file.url }}" download class="btn btn-outline-primary btn-sm mt-1">
+                                  <i class="fas fa-download"></i> Download
+                              </a>
+                              
+                            {% else %}
+                                <br><span class="text-danger">Leave Request File Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if leave.status_changed_date %}
+                                {{ leave.status_changed_date|date:"F j, Y" }}
+                            {% else %}
+                                <span class="text-white">No Date Available</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                          {% if leave.status == 'pending' %}
+                              <span class="badge bg-warning text-dark">Pending</span>
+                          {% elif leave.status == 'approved' %}
+                              <span class="badge bg-success">Approved</span>
+                          {% elif leave.status == 'rejected' %}
+                              <span class="badge badge-rejected">Rejected</span>
+                          {% endif %}
+                      </td>
+                      
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No leave records found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Apply Leave -->
+<div class="modal fade" id="applyLeaveModal" tabindex="-1" aria-labelledby="applyLeaveModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="applyLeaveModalLabel">Apply Leave</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{% url 'apply_leavehr' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row mb-3 px-3 pt-3">
+          <div class="col-md-6">
+            <label class="form-label">From Date *</label>
+            <input type="date" name="start_date" class="form-control bg-dark text-white border-light" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">To Date *</label>
+            <input type="date" name="end_date" class="form-control bg-dark text-white border-light" required>
+          </div>
+        </div>
+        <div class="mb-3 px-3">
+          <label class="form-label">Leave Type</label>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="leave_type" id="halfDay" value="half_day">
+              <label class="form-check-label" for="halfDay">Half Day</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="leave_type" id="fullDay" value="full_day" checked>
+              <label class="form-check-label" for="fullDay">Full Day</label>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3 px-3">
+          <label class="form-label">Leave Reason</label>
+          <textarea name="leave_reason" class="form-control bg-dark text-white border-light" rows="4" required></textarea>
+        </div>
+        <div class="mb-3 px-3">
+          <label class="form-label">Leave Request File (Optional)</label>
+          <input type="file" name="leave_request_file" class="form-control bg-dark text-white border-light">
+        </div>
+        <div class="d-flex justify-content-center gap-2 pb-3">
+          <button type="reset" class="btn btn-outline-light">
+            <i class="bi bi-trash"></i> Clear
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-calendar-plus me-2"></i> Apply Leave
+          </button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Close
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Reset form on modal hide -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const applyLeaveModal = document.getElementById('applyLeaveModal');
+    applyLeaveModal.addEventListener('hidden.bs.modal', function () {
+      const form = applyLeaveModal.querySelector('form');
+      if (form) {
+        form.reset();
+      }
+    });
+  });
+</script>
+
+<!-- Scripts for search functionality -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchBtn = document.querySelector(".btn-primary.w-100");
+    const fromDateInput = document.getElementById("fromDate");
+    const toDateInput = document.getElementById("toDate");
+    const tableRows = document.querySelectorAll("tbody tr");
+
+    searchBtn.addEventListener("click", function() {
+        const fromDate = fromDateInput.value ? new Date(fromDateInput.value) : null;
+        const toDate = toDateInput.value ? new Date(toDateInput.value) : null;
+        
+        // Reset time parts to ensure pure date comparison
+        if (fromDate) fromDate.setHours(0, 0, 0, 0);
+        if (toDate) toDate.setHours(0, 0, 0, 0);
+
+        let hasVisibleRows = false;
+
+        tableRows.forEach(row => {
+            if (row.classList.contains('text-center') && row.classList.contains('text-danger')) {
+                return;
+            }
+
+            const rowFromDate = new Date(row.cells[1].textContent.trim());
+            const rowToDate = new Date(row.cells[2].textContent.trim());
+            
+            // Reset time parts for row dates
+            rowFromDate.setHours(0, 0, 0, 0);
+            rowToDate.setHours(0, 0, 0, 0);
+
+            let shouldShow = true;
+
+            if (fromDate && toDate) {
+                if (fromDate.getTime() === toDate.getTime()) {
+                    // Case 1: Filtering for single day
+                    shouldShow = (rowFromDate.getTime() === fromDate.getTime() && 
+                                rowToDate.getTime() === fromDate.getTime());
+                } else {
+                    // Case 2: Date range filter
+                    shouldShow = (rowFromDate >= fromDate && rowToDate <= toDate);
+                }
+            } else if (fromDate) {
+                // Case 3: Only From Date provided
+                shouldShow = (rowFromDate >= fromDate);
+            } else if (toDate) {
+                // Case 4: Only To Date provided
+                shouldShow = (rowToDate <= toDate);
+            }
+
+            row.style.display = shouldShow ? "" : "none";
+            if (shouldShow) hasVisibleRows = true;
+        });
+
+        // Handle "no records" message
+        const noRecordsRow = document.querySelector("tbody tr.text-center.text-danger");
+        if (!hasVisibleRows && !noRecordsRow) {
+            const tbody = document.querySelector("tbody");
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = '<td colspan="7" class="text-center text-danger">No records found for the selected dates.</td>';
+            tbody.appendChild(newRow);
+        } else if (hasVisibleRows && noRecordsRow) {
+            noRecordsRow.remove();
+        }
+    });
+  });
+</script>
+
+<script>
+    function filterTable() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let table = document.getElementById("leaveRecordTable");
+        let tbody = table.getElementsByTagName("tbody")[0];
+        let rows = tbody.getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            let cells = rows[i].getElementsByTagName("td");
+            let match = false;
+
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].innerText.toLowerCase().includes(input)) {
+                    match = true;
+                    break;
+                }
+            }
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+{% endblock content %}

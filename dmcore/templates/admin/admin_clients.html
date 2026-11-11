@@ -1,0 +1,76 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+{% block title %}Clients{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/admin_clients.css' %}">
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a> / 
+      <a href="{% url 'admin_works' %}" class="text-decoration-none text-white">Works</a> / Clients</p>
+    </div>
+  </div>
+
+<div class="container-fluid admin-clients-wrap">
+  <h4 class="text-white mb-3">Clients</h4>
+
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-xl-4">
+      <a href="{% url 'admin_clients_new' %}" class="text-decoration-none">
+        <div class="works-card" data-card="ongoing">
+          <div class="works-card-body">
+            <div class="works-card-left">
+              <div class="works-card-title text-primary">New Clients</div>
+              <div class="works-card-count">{{ new_count }}</div>
+              <div class="works-card-sub">All works and task details of new clients</div>
+            </div>
+            <div class="works-card-icon works-icon-ongoing">
+              <i class="fa-solid fa-user-clock"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <a href="{% url 'admin_ongoing_clients_page' %}" class="text-decoration-none">
+        <div class="works-card" data-card="ongoing">
+          <div class="works-card-body">
+            <div class="works-card-left">
+              <div class="works-card-title text-primary">Ongoing Clients</div>
+              <div class="works-card-count">{{ ongoing_count }}</div>
+              <div class="works-card-sub">All works and task details of ongoing clients</div>
+            </div>
+            <div class="works-card-icon works-icon-ongoing">
+              <i class="fa-solid fa-user-clock"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <a href="{% url 'admin_completed_clients_page' %}" class="text-decoration-none">
+        <div class="works-card" data-card="completed">
+          <div class="works-card-body">
+            <div class="works-card-left">
+              <div class="works-card-title text-success">Completed Clients</div>
+              <div class="works-card-count">{{ completed_count }}</div>
+              <div class="works-card-sub">All works and task details of completed clients</div>
+            </div>
+            <div class="works-card-icon works-icon-completed">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script src="{% static 'admin/js/admin_clients.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "landingpage/home.html" %}
+{% block content %}
+<style>
+    body{
+        background: url('static/img/log.jpg') no-repeat center center/cover;
+    }
+    .loginform{
+        margin: 80px auto;
+        padding: 30px;
+    }
+    .login-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      .btn-login {
+        background-color: #0d6efd;
+        color: white;
+      }
+      .btn-login:hover {
+        background-color: #084fbb;
+      }
+      .alt-buttons {
+        margin-top: 1rem;
+      }
+      .alt-buttons .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+</style>
+<div class="container loginform">
+    <div class="login-form mx-auto">
+      <h4 class="text-center mb-4 fw-bold">Login</h4>
+      {% if messages %}
+  {% for message in messages %}
+    {% if message.tags == "success" %}
+      <p style="color: green;">{{ message }}</p>
+    {% elif message.tags == "error" %}
+      <p style="color: red;">{{ message }}</p>
+    {% else %}
+      <p>{{ message }}</p>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+
+
+      <form method="POST" action="">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" required placeholder="Enter username">
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required placeholder="Enter password">
+        </div>
+        <button type="submit" class="btn btn-login w-100">Login</button>
+      </form>
+  
+      <div class="alt-buttons mt-4">
+        <a href="{% url 'empsignup' %}" class="btn btn-danger">Employee Register</a>
+        <a href="{% url 'registerbusiness' %}" class="btn btn-success">Business Register</a>
+      </div>
+    </div>
+  </div>
+  {% endblock content %}

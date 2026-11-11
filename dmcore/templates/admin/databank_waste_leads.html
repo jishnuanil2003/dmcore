@@ -1,0 +1,220 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .client-select {
+    max-width: 420px;   
+}
+
+
+@media (max-width: 576px) {
+    .client-select {
+        max-width: 100%;
+    }
+}
+
+
+
+</style>
+<div class="container mt-4">
+
+    <form method="get" class="card p-4 bg-dark text-white rounded-xl shadow-lg">
+        <h4 class="mb-3">Select <span class="text-success">Client</span></h4>
+
+        <select name="client" class="form-control client-select" id="clientSelect">
+            <option value="">-- Select --</option>
+            {% for client in clients %}
+                <option value="{{ client.id }}">{{ client.client_name }}</option>
+            {% empty %}
+                <option disabled>No Clients found</option>
+            {% endfor %}
+        </select>
+    </form>
+
+</div>
+
+<div class="container mt-4" id="leadSection" style="display:none;">
+
+
+   
+    <div class="card p-4 bg-dark text-white rounded-xl shadow-lg">
+        <h5 class="mb-4">Lead Data</h5>
+
+        <form method="get">
+            <div class="row g-3">
+
+              
+                <div class="col-md-5">
+                    <label class="form-label">Employees</label>
+                    <select class="form-control" id="employeeSelect" name="employee">
+                        <option value="">Select</option>
+                    </select>
+
+                </div>
+
+       
+                <div class="col-md-5">
+                    <label class="form-label">Lead categories</label>
+                    <select class="form-control" id="categorySelect" name="category">
+                        <option value="">Select</option>
+                    </select>
+                </div>
+
+            
+                <div class="col-md-5">
+                    <label class="form-label ">From date</label>
+                    <input type="date" class="form-control" id="fromDate" name="from_date">
+                    
+                </div>
+
+      
+                <div class="col-md-5">
+                    <label class="form-label ">To date</label>
+                    <input type="date" class="form-control" id="toDate" name="to_date">
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+  
+    <div class="card mt-4 bg-dark text-white rounded-xl shadow-lg">
+        <div class="table-responsive">
+            <table class="table table-dark table-bordered align-middle mb-0">
+                <thead class="text-muted small">
+                    <tr>
+                        <th>No.</th>
+                        <th>Date</th>
+                        <th>Lead collected Employee</th>
+                        <th>Lead Category</th>
+                        <th>Lead Name</th>
+                        <th>Lead Email</th>
+                        <th>Lead Contact</th>
+                        <th>Lead Source</th>
+                        <th>Client Required</th>
+                    </tr>
+                </thead>
+                <tbody id="leadTableBody"></tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const clientSelect = document.getElementById('clientSelect');
+    const employeeSelect = document.getElementById('employeeSelect');
+    const categorySelect = document.getElementById('categorySelect');
+
+    if (!clientSelect) {
+        console.error("clientSelect not found");
+        return;
+    }
+
+    clientSelect.addEventListener('change', function () {
+        let clientId = this.value;
+
+        employeeSelect.innerHTML = '<option value="">Loading...</option>';
+        categorySelect.innerHTML = '<option value="">Loading...</option>';
+
+        if (clientId) {
+            fetch(`/get-client-data/?client_id=${clientId}`)
+                .then(response => response.json())
+                .then(data => {
+
+                    employeeSelect.innerHTML = '<option value="">Select</option>';
+                    data.employees.forEach(emp => {
+                        employeeSelect.innerHTML +=
+                            `<option value="${emp.collected_by__id}">
+                                ${emp.collected_by__name}
+                             </option>`;
+                    });
+
+                    categorySelect.innerHTML = '<option value="">Select</option>';
+                    data.categories.forEach(cat => {
+                        categorySelect.innerHTML +=
+                            `<option value="${cat.id}">
+                                ${cat.collection_for}
+                             </option>`;
+                    });
+                });
+        } else {
+            employeeSelect.innerHTML = '<option value="">Select</option>';
+            categorySelect.innerHTML = '<option value="">Select</option>';
+        }
+    });
+
+});
+</script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const clientSelect = document.getElementById('clientSelect');
+    const employeeSelect = document.getElementById('employeeSelect');
+    const categorySelect = document.getElementById('categorySelect');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    const leadSection = document.getElementById('leadSection');
+    const tableBody = document.getElementById('leadTableBody');
+
+    function fetchLeads() {
+        const clientId = clientSelect.value;
+        if (!clientId) return;
+
+        const params = new URLSearchParams({
+            client_id: clientId,
+            employee: employeeSelect.value,
+            category: categorySelect.value,
+            from_date: fromDate.value,
+            to_date: toDate.value
+        });
+
+        fetch(`/ajax/get-waste-leads/?${params.toString()}`)
+            .then(res => res.json())
+            .then(data => {
+                leadSection.style.display = 'block';
+                tableBody.innerHTML = '';
+
+                if (!data.leads.length) {
+                    tableBody.innerHTML =
+                        `<tr><td colspan="9" class="text-center">No leads found</td></tr>`;
+                    return;
+                }
+
+                data.leads.forEach((lead, index) => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${lead.date ?? ''}</td>
+                            <td>${lead.employee}</td>
+                            <td>${lead.category}</td>
+                            <td>${lead.name}</td>
+                            <td>${lead.email}</td>
+                            <td>${lead.contact}</td>
+                            <td>${lead.source}</td>
+                            <td>${lead.client_required.join('<br>') || '-'}</td>
+                        </tr>`;
+                });
+            });
+    }
+
+    
+    clientSelect.addEventListener('change', fetchLeads);
+    employeeSelect.addEventListener('change', fetchLeads);
+    categorySelect.addEventListener('change', fetchLeads);
+    fromDate.addEventListener('change', fetchLeads);
+    toDate.addEventListener('change', fetchLeads);
+});
+</script>
+
+
+
+{% endblock %}

@@ -1,0 +1,261 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Repeated Leads{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/leads_tracker.css' %}">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <div class="d-flex justify-content-between align-items-center mb-3 print-hide">
+    <h5 class="text-white mb-0">Repeated Leads (<span id="leadCount">0</span>)</h5>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-outline-info btn-sm" id="shareBtn" data-bs-toggle="modal"><i class="fas fa-share"></i></button>
+      <button class="btn btn-outline-danger btn-sm" id="pdfBtn"><i class="fas fa-file-pdf"></i></button>
+      <button class="btn btn-outline-success btn-sm" id="excelBtn"><i class="fas fa-file-excel"></i></button>
+      <button class="btn btn-outline-light btn-sm" id="printBtn"><i class="fas fa-print"></i></button>
+    </div>
+  </div>
+
+  <div class="row text-white mb-3 gx-2 gy-2 print-hide">
+    <div class="col-md-2">
+      <label class="form-label">Client</label>
+      <select class="form-select form-select-sm" id="clientFilter">
+        <option value="">All</option>
+        {% for c in clients %}
+        <option value="{{ c.client_name }}">{{ c.client_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Category</label>
+      <select class="form-select form-select-sm" id="categoryFilter" disabled>
+        <option value="">All</option>
+        {% for cat in categories %}
+        <option value="{{ cat.collection_for }}" data-client="{{ cat.client_task.client.client_name }}">{{ cat.collection_for }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Executive</label>
+      <select class="form-select form-select-sm" id="executiveFilter">
+        <option value="">All</option>
+        {% for emp in employees %}
+        <option value="{{ emp.name }}">{{ emp.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">From Date</label>
+      <input type="date" class="form-control form-control-sm" id="startDateFilter">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">To Date</label>
+      <input type="date" class="form-control form-control-sm" id="endDateFilter">
+    </div>
+        <div class="col-md-2">
+      <label class="form-label">Telecaller</label>
+      <select class="form-select form-select-sm" id="telecallerFilter">
+        <option value="">All</option>
+        {% for tc in telecallers %}
+        <option value="{{ tc.name }}">{{ tc.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Assign From</label>
+      <input type="date" class="form-control form-control-sm" id="assignFromDate">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Assign To</label>
+      <input type="date" class="form-control form-control-sm" id="assignToDate">
+    </div>
+    <div class="col-md-2 d-grid">
+      <label class="form-label invisible">Clear</label>
+      <button class="btn btn-outline-light btn-sm" id="clearFilter">Clear</button>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="d-flex gap-2 align-items-center">
+      <span class="text-white">Checked: <span id="checkedCount">0</span></span>
+      <button class="btn btn-outline-danger btn-sm" id="deleteBtn"><i class="fas fa-trash"></i></button>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between align-items-center mb-3 print-hide">
+    <div class="d-flex align-items-center gap-2">
+      <label class="text-white">Show</label>
+      <select id="rowLimit" class="form-select form-select-sm" style="width: 80px;">
+        <option>5</option>
+        <option>10</option>
+        <option>20</option>
+        <option>50</option>
+        <option>100</option>
+      </select>
+      <span class="text-white">rows</span>
+    </div>
+    <div class="input-group w-auto">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-hover align-middle text-center" id="repeatedTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th class="text-center"><input type="checkbox" id="selectAll"></th>
+          <th class="text-center table_en_sm">History</th>
+          <th class="text-center table_en_sm">Marked Date</th>
+          <th class="text-center table_en_lsm">Lead Name</th>
+          <th class="text-center table_en_lsm">Contact Details</th>
+          <th class="text-center table_en_sm">Type</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="7" class="text-center text-white py-4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<!--? Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Share Repeated Leads</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="d-flex flex-column gap-3">
+          <button class="btn btn-success" id="shareViaWhatsApp">
+            <i class="fab fa-whatsapp me-2"></i>Share via WhatsApp
+          </button>
+          <button class="btn btn-info text-white" id="shareViaEmail">
+            <i class="fas fa-envelope me-2"></i>Share via Email
+          </button>
+        </div>
+
+        <div class="mt-4" id="emailSection" style="display: none;">
+          <label class="form-label">Recipient Email(s)</label>
+          <input type="text" id="emailInput" class="form-control mb-2" placeholder="example1@mail.com, example2@mail.com">
+
+          <label class="form-label">Message</label>
+          <textarea id="emailMessage" class="form-control mb-3" rows="3" placeholder="Optional message..."></textarea>
+
+          <button class="btn btn-primary w-100" id="sendEmail">
+            <i class="fas fa-paper-plane me-2"></i>Send Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--? Offcanvas -->
+<div class="offcanvas offcanvas-end wide-canvas bg-dark text-white" tabindex="-1" id="leadDetailsCanvas">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Lead Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+
+        <div class="mb-3">
+          <h6 class="text-info">Lead Details</h6>
+          <p>Name: <strong id="leadName">-</strong></p>
+          <p>Email: <span id="leadEmail">-</span></p>
+          <p>Phone: <span id="leadPhone">-</span></p>
+          <p>Added Date: <span id="leadAddedDate">-</span></p>
+        </div>
+
+        <div class="mb-3">
+          <h6 class="text-info">Client Details</h6>
+          <p>Client: <span id="clientName">-</span></p>
+          <p>Business: <span id="clientBusiness">-</span></p>
+          <p>Category: <span id="clientCategory">-</span></p>
+        </div>
+
+        <div class="mb-3">
+          <h6 class="text-info">Collected Details</h6>
+          <p>Collected by: <span id="collectedByName">-</span></p>
+          <p>Category: <span id="collectedCategory">-</span></p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="accordion" id="followupAccordion">
+
+          <div class="accordion-item bg-dark text-white">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                Follow-Up Details
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse">
+              <div class="accordion-body" id="followupDetailsContent">---</div>
+            </div>
+          </div>
+
+          <div class="accordion-item bg-dark text-white">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                Follow-Up History
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse">
+              <div class="accordion-body" id="followupHistoryContent">---</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--? Toast Container -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <div id="repeatedToast" class="toast text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div id="toastMessage" class="toast-body">
+        <!--// message  -->
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  const leadData = JSON.parse(`{{ leads_json|safe|escapejs }}`);
+</script>
+<script src="{% static 'dm_head/js/repeated_leads.js' %}"></script>
+{% endblock %}

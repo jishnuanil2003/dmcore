@@ -1,0 +1,761 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+
+{% block content %}
+<style>
+  /* Dark Theme Styles to match admin.html */
+  .card {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card-header {
+    background-color: #333333 !important;
+    border-bottom: 1px solid #444;
+    color: white !important;
+  }
+  
+  .list-group-item {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+  }
+  
+  .table {
+    color: white;
+    background-color: #333333;
+  }
+  
+  .table td {
+    border-color: #444;
+    background-color: #333333 !important;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #3a3a3a !important;
+  }
+  
+  .badge {
+    color: white !important;
+  }
+  
+  .bg-primary {
+    background-color: #4a5568 !important; /* Dark blue-gray */
+  }
+  
+  .bg-success {
+    background-color: #2d6a4f !important; /* Dark green */
+  }
+  
+  .bg-warning {
+    background-color: #b88b4a !important; /* Dark orange */
+    color: white !important;
+  }
+  
+  .form-control, .form-select {
+    background-color: #444;
+    color: white;
+    border: 1px solid #555;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #555;
+    color: white;
+    border-color: #666;
+    box-shadow: 0 0 0 0.25rem rgba(100, 100, 100, 0.25);
+  }
+  
+  .current-date {
+    font-size: 1.1rem; /* Increased font size */
+    opacity: 0.9; /* Increased opacity for better visibility */
+    margin-top: 5px;
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-weight: 500; /* Added slight weight */
+  }
+  
+  .leave-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+  }
+  
+  .employee-name {
+    font-weight: bold;
+    color: #b8c2cc;
+  }
+  
+  .leave-type {
+    font-weight: bold;
+  }
+  
+  .date-range {
+    font-size: 0.85rem;
+    color: #adb5bd;
+  }
+  
+  .card-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: none;
+  }
+  
+  .equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .equal-height-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .action-icons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-icons button {
+    background: transparent;
+    border: none;
+    color: #adb5bd;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  
+  .action-icons button:hover {
+    color: white;
+  }
+  
+  .approve-icon {
+    color: #2d6a4f;
+  }
+  
+  .reject-icon {
+    color: #e74c3c;
+  }
+  
+  .status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+  
+  .status-pending {
+    background-color: #b88b4a;
+  }
+  
+  .status-approved {
+    background-color: #2d6a4f;
+  }
+  
+  .status-rejected {
+    background-color: #e74c3c;
+  }
+  
+  /* Hide sections by default */
+  #myLeaveContent, #employeeLeaveContent {
+    display: none;
+  }
+  
+  /* Icon Button Styles */
+  .circle-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  .circle-icon-btn:hover {
+    background-color: #5a6678;
+    transform: translateY(-2px);
+  }
+  
+  .metric-badge {
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #4ade80; /* Green color for positive metrics */
+  }
+  
+  .metric-badge.negative {
+    color: #f87171; /* Red color for negative metrics */
+  }
+</style>
+
+<!-- Link to Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="row equal-height-row mt-2 p-2">
+  <div class="col-md-4 equal-height-col mb-3">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <h5 class="card-title mb-0"> Apply Leave</h5>
+            <span class="metric-badge ms-2">+3.5%</span>
+          </div>
+          <button class="circle-icon-btn" id="btnShowLeaveApp">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Request your leave.</p>
+      </div>
+    </div>
+    
+    <!-- My Leave Section -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <h5 class="card-title mb-0">View My Leaves</h5>
+            <span class="metric-badge ms-2">+2.8%</span>
+          </div>
+          <button class="circle-icon-btn" id="btnShowMyLeave">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Review your leave requests, past and upcoming, all in one place.</p>
+      </div>
+    </div>
+    
+    <!-- Employee Leave Section -->
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <h5 class="card-title mb-0">View Employees Leaves</h5>
+            <span class="metric-badge negative ms-2">-1.3%</span>
+          </div>
+          <button class="circle-icon-btn" id="btnShowEmployeeLeave">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Monitor your team's leave requests, ensuring a smooth workflow.</p>
+      </div>
+    </div>
+  </div>
+
+<!-- Simplified Leave Application Form -->
+<div class="col-md-8 equal-height-col mb-3">
+  <!-- Leave Application Form Section -->
+  <div class="card shadow-sm" id="leaveApplicationForm">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Leave Application Form</h5>
+    </div>
+    <div class="card-body">
+      <form id="leaveRequestForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="startDate" name="start_date" required>
+          </div>
+          <div class="col-md-6">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="endDate" name="end_date" required>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Leave Type</label>
+          <div class="d-flex">
+            <div class="form-check me-4">
+              <input class="form-check-input" type="radio" name="leave_type" id="halfDay" value="Half Day" required>
+              <label class="form-check-label" for="halfDay">Half Day</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="leave_type" id="fullDay" value="Full Day" checked>
+              <label class="form-check-label" for="fullDay">Full Day</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="leaveReason" class="form-label">Reason for Leave</label>
+          <textarea class="form-control" id="leaveReason" name="reason" rows="3" required placeholder="Please provide details for your leave request"></textarea>
+        </div>
+        
+        <div class="mb-3">
+          <label for="requestFile" class="form-label">Attachment (Optional)</label>
+          <input class="form-control" type="file" id="requestFile" name="request_file">
+        </div>
+        
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary" id="submitLeaveRequest">
+            Leave Request
+          </button>
+        </div>
+      </form>
+      
+  </div>
+</div>
+
+<!-- My Leave Section Content (Initially Hidden) -->
+<div class="card shadow-sm" id="myLeaveContent">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">My Leave History</h5>
+      {% comment %} <button class="circle-icon-btn" id="btnBackFromMyLeave">
+        <i class="fas fa-arrow-left"></i>
+      </button> {% endcomment %}
+    </div>
+  </div>
+  <div class="card-body">
+    <!-- Search Form with POST method -->
+    <form id="leaveSearchForm" method="post">
+      {% csrf_token %}
+      <div class="row mb-3">
+        <div class="col-md-4 mb-2">
+          <label for="fromDateFilter" class="form-label">From Date</label>
+          <input type="date" class="form-control" id="fromDateFilter" name="from_date" required>
+        </div>
+        <div class="col-md-4 mb-2">
+          <label for="toDateFilter" class="form-label">To Date</label>
+          <input type="date" class="form-control" id="toDateFilter" name="to_date" required>
+        </div>
+        <div class="col-md-4 mb-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100" id="searchLeaveBtn">Search</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="table-responsive" style='white-space: nowrap;'>
+      <table class="table  table-bordered table-dark">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Leave Type</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Leave records will be populated here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+    
+<!-- Employee Leave Section Content -->
+<div class="card shadow-sm" id="employeeLeaveContent">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Team Leave Management</h5>
+      {% comment %} <button class="circle-icon-btn" id="btnBackFromEmployeeLeave">
+        <i class="fas fa-arrow-left"></i>
+      </button> {% endcomment %}
+    </div>
+  </div>
+  <div class="card-body">
+    <!-- Search filters in a form for AJAX submission -->
+    <form id="employeeLeaveFilterForm">
+      <div class="row mb-3">
+        <div class="col-md-3 mb-2">
+          <label for="employee_filter" class="form-label">Employee</label>
+          <select class="form-select" id="employee_filter" name="employee_filter" required>
+            <option value="">All Employees</option>
+            {% if employee %}
+              {% for allocation in employee %}
+                {% if allocation.employee %}
+                  <option value="{{ allocation.employee.id }}">{{ allocation.employee.name }}</option>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              <option>No employees allocated</option>
+            {% endif %}
+          </select>
+        </div>
+        <div class="col-md-3 mb-2">
+          <label for="employeeFromDateFilter" class="form-label">From Date</label>
+          <input type="date" class="form-control" id="employeeFromDateFilter" name="from_date" required>
+        </div>
+        <div class="col-md-3 mb-2">
+          <label for="employeeToDateFilter" class="form-label">To Date</label>
+          <input type="date" class="form-control" id="employeeToDateFilter" name="to_date" required>
+        </div>
+        <div class="col-md-3 mb-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100" id="searchEmployeeLeaveBtn">Search</button>
+        </div>
+      </div>
+    </form>
+    
+    <!-- Loading indicator -->
+    <div id="leaveTableLoader" class="text-center d-none">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    
+    <div class="table-responsive" style='white-space: nowrap;'>
+      <table class="table  table-bordered table-dark">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Employee Name</th>
+            <th>From</th>
+            <th>To</th>
+            <th>No. of Days</th>
+            <th>Leave Type</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="employeeLeaveTableBody">
+          <!-- Employee leave records will be populated here after search -->
+        </tbody>
+      </table>
+      <div id="initialStateMessage" class="text-center">
+        <!-- Use the search filters above to view employee leave records. -->
+      </div>
+      <div id="noLeaveRecordsMessage" class="d-none text-center">
+        No leave records found for the selected criteria.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Wait for the DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get references to all buttons and content sections
+    const btnShowLeaveApp = document.getElementById('btnShowLeaveApp');
+    const btnShowMyLeave = document.getElementById('btnShowMyLeave');
+    const btnShowEmployeeLeave = document.getElementById('btnShowEmployeeLeave');
+    const btnBackFromMyLeave = document.getElementById('btnBackFromMyLeave');
+    const btnBackFromEmployeeLeave = document.getElementById('btnBackFromEmployeeLeave');
+    
+    const leaveApplicationForm = document.getElementById('leaveApplicationForm');
+    const myLeaveContent = document.getElementById('myLeaveContent');
+    const employeeLeaveContent = document.getElementById('employeeLeaveContent');
+    
+    // Function to show only the selected section
+    function showOnlySection(sectionToShow) {
+      // Hide all sections first
+      leaveApplicationForm.style.display = 'none';
+      myLeaveContent.style.display = 'none';
+      employeeLeaveContent.style.display = 'none';
+      
+      // Show the selected section
+      sectionToShow.style.display = 'flex';
+    }
+    
+    // Set up event listeners for buttons
+    btnShowLeaveApp.addEventListener('click', function() {
+      showOnlySection(leaveApplicationForm);
+    });
+    
+    btnShowMyLeave.addEventListener('click', function() {
+      showOnlySection(myLeaveContent);
+    });
+    
+    btnShowEmployeeLeave.addEventListener('click', function() {
+      showOnlySection(employeeLeaveContent);
+    });
+    
+    btnBackFromMyLeave.addEventListener('click', function() {
+      showOnlySection(leaveApplicationForm);
+    });
+    
+    btnBackFromEmployeeLeave.addEventListener('click', function() {
+      showOnlySection(leaveApplicationForm);
+    });
+    
+    // By default, show the leave application form
+    showOnlySection(leaveApplicationForm);
+  });
+</script>
+
+<!-- /////////////////////////////////////// employee leave /////////////////////////////////////////////////////-->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Form submission handler
+  const filterForm = document.getElementById('employeeLeaveFilterForm');
+  filterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    fetchLeaveData();
+  });
+  
+  // Back button functionality
+  const backButton = document.getElementById('btnBackFromEmployeeLeave');
+  if (backButton) {
+    backButton.addEventListener('click', function() {
+      // Handle back button functionality based on your application flow
+      console.log('Back button clicked');
+      // Example: window.history.back() or hide/show other elements
+    });
+  }
+  
+  // Function to fetch leave data using AJAX
+  function fetchLeaveData() {
+    // Show loading indicator
+    const loader = document.getElementById('leaveTableLoader');
+    loader.classList.remove('d-none');
+    
+    // Get form data
+    const employeeId = document.getElementById('employee_filter').value;
+    const fromDate = document.getElementById('employeeFromDateFilter').value;
+    const toDate = document.getElementById('employeeToDateFilter').value;
+    
+    // Create form data object
+    const formData = new FormData();
+    formData.append('employee_id', employeeId);
+    formData.append('from_date', fromDate);
+    formData.append('to_date', toDate);
+    
+    // Add CSRF token for Django
+    const csrfToken = getCookie('csrftoken');
+    
+    // Make AJAX request
+    fetch('/teamlead_employee_leave_data/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Hide loading indicator
+      loader.classList.add('d-none');
+      
+      // Update table with fetched data
+      updateLeaveTable(data);
+    })
+    .catch(error => {
+      console.error('Error fetching leave data:', error);
+      loader.classList.add('d-none');
+      
+      // Show error message
+      const tableBody = document.getElementById('employeeLeaveTableBody');
+      tableBody.innerHTML = '<tr><td colspan="8" class="text-danger">Error loading data. Please try again.</td></tr>';
+    });
+  }
+  
+  // Function to update the leave table with fetched data
+  function updateLeaveTable(data) {
+    const tableBody = document.getElementById('employeeLeaveTableBody');
+    const noRecordsMessage = document.getElementById('noLeaveRecordsMessage');
+    const initialStateMessage = document.getElementById('initialStateMessage');
+    
+    // Clear existing table content
+    tableBody.innerHTML = '';
+    
+    // Hide the initial state message after first search
+    initialStateMessage.classList.add('d-none');
+    
+    if (data.length === 0) {
+      // Show no records message
+      noRecordsMessage.classList.remove('d-none');
+    } else {
+      // Hide no records message
+      noRecordsMessage.classList.add('d-none');
+      
+      // Populate table with data
+      data.forEach(leave => {
+        tableBody.innerHTML += `
+          <tr>
+            <td>${leave.id}</td>
+            <td>${leave.employee_name}</td>
+            <td>${formatDate(leave.start_date)}</td>
+            <td>${formatDate(leave.end_date)}</td>
+            <td>${leave.number_of_days}</td>
+            <td>${leave.leave_type}</td>
+            <td>${leave.reason}</td>
+            <td><span class="badge bg-${getStatusBadgeClass(leave.status)}">${leave.status}</span></td>
+          </tr>
+        `;
+      });
+    }
+  }
+  
+  // Helper function to format date
+  function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  }
+  
+  // Helper function to get badge class based on status
+  function getStatusBadgeClass(status) {
+    switch(status.toLowerCase()) {
+      case 'approved':
+        return 'success';
+      case 'rejected':
+        return 'danger';
+      default:
+        return 'warning';
+    }
+  }
+  
+  // Function to get CSRF token from cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+</script>
+
+<!--//////////////////////////////////////////////// apply leave  ///////////////////////////////////////////////////////-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+// Updated AJAX script for session-based authentication
+$(document).ready(function () {
+    $('#leaveRequestForm').on('submit', function (e) {
+        e.preventDefault();
+        
+        let formData = new FormData(this);
+        
+        $.ajax({
+            url: "{% url 'teamlead_apply_leave' %}",
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { 
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (response) {
+                alert('Leave request submitted successfully!');
+                $('#leaveRequestForm')[0].reset(); // Clear form
+            }, 
+            error: function (xhr, status, error) {
+                console.log("XHR:", xhr);
+                console.log("Status:", status);
+                console.log("Error:", error);
+                
+                let errorMessage = 'Something went wrong.';
+                
+                // Check if this is a session authentication error
+                if (xhr.status === 401) {
+                    alert('Your session has expired. Please log in again.');
+                    window.location.href = "{% url 'login' %}";  // Redirect to login page
+                    return;
+                }
+                
+                // Handle other errors
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                } else if (xhr.responseText) {
+                    try {
+                        let json = JSON.parse(xhr.responseText);
+                        if (json.error) {
+                            errorMessage = json.error;
+                        } else {
+                            errorMessage = xhr.responseText;
+                        }
+                    } catch (e) {
+                        errorMessage = xhr.responseText;
+                    }
+                }
+                
+                alert('Error: ' + errorMessage);
+            }
+        });
+    });
+});
+</script>
+
+<!--///////////////////////////////////////////////// view tl leave ///////////////////////////////////////////////////////////-->
+<script>
+$(document).ready(function () {
+    $('#leaveSearchForm').on('submit', function (e) {
+        e.preventDefault(); // Prevent full-page reload
+
+        const formData = {
+            from_date: $('#fromDateFilter').val(),
+            to_date: $('#toDateFilter').val(),
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        };
+
+        $.ajax({
+            url: "{% url 'teamlead_view_leaves' %}",  // Should match your Django URL name
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                const tbody = $('#myLeaveContent table tbody');
+                tbody.empty();
+
+                if (response.status === 'success') {
+                    if (response.leaves.length === 0) {
+                        tbody.append('<tr><td colspan="6" class="text-center">No leave records found.</td></tr>');
+                    } else {
+                        response.leaves.forEach(function (leave) {
+                            const row = `
+                                <tr>
+                                    <td>${leave.id}</td>
+                                    <td>${leave.start_date}</td>
+                                    <td>${leave.end_date}</td>
+                                    <td>${leave.leave_type}</td>
+                                    <td>${leave.reason}</td>
+                                    <td><span class="badge bg-${getStatusBadgeClass(leave.status)}">${leave.status}</span></td>
+                                </tr>`;
+                            tbody.append(row);
+                        });
+                    }
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function (xhr) {
+                alert("Failed to fetch leave records.");
+                console.log(xhr.responseText);
+            }
+        });
+    });
+
+    function getStatusBadgeClass(status) {
+    switch(status.toLowerCase()) {
+        case 'approved':
+            return 'success';
+        case 'rejected':
+            return 'danger';
+        default:
+            return 'warning';
+    }
+}
+
+
+    $('#btnBackFromMyLeave').on('click', function () {
+        $('#myLeaveContent').hide();
+    });
+});
+</script>
+
+{% endblock content %}

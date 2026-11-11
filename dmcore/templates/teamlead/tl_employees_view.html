@@ -1,0 +1,127 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% block content %}
+<style>
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+    .table-responsive {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .search-wrapper {
+        position: relative;
+    }
+    .clear-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #3f8cff;
+        font-size: 1.2rem;
+    }
+</style>
+<div class="main-content">
+    <div class="container-fluid mt-4 mb-4">
+         <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="/teamlead" class="text-secondary">Dashboard</a> /
+            <a href="{% url 'tl_employees_section' %}" class="text-secondary">Employee Section</a> /
+            <a class="text-light">Employees List</a>
+        </h5>
+        <div class="container-fluid" style="background-color: #333333;padding-top: 22px;padding-bottom: 22px;padding-left: 25px;padding-right: 25px;margin-top: 33px;border-radius: 20px;">
+            <h5 class="text-light"><b>Employees</b></h5>
+            <div class="search-wrapper mt-4">
+                <input type="text" id="employee-search" class="form-control" placeholder="Search here.." onkeyup="filterEmployees()">
+                <span id="clear-search" class="clear-icon d-none" onclick="clearSearch()"><b>&times;</b></span>
+            </div>
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered table-striped table-dark"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 10%;">No</th>
+                            <th scope="col" style="width: 10%;min-width: 111px;">Employee Id</th>
+                            <th scope="col" style="width: 10%;min-width: 144px;">Employee Name</th>
+                            <th scope="col" style="width: 10%;">Email</th>
+                            <th scope="col" style="width: 10%;">Phone</th>
+                            <th scope="col" style="width: 10%;min-width: 122px;">Register Date</th>
+                            <th scope="col" style="width: 10%;">Department</th>
+                            <th scope="col" style="width: 10%;">Designation</th>
+                            <th scope="col" style="width: 10%;min-width: 122px;text-align: center;">Active Status</th>
+                            <th scope="col" style="width: 10%;min-width: 133px;text-align: center;">Account Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if allocation %}
+                            {% for a in allocation %}
+                                <tr>
+                                    <td style="width: 10%;">
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        EMP0000
+                                    </td>
+                                    <td style="width: 10%;">
+                                        <i class="fa-solid fa-user" style="margin-right: 10px;"></i>{{ a.employee.name }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        {{ a.employee.email }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        {{ a.employee.contact_number }}
+                                    </td>
+                                    <td style="width: 10%;">
+                                        {{ a.employee.created_at }}
+                                    </td>
+                                     <td style="width: 10%;">
+                                        {{ a.employee.department.name }}
+                                    </td>
+                                     <td style="width: 10%;">
+                                        {{ a.employee.designation.name }}
+                                    </td>
+                                     <td style="width: 10%;text-align: center;">
+                                        <i class="fa-solid fa-circle-check text-success"></i>
+                                    </td>
+                                     <td style="width: 10%;text-align: center;">
+                                        {% if a.employee.verification_status == 0 %} <i class="fa-solid fa-user-xmark text-danger"></i> {% elif a.employee.verification_status == 1 %} <i class="fa-solid fa-user-check text-success"></i> {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" style="text-align: center;">No employees found!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>                        
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function filterEmployees() {
+        const input = document.getElementById('employee-search');
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll('table tbody tr');
+        const clearBtn = document.getElementById('clear-search');
+        clearBtn.classList.toggle('d-none', filter === '');
+        rows.forEach(row => {
+            const nameCell = row.cells[2];
+            if (nameCell && nameCell.textContent.toLowerCase().includes(filter)) {
+                row.style.display = '';
+            } else {
+                row.style.display = filter === '' ? '' : 'none';
+            }
+        });
+    }
+    function clearSearch() {
+        document.getElementById('employee-search').value = '';
+        filterEmployees();
+    }
+</script>
+{% endblock content %}

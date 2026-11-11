@@ -1,0 +1,199 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+{% block title %}Transfer Leads{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/transfer_leads.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 40px; right: 10px; z-index: 1099;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- /Messages -->
+
+  <div class="d-flex justify-content-between align-items-center mb-3 print-hide">
+    <h5 class="text-white" id="pdfContent">Verified Leads for Transfer</h5>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-outline-light btn-sm" id="printBtn"><i class="fas fa-print"></i></button>
+      <button class="btn btn-outline-danger btn-sm" id="pdfBtn"><i class="fa-solid fa-file-pdf"></i></button>
+      <button class="btn btn-outline-success btn-sm" id="excelBtn"><i class="fa-solid fa-file-excel"></i></button>
+      <button class="btn btn-outline-info btn-sm" id="shareBtn"><i class="fa-solid fa-share"></i></button>
+    </div>
+  </div>
+  
+  <!-- Filter toolbar -->
+  <div class="row mb-3 text-white print-hide flex-wrap gx-2 gy-2 d-flex align-items-end justify-content-start">
+    <div class="col-lg-2 col-md-3 col-sm-6">
+      <label class="form-label">Client</label>
+      <select id="clientFilter" class="form-select form-select-sm">
+        <option value="" disabled selected>Select Client</option>
+        <option value="">All</option>
+        {% for c in clients %}
+        <option value="{{ c.id }}">{{ c.client_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  
+    <div class="col-md-2">
+      <label>Category</label>
+        <select id="categoryFilter" class="form-select form-select-sm">
+          <option value="" disabled selected>Select Category</option>
+          <option value="">All</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" class="client-category client-{{ cat.client_task.client.id }}" style="display: none;">
+              {{ cat.collection_for }}
+            </option>
+          {% endfor %}
+        </select>
+    </div>
+  
+    <div class="col-lg-2 col-md-3 col-sm-6">
+      <label class="form-label">Employee</label>
+      <select id="employeeFilter" class="form-select form-select-sm">
+        <option value="" disabled selected>Select Employee</option>
+        <option value="">All</option>
+        {% for emp in employees %}
+        <option value="{{ emp.id }}">{{ emp.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  
+    <div class="col-lg-2 col-md-3 col-sm-6">
+      <label class="form-label">From</label>
+      <input type="date" id="fromDate" class="form-control form-control-sm">
+    </div>
+  
+    <div class="col-lg-2 col-md-3 col-sm-6">
+      <label class="form-label">To</label>
+      <input type="date" id="toDate" class="form-control form-control-sm">
+    </div>
+  
+    <div class="col-lg-2 col-md-3 col-sm-6 d-grid">
+      <label class="form-label invisible">Clear</label>
+      <button class="btn btn-outline-light btn-sm" id="clearFilters">Clear</button>
+    </div>
+
+  </div>
+
+
+  <div class="input-group w-100 mb-4 print-hide">
+    <input type="text" id="searchInput" class="form-control bg-dark text-white" placeholder="Search...">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  <div class="d-flex justify-content-between mt-3">
+    <button class="btn btn-outline-success btn-sm" id="transferBtn"><b>Transfer Leads</b></button>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    
+    <div class="d-flex justify-content-start mb-2">
+      <label class="text-white me-2">Showing</label>
+      <select id="rowLimit" class="form-select form-select-sm" style="width: 80px;">
+        <option>10</option><option>20</option><option>50</option><option>100</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="pdfContent">
+    {% if leads %}
+    <div id="tableWrapper" class="table-responsive">
+      <table id="leadTable" class="table table-dark table-striped align-middle text-center">
+        <thead>
+          <tr>
+            <th class="nosort text-center"><input type="checkbox" id="checkAll"></th>
+            <th class="text-center">Collected By</th>
+            <th class="text-center">Name & Source</th>
+            <th class="text-center">Contact</th>
+            <th class="nosort text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr data-client="{{ lead.work.client.id }}" data-category="{{ lead.lead_category.id }}"
+              data-employee="{{ lead.collected_by.id }}" data-date="{{ lead.added_date }}">
+            <td><input type="checkbox" name="selected_leads" value="{{ lead.id }}"></td>
+            <td>{{ lead.collected_by.name }}<br><small>{{ lead.added_date }}</small></td>
+            <td>{{ lead.name }}<br><small>{{ lead.source }}</small></td>
+            <td>{{ lead.email }}<br>{{ lead.contact }}</td>
+            <td><span class="badge bg-success">Verified</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div id="noResultsMessage" class="text-center text-white py-4" style="display: none;">
+      <h5>No leads found matching the filter.</h5>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-white">
+      <h5 class="text-white">No verified leads available for transfer.</h5>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Share modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title">Share Lead Report</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">Share via:</p>
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-outline-success btn-sm" id="shareViaWhatsApp">WhatsApp</button>
+          <button class="btn btn-outline-primary btn-sm" id="shareViaEmail">Email</button>
+        </div>
+
+        <!-- Email Section (initially hidden) -->
+        <div id="emailSection" style="display: none;">
+          <div class="mb-3">
+            <label for="emailInput">Email Address(es)</label>
+            <input type="text" class="form-control form-control-sm" id="emailInput"
+              placeholder="Enter email ID(s) separated by commas">
+          </div>
+          <div class="mb-3">
+            <label for="emailMessage">Message (optional)</label>
+            <textarea class="form-control form-control-sm" rows="3" id="emailMessage"></textarea>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-primary btn-sm" id="sendEmail">Send Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="{% static 'dm_head/js/transfer_leads.js' %}"></script>
+
+{% endblock %}

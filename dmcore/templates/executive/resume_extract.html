@@ -1,0 +1,487 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+<style>
+
+:root{
+    --primary:#4f46e5;
+    --secondary:#7c3aed;
+    --success:#10b981;
+    --danger:#ef4444;
+
+    --card-bg:#ffffff;
+    --text-primary:#1e293b;
+    --text-secondary:#64748b;
+    --border-color:#e2e8f0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Background animated shapes */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.shape {
+    position: absolute;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: float 20s infinite ease-in-out alternate;
+}
+
+.shape-1 {
+    width: 400px;
+    height: 400px;
+    background: var(--accent-1);
+    top: -100px;
+    left: -100px;
+    border-radius: 50%;
+}
+
+.shape-2 {
+    width: 500px;
+    height: 500px;
+    background: var(--accent-2);
+    bottom: -150px;
+    right: -100px;
+    border-radius: 50%;
+    animation-delay: -5s;
+}
+
+.shape-3 {
+    width: 300px;
+    height: 300px;
+    background: #c026d3;
+    top: 40%;
+    left: 40%;
+    border-radius: 50%;
+    animation-delay: -10s;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(100px, 50px) rotate(45deg); }
+}
+
+/* Layout */
+.resume-dashboard-container{
+    max-width:1200px;
+    margin:20px auto;
+    padding:20px;
+}
+
+.header {
+    text-align: center;
+    animation: fadeDown 0.8s ease-out;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.icon {
+    font-size: 2.5rem;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f8fafc, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+/* Glassmorphism Card */
+.dashboard-card{
+    background:#fff;
+    border:none;
+    border-radius:20px;
+    box-shadow:0 10px 35px rgba(0,0,0,0.08);
+    overflow:hidden;
+}
+
+.stats-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.stat-box{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    padding:20px;
+    text-align:center;
+    transition:.3s;
+}
+
+.stat-box:hover{
+    transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.stat-label{
+    display:block;
+    font-size:13px;
+    color:#64748b;
+    margin-bottom:10px;
+    text-transform:uppercase;
+    font-weight:600;
+}
+
+.stat-value{
+    font-size:18px;
+    font-weight:700;
+    color:#1e293b;
+}
+
+.status-online{
+    color:#10b981;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+
+.status-online::before{
+    content:'';
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#10b981;
+}
+
+.action-area{
+    text-align:center;
+    padding-top:25px;
+    border-top:1px solid #e5e7eb;
+}
+
+.action-description{
+    max-width:700px;
+    margin:auto auto 25px;
+    color:#64748b;
+    line-height:1.8;
+}
+
+
+
+/* Status Loading */
+.status-container {
+    margin-top: 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.hidden {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader{
+    width:50px;
+    height:50px;
+    border:4px solid #e5e7eb;
+    border-top:4px solid #4f46e5;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#status-message {
+    color: var(--accent-2);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    animation: pulseText 1.5s infinite alternate;
+}
+
+@keyframes pulseText {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    transform: translateY(100px);
+    opacity: 0;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast.success {
+    border-left: 4px solid var(--success);
+}
+
+.toast.error {
+    border-left: 4px solid var(--error);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: var(--text-primary);
+}
+
+/* Animations */
+@keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media(max-width:991px){
+
+    .stats-row{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .page-header h1{
+        font-size:1.8rem;
+    }
+}
+
+@media(max-width:576px){
+
+    .resume-dashboard-container{
+        padding:10px;
+    }
+
+    .stats-row{
+        grid-template-columns:1fr;
+    }
+
+    .dashboard-card{
+        border-radius:15px;
+    }
+
+    .page-header h1{
+        font-size:1.5rem;
+    }
+
+    .primary-btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    .action-description{
+        max-width:100%;
+        font-size:14px;
+    }
+
+    .toast{
+        left:10px;
+        right:10px;
+        width:auto;
+        bottom:15px;
+    }
+}
+
+
+
+.page-header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.page-header h1{
+    font-size:2.2rem;
+    font-weight:700;
+    color:#1e293b;
+    margin-bottom:8px;
+}
+
+.page-header p{
+    color:#64748b;
+    margin-bottom:0;
+}
+
+.primary-btn{
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:14px 30px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+}
+
+.primary-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 25px rgba(79,70,229,.3);
+}
+</style>
+
+<div class="resume-dashboard-container">
+
+        <header class="page-header">
+            <div class="logo-container">
+                <span class="icon">✨</span>
+                <h1>ResumeAI</h1>
+            </div>
+            <p class="subtitle">Automated processing & verification engine</p>
+        </header>
+
+        <main class="dashboard-card p-4 p-md-5">
+            <div class="stats-row">
+                <div class="stat-box">
+                    <span class="stat-label">System Status</span>
+                    <span class="stat-value status-online">Online</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Sink</span>
+                    <span class="stat-value">Google Sheets</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Next Automatic Run</span>
+                    <span class="stat-value" id="countdown-timer">Calculating...</span>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <p class="action-description">
+                    Extract candidates' details from emails, parse resumes with AI, and sync to your Google Sheets
+                    automatically.
+                </p>
+                <button id="trigger-btn" class="btn primary-btn">
+                    <span class="btn-text">Start Pipeline</span>
+                    <span class="btn-icon">⚡</span>
+                </button>
+            </div>
+
+            <div id="status-container" class="status-container hidden">
+                <div class="loader"></div>
+                <p id="status-message">Connecting to mail server...</p>
+            </div>
+        </main>
+
+        <div id="toast" class="toast hidden">
+            <div class="toast-content">
+                <span id="toast-icon" class="toast-icon">✅</span>
+                <p id="toast-message">Processing completed successfully!</p>
+            </div>
+            <button id="toast-close" class="toast-close">&times;</button>
+        </div>
+    </div>
+
+    <!-- CSRF Token -->
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        
+        // Countdown Logic
+        const nextRunTimeIso = "{{ next_run_time|default_if_none:''|escapejs }}";
+        const timerElement = document.getElementById("countdown-timer");
+
+        function updateCountdown() {
+            if (!nextRunTimeIso || nextRunTimeIso === "None") {
+                timerElement.innerText = "Not Scheduled";
+                return;
+            }
+
+            const nextRun = new Date(nextRunTimeIso);
+            const now = new Date();
+            const diff = nextRun - now;
+
+            if (diff <= 0) {
+                timerElement.innerText = "Running soon...";
+                // Give it a few seconds to run, then reload to get the new future time
+                setTimeout(() => location.reload(), 5000); 
+                return;
+            }
+
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            timerElement.innerText = `${minutes}m ${seconds}s`;
+        }
+
+        if (timerElement) {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+    </script>
+    <script src="{% static 'executive/js/resume_extract.js' %}"></script>
+
+
+{% endblock %}

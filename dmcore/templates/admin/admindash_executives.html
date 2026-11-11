@@ -1,0 +1,114 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<style>
+    .exec-card {
+        background-color: #1a1e21;
+        border: 1px solid #2d3238;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .exec-card:hover {
+        transform: translateY(-5px);
+        border-color: #4e73df;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .profile-container {
+        position: relative;
+        padding: 5px;
+        background: linear-gradient(45deg, #4e73df, #224abe);
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .profile-img-exec {
+        width: 75px;
+        height: 75px;
+        object-fit: cover;
+        border: 3px solid #1a1e21;
+        border-radius: 50%;
+    }
+
+    .stat-section {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 12px 5px;
+        margin-top: 15px;
+    }
+
+    .info-text {
+        color: #a1a1a1;
+        font-size: 0.85rem;
+    }
+
+    .info-text i {
+        width: 20px;
+        color: #4e73df;
+    }
+
+    .profile-header-gap {
+        margin-left: 20px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        {% for exec in executives %}
+        <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+            <a href="{% url 'admindash_executive_leads' exec.id client.id %}" style="text-decoration: none;">
+                <div class="card exec-card shadow-sm h-100 text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="profile-container">
+                                {% if exec.profile_picture %}
+                                    <img src="{{ exec.profile_picture.url }}" class="profile-img-exec" alt="Profile">
+                                {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ exec.name }}&background=4e73df&color=fff&bold=true" class="profile-img-exec" alt="Avatar">
+                                {% endif %}
+                            </div>
+                            
+                            <div class="profile-header-gap">
+                                <h5 class="mb-1 font-weight-bold" style="letter-spacing: 0.5px;">{{ exec.name }}</h5>
+                                <span class="badge badge-primary-soft text-primary small px-2 py-1" style="background: rgba(78, 115, 223, 0.1);">
+                                    {{ exec.employee_code }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info px-1">
+                            <div class="info-text mb-2 text-truncate">
+                                <i class="fas fa-envelope mr-2"></i>{{ exec.email }}
+                            </div>
+                            <div class="info-text mb-0">
+                                <i class="fas fa-phone mr-2"></i>{{ exec.contact_number }}
+                            </div>
+                        </div>
+
+                        <div class="row no-gutters text-center stat-section">
+                            <div class="col-6 border-right border-secondary">
+                                <div class="text-xs font-weight-bold text-uppercase text-white-50 mb-1" style="font-size: 0.65rem;">Total Leads</div>
+                                <div class="h5 mb-0 font-weight-bold text-primary">{{ exec.total_leads|default:0 }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-xs font-weight-bold text-uppercase text-white-50 mb-1" style="font-size: 0.65rem;">Confused</div>
+                                <div class="h5 mb-0 font-weight-bold text-warning">{{ exec.confused_leads_count|default:0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div> {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-users-slash fa-4x text-dark" style="opacity: 0.3;"></i>
+            </div>
+            <h5 class="text-muted">No executives found for this company.</h5>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

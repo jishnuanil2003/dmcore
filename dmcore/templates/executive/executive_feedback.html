@@ -1,0 +1,196 @@
+{% extends 'executive/executivesidebar.html' %}
+{% block content %}
+<style>
+    body {
+        background-color: #12151e; 
+        color: #ffffff; /* Optional: sets default text color */
+    }
+
+    #main-content {
+        margin-top: 20px;
+    }
+
+    @media (max-width: 576px) {
+        #main-content {
+            margin-top: 50px;
+        }
+    }
+
+
+    .custom-card {
+        background-color: #333333;
+        border: none !important;
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+    }
+
+    .custom-card:hover {
+        background-color: #333333;
+    }
+
+    .custom-card p {
+        color: rgb(192, 192, 192);
+    }
+    select {
+        appearance: auto !important; 
+    }
+</style>
+
+
+        <!-- Bootstrap Toast Container -->
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="toast align-items-center text-white {% if message.tags == 'error' %}bg-danger{% else %}bg-success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Left column -->
+        <div class="col-md-4 col-sm-12 mt-3">
+            <div class="custom-card mb-3" id="addBtn" style="cursor: pointer;">
+                <h3>Add Feedbacks &nbsp; <i class="fa-solid fa-arrow-up-right-from-square"></i></h3>
+                <p>Add your feedback here.</p>
+            </div>
+            <div class="custom-card" id="viewBtn" style="cursor: pointer;">
+                <h3>View Feedbacks &nbsp; <i class="fa-solid fa-arrow-up-right-from-square"></i></h3>
+                <p>View all feedbacks.</p>
+            </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="col-md-8 col-sm-12  mt-3">
+            <!-- Feedback Form Card -->
+            <div id="addFormDiv" class="custom-card mb-3">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        Add Feedbacks
+                    </h4>
+                <form action="{% url 'executive_add_feedback' %}" method="post" class="pt-2">
+                    {% csrf_token %}
+                    <label class="mb-2">Select Employee</label>
+                    <select name="receiver" class="form-control" required>
+                        <option value="">-- Select --</option>
+                        {% for i in feedback_receivers %}
+                            <option value="{{ i.id }}">{{ i.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label class="mt-3 mb-2">Feedback</label>
+                    <textarea cols="5" rows="5" placeholder="Enter Feedback..." class="form-control mt-1" name="feedback"></textarea>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                </form>
+            </div>
+
+                <!-- Feedback Table Card -->
+            <div id="viewTableDiv" class="custom-card p-3" style="display: none; background-color: rgba(76, 78, 78, 0.5); border-radius: 12px;">
+               <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+                    <h4 class="text-light mb-2 mb-md-0">Feedbacks View</h4>
+                    <select id="feedbackFilter" 
+                            class="form-control w-100" 
+                            style="max-width: 200px;" 
+                            onchange="filterFeedback()">
+                        <option value="given" selected>Feedback Given</option>
+                        <option value="received">Feedback Received</option>
+                    </select>
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-dark text-light">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Feedback By</th>
+                                <th>Feedback To</th>
+                                <th>Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedbackTableBody">
+                           {% for fb in feedback_given %}
+                            <tr data-type="given">
+                                <td style="min-width: 100px;">{{ fb.feedback_date|date:"Y-m-d" }}</td>
+                                <td style="min-width: 120px;">{{ fb.from_name }}</td>
+                                <td style="min-width: 120px;">{{ fb.employee.name }}</td>
+                                <td style="min-width: 250px;">{{ fb.feedback_content }}</td>
+                            </tr>
+                            {% endfor %}
+
+                            {% for fb in feedback_received %}
+                            <tr data-type="received">
+                                <td style="min-width: 100px;">{{ fb.feedback_date|date:"Y-m-d" }}</td>
+                                <td style="min-width: 120px;">{{ fb.from_name }}</td>
+                                <td style="min-width: 120px;">{{ fb.employee.name }}</td>
+                                <td style="min-width: 250px;">{{ fb.feedback_content }}</td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const addBtn = document.getElementById("addBtn");
+        const viewBtn = document.getElementById("viewBtn");
+        const addFormDiv = document.getElementById("addFormDiv");
+        const viewTableDiv = document.getElementById("viewTableDiv");
+
+        // Show form by default
+        addFormDiv.style.display = "block";
+        viewTableDiv.style.display = "none";
+
+        addBtn.addEventListener("click", function () {
+            addFormDiv.style.display = "block";
+            viewTableDiv.style.display = "none";
+        });
+
+        viewBtn.addEventListener("click", function () {
+            addFormDiv.style.display = "none";
+            viewTableDiv.style.display = "block";
+        });
+    });
+</script>
+
+
+<script>
+    function filterFeedback() {
+        const selected = document.getElementById('feedbackFilter').value;
+        const rows = document.querySelectorAll('#feedbackTableBody tr');
+
+        rows.forEach(row => {
+            const type = row.getAttribute('data-type');
+            row.style.display = (type === selected) ? '' : 'none';
+        });
+    }
+
+    // Run after the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('feedbackFilter').value = 'given'; // Ensure the correct option is selected
+        filterFeedback(); // Show only 'given' feedback rows
+    });
+</script>
+
+
+
+{% endblock %}

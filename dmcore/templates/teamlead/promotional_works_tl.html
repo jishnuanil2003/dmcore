@@ -1,0 +1,144 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% load static %}
+{% block content %}
+
+
+  
+       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+        <link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+        <link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+
+        color: white;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin-top: 50px;
+    
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+
+
+
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-light mb-0">Dashboard / Promotional Works</p>
+    </div>
+  </div>
+
+
+<div class="container-fluid mt-3 comn_table_bg">
+
+
+    <div class="card shadow-lg p-3" style="background:#2b2b2b; border-radius:12px;">
+
+    <h5 class="text-white mb-3 text-start">
+        <i class="bi bi-list-check"></i> Promotional Works
+    </h5>
+
+    <div class="table-responsive">
+        <table class="table table-dark table-bordered table-hover align-middle text-center" style="white-space: nowrap;">
+
+            <thead>
+            <tr>
+                <th>SL No</th>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Content</th>
+                <th>Poster / Video</th>
+                <th>Executive Name</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            {% for work in promotion_work %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+
+
+                <!-- Date -->
+                <td>{{ work.created_at|date:"d-m-Y" }}</td>
+
+                <!-- Title -->
+                <td>{{ work.title }}</td>
+
+                <!-- Content -->
+                <td style="max-width:200px;">
+                    {{ work.content|truncatechars:50 }}
+                </td>
+
+                <!-- Media -->
+                <td>
+                    {% if work.media %}
+                        <a href="{{ work.media.url }}" target="_blank" class="btn btn-sm btn-info">
+                            View
+                        </a>
+                    {% else %}
+                        <span class="text-muted">No File</span>
+                    {% endif %}
+                </td>
+
+                <!-- Executive -->
+                <td>{{ work.created_by.name }}</td>
+
+                <!-- Action -->
+                <td>
+                    {% if work.status == 0 %}
+                        <!-- Approve -->
+                        <a href="{% url 'update_promotional_status' work.id 1 %}" 
+                        class="btn btn-sm btn-success">
+                        <i class="bi bi-check-circle"></i>
+                        </a>
+
+                        <!-- Reject -->
+                        <a href="{% url 'update_promotional_status' work.id 2 %}" 
+                        class="btn btn-sm btn-danger">
+                        <i class="bi bi-x-circle"></i>
+                        </a>
+
+                    {% elif work.status == 1 %}
+                        <span class="badge bg-success">Approved</span>
+
+                    {% elif work.status == 2 %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-danger text-center">
+                    No Promotional Works Found
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+</div>
+
+
+
+
+    
+         
+{% endblock %}

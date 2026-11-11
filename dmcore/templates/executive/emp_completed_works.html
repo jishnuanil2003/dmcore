@@ -1,0 +1,311 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: white;
+    }
+
+    .dashboard-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        padding: 2rem;
+        justify-content: center; 
+        text-align: center;
+    }
+
+    {% comment %} ========== {% endcomment %}
+
+    
+    .card {
+      background-color: #333333;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+
+    .card h2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .card h2 .new {
+      color: red;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      background-color: #2c2c2e;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      color: #ccc;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      color: #bbb;
+      border-bottom: 1px solid #333;
+    }
+
+    tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+
+    .btn-view, .btn-accept {
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .btn-view {
+      background-color: #1a73e8;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-accept {
+      background-color: #00c851;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      table {
+        font-size: 14px;
+      }
+
+      .btn-view, .btn-accept {
+        font-size: 12px;
+        padding: 4px 8px;
+      }
+    }
+
+    {% comment %} ======== {% endcomment %}
+   
+.table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+    }
+
+    thead {
+        background-color: #333;
+        color: white;
+    }
+
+    table, th, td {
+        border: 1px solid #555;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .bg-success {
+        background-color: green;
+    }
+   
+.file-link {
+        color: #0d6efd;
+        font-weight: 500;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .file-link:hover {
+        text-decoration: underline;
+        color: #084298;
+    }
+    
+
+
+    
+
+{% comment %} cards {% endcomment %}
+
+
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="success-alert">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container mt-4" style="background-color:rgb(53, 53, 54); padding: 20px; border-radius: 10px; color: white;">
+    {% for task in tasks %}
+        <h5 class="mb-4">Daily Work Details - <span style="color: #3ab4f2;">{{ task.client_task.task_name }}</span></h5>
+    {% endfor %}
+
+    <div class="row mb-3">
+      <div class="col-md-3">
+          <label>From date</label>
+          <input type="date" class="form-control" id="fromDate">
+      </div>
+      <div class="col-md-3">
+          <label>To date</label>
+          <input type="date" class="form-control" id="toDate">
+      </div>
+      <div class="col-md-6 align-items-end">
+          <br>
+          <input type="text" id="searchBar" class="" placeholder="Search Here...">
+      </div>
+  </div>
+
+  <script>
+    const fromDateInput = document.getElementById("fromDate");
+    const toDateInput = document.getElementById("toDate");
+    const searchInput = document.getElementById("searchBar");
+
+    function filterTable() {
+        const fromDate = new Date(fromDateInput.value);
+        const toDate = new Date(toDateInput.value);
+        const searchText = searchInput.value.toLowerCase();
+
+        const rows = document.querySelectorAll("#dailyWorkTable tr");
+
+        rows.forEach(row => {
+            const dateCell = row.cells[1]; // Date column
+            const titleCell = row.cells[2]; // Title column
+
+            if (dateCell && titleCell) {
+                const taskDate = new Date(dateCell.textContent.trim());
+                const title = titleCell.textContent.toLowerCase();
+
+                let matchesDate = true;
+                let matchesTitle = title.includes(searchText);
+
+                if (fromDateInput.value && taskDate < fromDate) {
+                    matchesDate = false;
+                }
+
+                if (toDateInput.value && taskDate > toDate) {
+                    matchesDate = false;
+                }
+
+                if (matchesDate && matchesTitle) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+    }
+
+    // Event listeners
+    fromDateInput.addEventListener("change", filterTable);
+    toDateInput.addEventListener("change", filterTable);
+    searchInput.addEventListener("keyup", filterTable);
+</script>
+
+
+    <script>
+        document.getElementById("searchBar").addEventListener("keyup", function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#dailyWorkTable tr");
+
+            rows.forEach(row => {
+                const titleCell = row.cells[2];  // 0-indexed, so 2 = Title column
+                if (titleCell) {
+                    const titleText = titleCell.textContent.toLowerCase();
+                    row.style.display = titleText.includes(filter) ? "" : "none";
+                }
+            });
+        });
+    </script>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-dark">
+            <thead class="thead-light text-center">
+                <tr>
+                    <th>No</th>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Daily Work</th>
+                    <th>File</th>
+                    <th>Target Achieved</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="dailyWorkTable">
+              {% for task in tasks %}
+                  <tr class="text-center">
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ task.start_date }}</td>
+                      <td>{{ task.client_task.task_name }}</td>
+                      <td><a href="{% url 'view_detail_ongoin_works' task.id %}" class="btn btn-outline-primary">View</a></td>
+                      <td>
+                          {% if task.file %}
+                              <a href="{{ task.file.url }}" target="_blank" class="file-link">
+                                  {{ task.file.name|slice:"12:" }}
+                              </a>
+                          {% else %}
+                              <span class="text-muted">—</span>
+                          {% endif %}
+                      </td>
+                      <td>{{ task.target }}</td>
+                      <td>
+                          {% if task.status == 2 %}
+                              <span class="badge bg-success">Verified</span>
+                          {% else %}
+                              <span class="badge bg-warning text-dark">Pending</span>
+                          {% endif %}
+                      </td>
+                  </tr>
+              {% empty %}
+                  <tr>
+                      <td colspan="7" class="text-center">No completed work found.</td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+    </div>
+</div>
+    
+
+
+{% endblock %}

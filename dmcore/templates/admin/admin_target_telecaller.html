@@ -1,0 +1,492 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+{% load static %}
+
+
+
+
+
+<style>
+
+
+    .filter-box{
+    
+        padding:20px;
+        border-radius:14px;
+        margin-bottom:25px;
+      
+    }
+
+    .form-label{
+        color:#fff;
+        font-weight:600;
+        margin-bottom:8px;
+        font-size:14px;
+    }
+
+    .form-control,
+    .form-select{
+    
+        border:1px solid #444;
+        color:black;
+        border-radius:10px;
+        height:48px;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+        border-color:#4f8cff;
+        box-shadow:none;
+       
+        color:black
+    }
+
+    .form-control::placeholder{
+        color:#999;
+    }
+
+    .search-btn{
+        height:48px;
+        width:48px;
+        border-radius:10px;
+        border:none;
+        background:linear-gradient(135deg,#4f8cff,#6f6bff);
+        color:#fff;
+        transition:0.3s ease;
+    }
+
+
+
+    /* ================= TABLE ================= */
+
+    .table-wrapper{
+        border-radius:14px;
+        overflow:hidden;
+        border:1px solid rgba(255,255,255,0.05);
+    }
+
+    .custom-table{
+        margin-bottom:0;
+        white-space:nowrap;
+    }
+
+    .custom-table thead{
+        background:#3a3a55;
+    }
+
+    .custom-table thead th{
+        color:#fff;
+        font-weight:600;
+        font-size:14px;
+        padding:16px;
+        border:none;
+        text-align:center;
+    }
+
+    .custom-table tbody{
+        background:#2d2d44;
+    }
+
+    .custom-table tbody td{
+        color:#e5e5e5;
+        padding:16px;
+        border-color:rgba(255,255,255,0.05);
+        vertical-align:middle;
+        text-align:center;
+    }
+
+    .custom-table tbody tr{
+        transition:0.3s ease;
+    }
+
+    .custom-table tbody tr:hover{
+        background:#373755;
+    }
+
+    /* ================= BADGES ================= */
+
+    .count-badge{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-width:40px;
+        height:32px;
+        padding:0 12px;
+        border-radius:30px;
+        font-size:13px;
+        font-weight:600;
+    }
+
+    .allocated-badge{
+        background:rgba(13, 202, 240, 0.15);
+        color:#4dd4ff;
+    }
+
+    .followup-badge{
+        background:rgba(25, 135, 84, 0.15);
+        color:#5ce1a1;
+    }
+
+    /* ================= EMPTY STATE ================= */
+
+    .empty-row td{
+        padding:40px !important;
+        color:#ff6b6b !important;
+        font-weight:600;
+        font-size:15px;
+    }
+
+
+    @media(max-width:768px){
+
+        .card-body{
+            padding:18px;
+        }
+
+        .page-title{
+            font-size:20px;
+        }
+
+        .filter-box{
+            padding:16px;
+        }
+
+        .custom-table thead th,
+        .custom-table tbody td{
+            padding:12px;
+            font-size:13px;
+        }
+    }
+
+
+
+
+.form-label {
+    color: #fff !important;
+    font-weight: 500;
+  }
+        .messages-container {
+        position: fixed;
+        top: 30px;  /* Increased from 20px */
+        right: 20px;
+        z-index: 1100;
+        max-width: 400px;
+    }
+    
+    .alert {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;  /* Slightly increased padding */
+        margin-bottom: 15px;  /* Increased from 10px */
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .alert-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-grow: 1;
+    }
+    
+    .alert-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;  /* Small adjustment for vertical alignment */
+    }
+    
+    .alert-success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border-left: 4px solid #22c55e;
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-left: 4px solid #0ea5e9;
+    }
+    
+    .alert-warning {
+        background-color: #fefce8;
+        color: #854d0e;
+        border-left: 4px solid #facc15;
+    }
+    
+    .alert-danger, .alert-error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .btn-close {
+        padding: 0.5rem;
+        opacity: 0.7;
+        margin-top: -4px;  /* Better alignment with text */
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Auto-hide animation */
+    .auto-hide-toast {
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease;
+    }
+    
+    .auto-hide-toast.hide {
+        opacity: 0;
+        transform: translateX(20%);
+    }
+</style>
+
+
+<div class="container-fluid">
+
+  <!-- Breadcrumb -->
+  <div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-light mb-0">Dashboard /Telecaller Target</p>
+    </div>
+  </div>
+
+
+      {% if messages %}
+      <div class="container mt-5 messages-container">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show auto-hide-toast mt-3" role="alert">
+              <div class="alert-content">
+                  {% if message.tags == 'success' %}
+                  <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                  </svg>
+                  {% elif message.tags == 'error' or message.tags == 'danger' %}
+                  <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                  {% elif message.tags == 'warning' %}
+                  <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                  </svg>
+                  {% else %}
+                  <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                  </svg>
+                  {% endif %}
+                  <span>{{ message }}</span>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
+      {% endif %}
+
+  <div class="card main-card" style="background-color: #333333; border-radius:10px;">
+
+        <div class="card-body">
+
+            <h5 class="text-white mb-4">Telecaller Target</h5>
+
+            <div class="filter-box">
+
+                <form method="get">
+
+                    <div class="row g-3 align-items-end">
+
+                        <div class="col-lg-3 col-md-6">
+
+                            <label class="form-label">
+                                Telecaller
+                            </label>
+
+                            <select class="form-select"
+                                    name="telecaller">
+
+                                <option value="">
+                                    -- Select Telecaller --
+                                </option>
+
+                                {% for i in employee %}
+
+                                <option value="{{ i.id }}"
+                                {% if i.id|stringformat:"s" == selected_employee %}
+                                selected
+                                {% endif %}
+                                >
+
+                                    {{ i.name }}
+
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+
+                            <label class="form-label">
+                                From Date
+                            </label>
+
+                            <input type="date"
+                                   name="from_date"
+                                   class="form-control"
+                                   value="{{ request.GET.from_date }}">
+
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+
+                            <label class="form-label">
+                                To Date
+                            </label>
+
+                            <input type="date"
+                                   name="to_date"
+                                   class="form-control"
+                                   value="{{ request.GET.to_date }}">
+
+                        </div>
+
+                        <div class="col-lg-2 col-md-6">
+
+                            <button type="submit"
+                                    class="search-btn">
+
+                                <i class="bi bi-search"></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+            <!-- ================= TABLE ================= -->
+
+            <div class="table-wrapper">
+
+                <div class="table-responsive">
+
+                    <table class="table custom-table align-middle table-dark">
+
+                        <thead>
+
+                            <tr>
+                                <th>#</th>
+                                <th>Telecaller</th>
+                                <th>Date</th>
+                                <th>Allocated</th>
+                                <th>Follow Updates</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for t in target %}
+
+                            <tr>
+
+                                <td>
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <td>
+                                    {{ t.telecaller__name }}
+                                </td>
+
+                                <td>
+                                    {{ t.assign_date }}
+                                </td>
+
+                                <td>
+
+                                    <span class="count-badge allocated-badge">
+
+                                        {{ t.allocated_count }}
+
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="count-badge followup-badge">
+
+                                        {{ t.followup_count }}
+
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr class="empty-row">
+
+                                <td colspan="5">
+
+                                    No Results Found
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    const alerts = document.querySelectorAll('.auto-hide-toast');
+
+    alerts.forEach(alert => {
+     
+      setTimeout(() => {
+        alert.classList.add('hide'); 
+        setTimeout(() => alert.remove(), 500); 
+      }, 5000);
+    });
+  });
+</script>
+
+
+
+{% endblock content %}

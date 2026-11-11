@@ -1,0 +1,41 @@
+@import url(./colour.css);
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.card-common {
+    background-color: var(--card-bg);
+    color: white;
+    min-width: 170px;
+    min-height: 150px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    border-radius: 0.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-common:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-common i {
+    font-size: 1.5rem;
+}
+
+.card-common h5 {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+}
+
+.card-common p {
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}

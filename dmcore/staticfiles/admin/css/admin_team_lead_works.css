@@ -1,0 +1,53 @@
+@import url("../dm_head/css/colour.css");
+
+.tl-select-wrap select {
+  max-width: 420px;
+}
+
+.work-card {
+  background: #1f242b;
+  border: 1px solid #2b313a;
+  border-radius: 10px;
+  padding: 18px 18px;
+  cursor: pointer;
+  transition: 0.15s ease-in-out;
+}
+
+.work-card:hover {
+  border-color: #3f8cff;
+}
+
+.work-card.active {
+  border-color: #3f8cff;
+  box-shadow: 0 0 0 0.12rem rgba(63, 140, 255, 0.2);
+}
+
+.progress {
+  height: 16px;
+  background: #2b313a;
+}
+
+.progress-bar {
+  font-size: 11px;
+}
+
+
+.tl-daily-modal {
+  max-width: 80vw;
+  width: 80vw;
+}
+
+@media (max-width: 992px) {
+  .tl-daily-modal {
+    max-width: 95vw;
+    width: 95vw;
+  }
+}
+
+.tl-daily-modal .modal-content {
+  max-height: 85vh;
+}
+
+#resetFilterBtn {
+  margin-left: 6px;
+}

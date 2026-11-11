@@ -1,0 +1,171 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Task List{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/register_work.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/work_task_list.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+        body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-3 comn_table_bg">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb text-white mb-3">
+            <li class="breadcrumb-item">
+                <a href="{% url 'employees' %}" class="text-decoration-none text-white">
+                    Employee
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'dm_works' %}" class="text-decoration-none text-white">
+                    Employee Works
+                </a>
+            </li>
+            <li class="breadcrumb-item active text-white-50" aria-current="page">
+                Details
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-white mb-0">Tasks List</h3>
+        {% if work.client %}
+            <span class="text-white-50 small">
+                Client: <strong>{{ work.client.client_name }}</strong>
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Search -->
+    <div class="mb-3">
+        <input type="text" id="taskSearch" class="form-control" placeholder="search here...">
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover align-middle" id="taskTable">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Task Name</th>
+                    <th>Start Date</th>
+                    <th>Due Date</th>
+                    <th>Allocated Date</th>
+                    <th>Task Done By</th>
+                    <th>Target</th>
+                    <th>Achieved</th>
+                    <th>Progress</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in task_rows %}
+                <tr>
+                    <td class="row-index">{{ forloop.counter }}</td>
+                    <td>
+                        {{ row.task_name }}
+                        {% if row.categories %}
+                            <ul class="mb-0 ps-3">
+                                {% for cat in row.categories %}
+                                    <li>{{ cat }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.start_date|date:"M d, Y" }}</td>
+                    <td>{{ row.due_date|date:"M d, Y" }}</td>
+                    <td>{{ row.allocated_date|date:"M d, Y" }}</td>
+                    <td>{{ row.done_by }}</td>
+                    <td>{{ row.target }}</td>
+                    <td>{{ row.achieved }}</td>
+                    <td>
+                        <div class="progress" style="height: 18px;">
+                            <div class="progress-bar bg-success"
+                                 role="progressbar"
+                                 data-progress="{{ row.progress }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm task-details-btn"
+                                data-task-id="{{ row.id }}"
+                                data-work-id="{{ work.id }}"
+                                data-source="{{ row.source }}">
+                            Task Details
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center text-muted">
+                        No tasks found for this work.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Task Details Modal -->
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog task-details-modal">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Task Details</h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body pt-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Collected Date</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Target</th>
+                                <th>File</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskDetailsTbody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    No details available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.DM_TASK_DETAILS_URL = "{% url 'dm_task_details' %}";
+</script>
+<script src="{% static 'dm_head/js/work_task_list.js' %}"></script>
+{% endblock %}

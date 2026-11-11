@@ -1,0 +1,158 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}DM Work{% endblock %}
+
+{% block content %}
+
+<style>
+    .dashboard-card {
+            background-color: #292c2d; 
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+            /* text-align: center; */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+</style>
+
+
+  <div class="messages-container" style="position: fixed; top: 20px; right: 10px; z-index: 99;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/allocate_work.css' %}">
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+
+<style>
+        body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="" class="text-decoration-none text-white">Dashboard</a>
+         / Work Progress Monitor</p>
+    </div>
+</div>
+
+<div class="container mt-4 comn_table_bg">
+            
+
+
+                <div class="row">
+                 
+                    <div class="col-12 col-md-4 mt-3">
+                    <div class="dashboard-card h-100">
+                      <h4>Client Details</h4>
+                      <p><strong>Name:</strong> {{client.client_name}}</p>
+                      <p><strong>Email:</strong> {{client.client_email_primary}}</p>
+                      <p><strong>Phone:</strong> {{client.client_phone}}</p>
+                      <p><strong>Business:</strong> {{client.client_business_name}}</p>
+                      <p><strong>Website:</strong> 
+                        {% if client.client_business_website %}
+                         <a href="{{client.client_business_website}}" target="_blank">{{client.client_business_website}}</a> 
+                        {% else %} Not Available {% endif %}</p>
+                    </div>
+                    </div>
+                   
+                    <div class="col-12 col-md-4 mt-3">
+                    <div class="dashboard-card h-100">
+                        <h4>Work Progress</h4>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" style="width: {{wrkreg.work_progress}}%;">
+                                {{wrkreg.work_progress}}%
+                            </div>
+                        </div><br>
+                        <p class="date"><strong>Start Date: </strong>{{wrkreg.work_create_date}}</p>
+                        <p class="date"><strong>Due Date: </strong>{{wrkreg.work_end_date}}</p>                       
+                    </div>
+                    </div>
+             
+                    <div class="col-12 col-md-4 mt-3">
+                    <div class="dashboard-card h-100">
+                        <h4>Task Details</h4>
+                        {% if tasks %}
+                        <ul>
+                            {% for i in tasks %}
+                            <li>{{i.task_name}}</li>
+                            {% endfor %}
+                        </ul> 
+                        {% else %}
+                        <p>No Task</p>
+                        {% endif %}                    
+                    </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-dark align-middle text-nowrap">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Task Name</th>
+                                <th>Task Description</th>
+                                <th>File</th>
+                                <th>Progress</th>
+                                <th>Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for i in tasks %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ i.task_name }} <p class="date">( {{ i.task_create_date }} )</p></td>
+                                <td>{{ i.task_description }}</td>
+                                <td>
+                                    {% if i.task_file %}
+                                        <a href="{{ i.task_file.url }}" download>
+                                            <button class="btn btn-outline-primary">Download</button>
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-outline-danger">X</button>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" style="width: {{i.task_total_progress}}%;">
+                                            {{i.task_total_progress}}%
+                                        </div>
+                                    </div>
+                                    
+                                </td>
+                                <td>
+                                    <a href="{% url 'clienttaskdetails' i.id %}" style="text-decoration: none;"><button class="btn btn-outline-primary">View Details</button></a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+      
+    </div>
+
+
+{% endblock %}

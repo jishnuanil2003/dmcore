@@ -1,0 +1,160 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% block content %}
+<style>
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .card {
+        background-color: #333333;
+        border: none;
+        transition: transform 0.3s;
+        position: relative;
+        min-height: 144px;
+    }
+    .icon-container {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20%;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+    }
+    .text-success-bg { background-color: rgba(40, 167, 69, 0.2); color: #28a745; }
+    .text-primary-bg { background-color: rgba(0, 123, 255, 0.2); color: #007bff; }
+    .text-light-bg { background-color: rgba(255, 255, 255, 0.2); color: #f8f9fa; }
+    .text-warning-bg { background-color: rgba(255, 193, 7, 0.2); color: #ffc107; }
+    .text-danger-bg { background-color: rgba(220, 53, 69, 0.2); color: #dc3545; }
+    .text-info-bg { background-color: rgba(23, 162, 184, 0.2); color: #17a2b8; }
+    .text-secondary-bg { background-color: rgba(108, 117, 125, 0.2); color: #6c757d; }
+    .text-dark-bg { background-color: rgba(52, 58, 64, 0.2); color: #343a40; }
+    .card h5 {
+        color: white;
+    }
+    .icon-container i {
+        font-size: 12px;
+    }
+    .exclamation {
+        font-size: 0.6em;
+        line-height: 1;
+    }
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+    @media (min-width: 1200px) and (max-width:1244.9px){
+        .card h5 {
+            font-size: 1.1rem;
+        }
+    }
+    @media (min-width: 768px) and (max-width:784.9px){
+        .card h5 {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+<div class="main-content">
+    <div class="container mt-4 mb-4">
+        <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="/teamlead" class="text-secondary">Dashboard</a> /
+            <a class="text-light">Employee Section</a>
+        </h5>
+        <div class="row g-3 mt-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>View Employees</h5>
+                        <p class="small text-secondary mt-3">To view all employees in different department \ designations</p>
+                    </div>
+                    <a href="{% url 'tl_employees_view' %}">
+                        <div class="icon-container text-success-bg mt-3">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>Leaves</h5>
+                        <p class="small text-secondary mt-3">The list of all employees's leave details</p>
+                    </div>
+                    <a href="{% url 'tl_employees_leaves' %}">
+                        <div class="icon-container text-danger-bg mt-3">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>Schedules</h5>
+                        <p class="small text-secondary mt-3">The list of all employees's schedules</p>
+                    </div>
+                    <a href="{% url 'tl_employees_schedules' %}">
+                        <div class="icon-container text-warning-bg mt-3">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>Action Taken</h5>
+                        <p class="small text-secondary mt-3">The list of all employees's actions taken</p>
+                    </div>
+                    <a href="{% url 'tl_employees_action_taken' %}">
+                        <div class="icon-container text-primary-bg mt-3">
+                            <i class="fas fa-hand-pointer"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+             <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>Feedback</h5>
+                        <p class="small text-secondary mt-3">The list of all employees's feedback</p>
+                    </div>
+                    <a href="{% url 'tl_employees_feedback' %}">
+                        <div class="icon-container text-success-bg mt-3">
+                            <i class="fa-solid fa-message"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+             <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>Complaints</h5>
+                        <p class="small text-secondary mt-3">The list of all employees's complaints</p>
+                    </div>
+                    <a href="{% url 'tl_employees_complaints' %}">
+                         <div class="icon-container text-light-bg mt-3" style="gap: 2px;">
+                            <i class="fa-solid fa-user"></i>
+                            <span class="exclamation"><b>!</b></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="{% url 'teamlead_works' %}" style="text-decoration: none;">
+                <div class="card" style="padding-left: 20px;padding-right: 20px;padding-top: 25px;">
+                    <div>
+                        <h5>Works</h5>
+                        <p class="small text-secondary mt-3">The list of all employees' pending and completed works</p>
+                    </div>
+                        <div class="icon-container text-success-bg mt-3">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                   
+                </div>
+                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

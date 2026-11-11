@@ -1,0 +1,249 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+{% block content %}
+
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+
+    .card-custom {
+        color: white;
+        border: none;
+        border-radius: 10px;
+       
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .card-custom:hover {
+        background-color: #1f1f1f;
+    }
+
+    .card-title-section {
+        
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-icon {
+        font-size: 46px;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+        color: #cbd5e1;
+    }
+    @media (min-width: 992px) {
+        .row > div {
+            margin-bottom: 20px;
+            
+        }
+    }
+    a.text-decoration-none {
+        color: inherit;
+    }
+
+    a.text-decoration-none:hover {
+        color: inherit;
+    }
+    
+    
+</style>
+<p style="color: #a0a0a0; font-size: 14px;"><b>Work / Monthly Progress</b></p>
+<div class="container mt-2 card card-custom p-3 bg-dark">
+    <div class="row">
+        <div class="col mt-2">
+            
+            <div class="card-title-section " >
+                <h5 class="card-title mb-0" style="margin-left: 20px;">List Of Monthly Progress</h5><br>
+                <p style="font-size: 12px;color: gray;margin-left: 20px;">A list of monthly progress that employees work for different clients<p>
+                        
+            </div>
+            
+           
+            
+            <form action="" method="get">
+                <div class="row align-items-end mb-4 ms-auto">
+                    <div class="col-lg-3 col-md-6 mb-2">
+                        <label class="d-flex mb-1">Select Employee</label>
+                            <select name="employee_id" class="form-control">
+                                <option value="">-- Select Employee --</option>
+                                {% for employee in employees %}
+                                    <option value="{{ employee.id }}" {% if employee.id|stringformat:"s" == selected_employee_id %}selected{% endif %}>
+                                        {{ employee.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-2">
+                        <label class="d-flex mb-1">From Date</label>
+                        <input type="date" name="from_date" class="form-control" value="{{ from_date }}">
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-2">
+                        <label class="d-flex mb-1">To Date</label>
+                        <input type="date" name="to_date" class="form-control" value="{{ to_date }}">
+                    </div>
+
+                    <div class="col-lg-1 col-md-4 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="container-fluid " style="max-width: 1150px;">
+                {% for progress in progresses %}
+                <div class="row mb-4 p-4 border rounded" style="border: 1px solid #007bff; background-color: #1c1c1c; color: #fff;">
+                    
+                    <!-- Left Column: Name, Dates, Description -->
+                    <div class="col-md-4 d-flex flex-column justify-content-center">
+                        <i class="fa-regular fa-file"></i>
+                        <strong>{{ progress.employee.name }}</strong>
+                        <small>{{ progress.from_date }} to {{ progress.to_date }}</small>
+                        <span>{{ progress.description }}</span>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-center">
+                        <!-- Progress Bar -->
+                        <div class="flex-grow-1 me-2" style="min-width: 0;">
+                            <h6><b>Progress</b></h6>
+                            <div class="progress" style="height: 20px; width: 100%; cursor: pointer;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#updateProgressModal"
+                                onclick="setProgress({{ progress.id }}, {{ progress.progress }})">
+
+                                {% if progress.progress <= 9 %}
+                                    <div class="progress-bar bg-danger" style="width: {{ progress.progress }}%;">{{ progress.progress }}%</div>
+                                {% elif progress.progress <= 79 %}
+                                    <div class="progress-bar bg-warning text-dark" style="width: {{ progress.progress }}%;">{{ progress.progress }}%</div>
+                                {% else %}
+                                    <div class="progress-bar bg-success" style="width: {{ progress.progress }}%;">{{ progress.progress }}%</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="updateProgressModal" tabindex="-1" role="dialog" aria-labelledby="updateProgressModalLabel" aria-hidden="true">
+                            <div class="modal-dialog bg-dark" role="document">
+                                <form method="POST" action="{% url 'update_mon_progress' %}">
+                                    {% csrf_token %}
+                                    <div class="modal-content bg-dark">
+                                        <div class="modal-header border-0">
+                                            <h5 class="modal-title">Update Monthly Progress</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                                            
+                                        </div>
+                                        <div class="modal-body border-0">
+                                            <input type="hidden" name="progress_id" id="progress_id">
+                                            <label for="progress_value" class="form-label">Progress</label>
+                                            <input type="number" class="form-control" id="progress_value" name="progress_value" min="0" max="100" required>
+                                        </div>
+                                        <div class="modal-footer border-0">
+                                            <button type="submit" class="btn btn-outline-primary mx-auto" style="border: 1px solid blue;"><i class="fa-solid fa-rotate-right text-primary"></i>&nbsp;Change</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <script>
+                            function setProgress(id, value) {
+                                document.getElementById('progress_id').value = id;
+                                document.getElementById('progress_value').value = value;
+                            }
+                        </script>
+
+
+                        
+                        <div style="width: 40px;">
+                            <h6><b>Files</b></h6>
+                            {% if progress.file_list %}
+                                <div class="d-flex flex-column gap-1">
+                                    {% for file in progress.file_list %}
+                                        <a href="{{ file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Download" style="border: 1px solid blue;">
+                                            <i class="fa-solid fa-download"></i>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-muted" style="font-size: 12px;">
+                                    No files
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 d-flex flex-column justify-content-center">
+                        <p class="text-muted">none</p>
+                    </div>
+                    
+                    <!-- Right Column: File + Status -->
+                    <div class="col-md-2 d-flex flex-column  justify-content-center">
+                        <div class="text-start">
+                            <h6><b>Status</b></h6>
+                            {% if progress.status == 0 %}
+                                <button class="btn btn-outline-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#MonthlyProgressModal{{ progress.id }}" 
+                                        style="border: 1px solid red;">
+                                    x Unverified
+                                </button>
+
+                            {% else %}
+                                <button class="btn btn-outline-success" style="border: 1px solid green;"><i class="fa-solid fa-check text-success"></i>&nbsp; Verified</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+               
+                <div class="modal fade" id="MonthlyProgressModal{{ progress.id }}" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-top" role="document">
+                        <div class="modal-content bg-dark text-light">
+                            <form method="POST" action="{% url 'dm_mon_progress' progress.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title">Verify Monthly Progress</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="margin-left: 220px;"></button>
+
+                                </div>
+                                <div class="modal-body">
+                                    <p>* Update the progress after verification if required.</p>
+                                    <div class="form-group">
+                                        <label>Current Progress</label>
+                                        <input type="number" class="form-control" value="{{ progress.progress }}" >
+                                    </div><br>
+                                    <div class="form-group">
+                                        <label>Verified Progress</label>
+                                        <input type="number" name="progress" class="form-control" min="0" max="100" required>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="submit" class="btn btn-outline-primary mx-auto" style="border: 1px solid blue;">Verify</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+        
+
+ 
+    </div>
+
+
+</div>
+
+{% endblock %}

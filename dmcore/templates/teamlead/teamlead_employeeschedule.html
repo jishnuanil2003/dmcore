@@ -1,0 +1,813 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+
+{% block content %}
+<style>
+  /* Dark Theme Styles to match admin.html - keeping existing styles */
+  .card {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Rest of your CSS styles unchanged */
+  .card-header {
+    background-color: #333333 !important;
+    border-bottom: 1px solid #444;
+    color: white !important;
+  }
+  
+  .list-group-item {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+  }
+  
+  .table {
+    color: white;
+    background-color: #333333;
+  }
+  
+  .table th,
+  .table td {
+    border-color: #444;
+    background-color: #333333 !important;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #3a3a3a !important;
+  }
+  
+  .badge {
+    color: white !important;
+  }
+  
+  .bg-primary {
+    background-color: #4a5568 !important; /* Dark blue-gray */
+  }
+  
+  .bg-success {
+    background-color: #2d6a4f !important; /* Dark green */
+  }
+  
+  .bg-warning {
+    background-color: #b88b4a !important; /* Dark orange */
+    color: white !important;
+  }
+  
+  .form-control, .form-select {
+    background-color: #444;
+    color: white;
+    border: 1px solid #555;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #555;
+    color: white;
+    border-color: #666;
+    box-shadow: 0 0 0 0.25rem rgba(100, 100, 100, 0.25);
+  }
+  
+  .current-date {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 5px;
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-weight: 500;
+  }
+
+  .schedule-content {
+  color: #d1d9e0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  padding: 8px 12px;
+  border-radius: 8px;
+  max-width: 300px;  /* Constrains the width */
+  word-wrap: break-word;  /* Breaks long words */
+  word-break: break-word; /* Alternative word breaking */
+  white-space: normal;    /* Allows text to wrap */
+  text-align: right;      /* Maintains right alignment */
+  overflow-wrap: break-word; /* Modern word wrapping */
+}
+
+  
+.schedule-item {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3a3a3a 0%, #424242 100%);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  width: 75%; 
+  display: inline-block;
+  margin-right: 2%;
+  vertical-align: top;
+  overflow: hidden; /* Prevents content from overflowing */
+}
+.schedule-item .d-flex.flex-column.align-items-end > .d-flex {
+  width: 100%;
+  max-width: 100%;
+}
+
+
+  .employee-name {
+    font-weight: bold;
+    color: #b8c2cc;
+  }
+  
+  .schedule-name {
+    font-weight: bold;
+  }
+  
+.time-slot {
+  font-size: 0.85rem;
+  color: #a8b3c1;
+  background: rgba(168, 179, 193, 0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-left: 10px;
+  font-weight: 500;
+}
+  
+  .card-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: none;
+  }
+  
+  .equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .equal-height-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+.action-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}  
+  
+.action-icons button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #adb5bd;
+  padding: 8px;
+  font-size: 0.9rem;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}  
+  
+.action-icons button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}  
+.edit-icon:hover {
+  color: #4a90e2;
+  background: rgba(74, 144, 226, 0.2);
+}
+
+.delete-icon:hover {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.2);
+}
+
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #6c757d;
+  background-color: transparent;
+}
+
+  
+  /* Message alert styles */
+  .alert {
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border: 1px solid transparent;
+  }
+  
+  .alert-success {
+    background-color: #2d6a4f;
+    color: white;
+    border-color: #205c42;
+  }
+  
+  .alert-danger {
+    background-color: #a83232;
+    color: white;
+    border-color: #922b2b;
+  }
+  
+  /* Added style for schedule items container */
+  .schedule-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  /* Add the text-decoration-line-through class for completed tasks */
+  .text-decoration-line-through {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+  
+  /* Smooth transition for strikethrough effect */
+  .employee-name, .schedule-name {
+    transition: all 0.3s ease;
+  }
+
+@media (max-width: 768px) {
+  .schedule-item {
+    padding: 12px;
+    width: 100%;
+    overflow: hidden; /* Prevent any potential overflow */
+  }
+    .employee-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .schedule-name {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .schedule-content {
+    font-size: 14px;
+    color: #817f7f;
+  }
+
+  .schedule-date {
+    font-size: 13px;
+    color: #817f7f;
+    margin: 4px 0;
+  }
+
+  .time-slot {
+    font-size: 13px;
+    color: #817f7f;
+  }
+
+  .action-icons {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .action-icons button {
+    padding: 4px;
+    font-size: 14px;
+    background: none;
+    border: none;
+    color: #666;
+  }
+  
+}
+
+</style>
+
+
+<div class="row equal-height-row mt-2 p-2">
+  <!-- Employee Day List - Smaller -->
+  <div class="col-md-4 equal-height-col mb-3">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Employee Day List</h5>
+          <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+              <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="current-date mt-2" id="currentDate"></span>
+        <!-- Removed status messages area -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Schedule List - Larger -->
+  <div class="col-md-8 equal-height-col mb-3">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Employee Schedule List</h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Date Range Filter Form - CHANGED from POST to GET -->
+       <form id="scheduleFilterForm" class="mb-4">
+        {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label for="employee_filter" class="form-label">Employee</label>
+              <select class="form-select" id="employee_filter" name="employee_filter" required>
+                <option value="">All Employees</option>
+                {% if employee %}
+                  {% for allocation in employee %}
+                    {% if allocation.employee %}
+                      <option value="{{ allocation.employee.id }}" {% if employee_filter == allocation.employee.id|stringformat:"s" %}selected{% endif %}>{{ allocation.employee.name }}</option>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <option>No employees allocated</option>
+                {% endif %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="start_date" class="form-label">Start Date</label>
+              <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|default:'' }}" required>
+            </div>
+            <div class="col-md-3">
+              <label for="end_date" class="form-label">End Date</label>
+              <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|default:'' }}" required>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Search
+              </button>
+            </div>
+          </div>
+        </form>
+        
+        <!-- Employee Schedule Items -->
+       <div id="scheduleItemsContainer" class="schedule-items">
+          <!-- Content will be loaded here by AJAX -->
+          {% if schedule_data %}
+            <!-- Initial schedule data will be loaded here -->
+          {% else %}
+            <p class="text-center text-muted">No schedules found. Please apply filters or add a new schedule.</p>
+          {% endif %}
+        </div>
+          </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Schedule Modal -->
+<div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="addScheduleModalLabel">Add New Schedule</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" id="scheduleAddForm" action="{% url 'tl_employee_schedule' %}">
+          {% csrf_token %}
+          <!-- Store current filter values in hidden fields -->
+          <input type="hidden" name="employee_filter" value="{{ employee_filter|default:'' }}">
+          <input type="hidden" name="start_date" value="{{ start_date|default:'' }}">
+          <input type="hidden" name="end_date" value="{{ end_date|default:'' }}">
+          
+          <div class="mb-3">
+            <label for="employeeSelect" class="form-label">Employee</label>
+            <select class="form-select" id="employeeSelect" name="employee" required>
+              <option value="" selected disabled>Select Employee</option>
+              {% if employee %}
+                {% for allocation in employee %}
+                  {% if allocation.employee %}
+                    <option value="{{ allocation.employee.id }}">{{ allocation.employee.name }}</option>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <option>No employees allocated</option>
+              {% endif %}
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="scheduleDate" class="form-label">Date</label>
+            <input type="date" class="form-control" id="scheduleDate" name="schedule_date" required>
+          </div>
+          <div class="mb-3">
+            <label for="startTime" class="form-label">Start Time</label>
+            <input type="time" class="form-control" id="startTime" name="start_time" required>
+          </div>
+          <div class="mb-3">
+            <label for="endTime" class="form-label">End Time</label>
+            <input type="time" class="form-control" id="endTime" name="end_time" required>
+          </div>
+          <div class="mb-3">
+            <label for="eventTitle" class="form-label">Event Title</label>
+            <input type="text" class="form-control" id="eventTitle" name="schedule_head" placeholder="Enter event title" required>
+          </div>
+          <div class="mb-3">
+            <label for="eventDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="eventDescription" name="todo_content" rows="3" placeholder="Enter event description"></textarea>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save Schedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Schedule Modal -->
+<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="editScheduleModalLabel">Edit Schedule</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="scheduleEditForm">
+          {% csrf_token %}
+          <input type="hidden" name="schedule_id" id="editScheduleId">
+          <!-- No need for hidden filter fields -->
+          
+          <div class="mb-3">
+            <label for="editEmployee" class="form-label">Employee</label>
+            <select class="form-select" id="editEmployee" name="employee" required>
+              {% for allocation in employee %}
+                {% if allocation.employee %}
+                  <option value="{{ allocation.employee.id }}">{{ allocation.employee.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="editDate" class="form-label">Date</label>
+            <input type="date" class="form-control" id="editDate" name="schedule_date" required>
+          </div>
+          <div class="mb-3">
+            <label for="editStartTime" class="form-label">Start Time</label>
+            <input type="time" class="form-control" id="editStartTime" name="start_time" required>
+          </div>
+          <div class="mb-3">
+            <label for="editEndTime" class="form-label">End Time</label>
+            <input type="time" class="form-control" id="editEndTime" name="end_time" required>
+          </div>
+          <div class="mb-3">
+            <label for="editTitle" class="form-label">Event Title</label>
+            <input type="text" class="form-control" id="editTitle" name="schedule_head" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editDescription" name="todo_content" rows="3"></textarea>
+          </div>
+
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Schedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AJAX Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  
+  // Display date in the header and load current day schedules immediately
+  document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
+    const currentDateStr = today.toLocaleDateString('en-US', options);
+    document.getElementById('currentDate').textContent = currentDateStr;
+    
+    loadCurrentDaySchedules();
+  });
+  
+  ////////////// LOAD SCHEDULE FUNCTIONS //////////////
+// For loading current day schedules
+function loadCurrentDaySchedules() {
+    $.ajax({
+        url: '/get_current_day_schedules_teamlead/',  // Use correct URL
+        type: 'POST',
+        data: {
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()  // Required for POST
+        },
+        success: function(response) {
+            if (response.status === 'success') {
+                updateScheduleDisplay(response.schedules);
+            } else {
+                console.error('Error:', response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading current day schedules:', error);
+        }
+    });
+}
+  // Function to load schedules with date filters
+function loadSchedules() {
+  const employeeFilter = $('#employee_filter').val() || '';
+  const startDate = $('#start_date').val() || '';
+  const endDate = $('#end_date').val() || '';
+
+  $.ajax({
+    url: '{% url "teamlead_employee_schedule_list" %}',  // Ensure the URL name is correct
+    type: 'POST',
+    data: {
+      'employee_filter': employeeFilter,
+      'start_date': startDate,
+      'end_date': endDate,
+      'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+    },
+    success: function(response) {
+      updateScheduleDisplay(response.schedules);
+    },
+    error: function(xhr, status, error) {
+      console.error('Error loading schedules:', error);
+    }
+  });
+}
+  
+  ////////////// DISPLAY //////////////
+  // Function to update the schedule display
+// Function to update the schedule display
+function updateScheduleDisplay(schedules) {
+  const container = $('#scheduleItemsContainer');
+  container.empty();
+  
+  if (schedules && schedules.length > 0) {
+    schedules.forEach((item) => {
+      // Check if task is completed to apply strikethrough
+      const completedClass = item.schedule_status === 'completed' ? 'text-decoration-line-through' : '';
+      const checkedAttr = item.schedule_status === 'completed' ? 'checked' : '';
+      
+      // Format todo content - handle empty/null content
+      const todoContent = item.todo_content ? item.todo_content : '';
+      
+      container.append(`
+        <div class="schedule-item" data-id="${item.id}">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex flex-column">
+              <div class="employee-name ${completedClass}">${item.employee_name}</div>
+              <div class="schedule-date">${item.formatted_date}</div>
+            </div>
+            
+            <!-- Right side container pushed to the right -->
+            <div class="d-flex flex-column align-items-end ms-3">
+              <div class="d-flex justify-content-end align-items-start w-100">
+                
+                <!-- Subcontainer for head + content -->
+                <div class="d-flex flex-column align-items-end">
+                  <div class="schedule-name ${completedClass}">${item.schedule_head}</div>
+                  <div class="schedule-content mt-1 text-end">
+                    ${todoContent}
+                  </div>
+                </div>
+                
+                <!-- Action buttons beside the head -->
+                <div class="action-icons d-flex gap-1 ms-2">
+                  <button class="edit-icon" 
+                          title="Edit"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#editScheduleModal"
+                          data-id="${item.id}"
+                          data-employee="${item.employee_id}"
+                          data-date="${item.schedule_date}"
+                          data-start="${item.start_time}"
+                          data-end="${item.end_time}"
+                          data-title="${item.schedule_head}"
+                          data-description="${item.todo_content || ''}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <button class="delete-icon" 
+                          title="Delete"
+                          data-id="${item.id}">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="form-check">
+              <input class="form-check-input status-toggle" 
+                     type="checkbox" 
+                     id="schedule${item.id}" 
+                     data-id="${item.id}" 
+                     ${checkedAttr}>
+              <div class="time-slot">
+                Time - ${item.start_time_formatted} - ${item.end_time_formatted}
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+    });
+    
+    // Re-attach event handlers for newly created elements
+    attachEditHandlers();
+    attachDeleteHandlers();
+    attachStatusToggleHandlers();
+  } else {
+    container.html('<p class="text-center text-muted">No schedules found. Please apply filters or add a new schedule.</p>');
+  }
+}  
+  ////////////// EVENT HANDLERS //////////////
+  // Filter form submission handler
+  $('#scheduleFilterForm').submit(function(e) {
+    e.preventDefault();
+    loadSchedules();
+  });
+  
+  // Add schedule form submission handler
+  $('#scheduleAddForm').submit(function (e) {
+    e.preventDefault();
+    
+    $.ajax({
+      type: 'POST',
+      url: '{% url "tl_employee_schedule" %}',
+      data: $(this).serialize(),
+      headers: { 'X-CSRFToken': csrftoken },
+      success: function (response) {
+        if (response.success) {
+          // Close modal and reset form
+          $('#addScheduleModal').modal('hide');
+          $('#scheduleAddForm')[0].reset();
+          
+          // Reload schedules with current filters
+          refreshCurrentView();
+        } else {
+          console.error('Failed to add schedule:', response.error);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error('Error adding schedule:', error);
+      }
+    });
+  });
+  
+  ////////////// EDIT //////////////
+  // Function to attach edit button handlers
+  function attachEditHandlers() {
+    $('.edit-icon').off('click').on('click', function() {
+      document.getElementById('editScheduleId').value = this.getAttribute('data-id');
+      document.getElementById('editEmployee').value = this.getAttribute('data-employee');
+      document.getElementById('editDate').value = this.getAttribute('data-date');
+      document.getElementById('editStartTime').value = this.getAttribute('data-start');
+      document.getElementById('editEndTime').value = this.getAttribute('data-end');
+      document.getElementById('editTitle').value = this.getAttribute('data-title');
+      document.getElementById('editDescription').value = this.getAttribute('data-description');
+    });
+  }
+  
+  // Edit schedule form submission handler
+  $('#scheduleEditForm').submit(function(e) {
+    e.preventDefault();
+    
+    $.ajax({
+      type: 'POST',
+      url: '{% url "teamlead_employee_edit_schedule" %}',
+      data: $(this).serialize(),
+      headers: { 'X-CSRFToken': csrftoken },
+      success: function(response) {
+        if (response.success) {
+          // Close modal
+          $('#editScheduleModal').modal('hide');
+          
+          // Reload appropriate schedule list
+          refreshCurrentView();
+        } else {
+          console.error('Failed to update schedule:', response.error);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Error updating schedule:', error);
+      }
+    });
+  });
+  
+  ////////////// DELETE //////////////
+  // Function to attach delete button handlers
+  function attachDeleteHandlers() {
+    $('.delete-icon').off('click').on('click', function() {
+      if (confirm('Are you sure you want to delete this schedule?')) {
+        const scheduleId = this.getAttribute('data-id');
+        
+        $.ajax({
+          type: 'POST',
+          url: `/teamlead_employee_delete_schedule/${scheduleId}/`,
+          headers: { 'X-CSRFToken': csrftoken },
+          success: function(response) {
+            if (response.success) {
+              // Reload appropriate schedule list
+              refreshCurrentView();
+            } else {
+              console.error('Failed to delete schedule');
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Error deleting schedule:', error);
+          }
+        });
+      }
+    });
+  }
+  
+  ////////////// STATUS FUNCTION //////////////
+// For status updates
+function attachStatusToggleHandlers() {
+    $('.status-toggle').off('change').on('change', function() {
+        const scheduleId = $(this).data('id');
+        const isCompleted = $(this).prop('checked');
+        const newStatus = isCompleted ? 'completed' : 'pending';
+        const scheduleItem = $(this).closest('.schedule-item');
+        const employeeName = scheduleItem.find('.employee-name');
+        const scheduleName = scheduleItem.find('.schedule-name');
+        
+        // Apply visual changes immediately for better UX
+        if (isCompleted) {
+            employeeName.addClass('text-decoration-line-through');
+            scheduleName.addClass('text-decoration-line-through');
+        } else {
+            employeeName.removeClass('text-decoration-line-through');
+            scheduleName.removeClass('text-decoration-line-through');
+        }
+        
+        $.ajax({
+            type: 'POST',
+            url: '{% url "teamlead_empschedule_status" %}',
+            data: {
+                'schedule_id': scheduleId,
+                'status': newStatus,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status !== 'success') {
+                    // Revert checkbox state and visual changes on error
+                    $(`.status-toggle[data-id="${scheduleId}"]`).prop('checked', !isCompleted);
+                    if (isCompleted) {
+                        employeeName.removeClass('text-decoration-line-through');
+                        scheduleName.removeClass('text-decoration-line-through');
+                    } else {
+                        employeeName.addClass('text-decoration-line-through');
+                        scheduleName.addClass('text-decoration-line-through');
+                    }
+                    console.error('Failed to update task status:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Revert checkbox state and visual changes on error
+                $(`.status-toggle[data-id="${scheduleId}"]`).prop('checked', !isCompleted);
+                if (isCompleted) {
+                    employeeName.removeClass('text-decoration-line-through');
+                    scheduleName.removeClass('text-decoration-line-through');
+                } else {
+                    employeeName.addClass('text-decoration-line-through');
+                    scheduleName.addClass('text-decoration-line-through');
+                }
+                console.error('Error updating status:', error);
+            }
+        });
+    });
+}
+
+// Helper function to refresh the current view
+function refreshCurrentView() {
+    if ($('#start_date').val() && $('#end_date').val()) {
+        loadSchedules();
+    } else {
+        loadCurrentDaySchedules();
+    }
+}
+</script>
+
+{% endblock content %}

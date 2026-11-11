@@ -1,0 +1,42 @@
+@import url(./colour.css);
+
+#resignedEmployeeTable th,
+#resignedEmployeeTable td {
+  white-space: nowrap;
+}
+
+#resignedEmployeeTable {
+  font-size: 0.9rem;
+}
+
+#searchInput {
+  border-color: #444;
+}
+
+#searchInput:focus {
+  border-color: #3f8cff;
+  box-shadow: 0 0 0 0.1rem rgba(63, 140, 255, 0.25);
+}
+
+
+.emp-modal {
+  background: #11161c;
+  border: 1px solid #252c35;
+  border-radius: 12px;
+}
+
+.emp-modal .form-label {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.emp-modal .emp-input {
+  background: #1a222b;
+  border: 1px solid #2a3440;
+  color: #e5e7eb;
+}
+
+.emp-modal .emp-input:focus {
+  border-color: #3f8cff;
+  box-shadow: 0 0 0 0.1rem rgba(63, 140, 255, 0.25);
+}

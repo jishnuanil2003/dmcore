@@ -1,0 +1,348 @@
+{% extends "telecaller/telecallersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.audio-upload-wrapper{
+    max-width:750px;
+    margin:30px auto;
+    padding:0 15px;
+}
+
+/* Card */
+.upload-card{
+    background:linear-gradient(145deg,#101827,#0b1220);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+/* Header */
+.upload-card-header{
+    padding:22px 25px;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.upload-card-header h4{
+    margin:0;
+    color:#ffffff;
+    font-size:22px;
+    font-weight:600;
+}
+
+.upload-card-body{
+    padding:25px;
+}
+
+/* Label */
+.form-label{
+    color:#dbe4f0;
+    font-size:15px;
+    font-weight:600;
+    margin-bottom:12px;
+}
+
+/* Drop Zone */
+.drop-zone{
+    position:relative;
+    border:2px dashed #334155;
+    background:#0f172a;
+    border-radius:18px;
+    padding:50px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:.3s ease;
+}
+
+.drop-zone:hover{
+    border-color:#3b82f6;
+    background:#111c31;
+}
+
+.drop-zone.drag-over{
+    border-color:#10b981;
+    background:#10241d;
+    transform:scale(1.01);
+}
+
+.drop-zone input{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+}
+
+/* Upload Content */
+.upload-icon{
+    font-size:60px;
+    margin-bottom:15px;
+}
+
+.upload-title{
+    color:#ffffff;
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.upload-subtitle{
+    color:#94a3b8;
+    font-size:13px;
+    line-height:1.7;
+}
+
+/* Selected File */
+.file-selected{
+    display:none;
+}
+
+.file-name{
+    color:#22c55e;
+    font-size:16px;
+    font-weight:600;
+    word-break:break-word;
+}
+
+.file-size{
+    color:#94a3b8;
+    margin-top:5px;
+    font-size:13px;
+}
+
+/* Upload Button */
+.upload-btn{
+    width:100%;
+    margin-top:22px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#2563eb,#06b6d4);
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.upload-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(37,99,235,.35);
+}
+
+.upload-btn:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+/* Validation Errors */
+.text-danger{
+    color:#ef4444 !important;
+    font-size:13px;
+    margin-top:8px;
+}
+
+/* Mobile */
+@media(max-width:768px){
+
+    .audio-upload-wrapper{
+        margin:15px auto;
+        padding:0 10px;
+    }
+
+    .upload-card-header{
+        padding:18px;
+    }
+
+    .upload-card-header h4{
+        font-size:18px;
+    }
+
+    .upload-card-body{
+        padding:18px;
+    }
+
+    .drop-zone{
+        padding:35px 15px;
+    }
+
+    .upload-icon{
+        font-size:45px;
+    }
+
+    .upload-title{
+        font-size:15px;
+    }
+
+    .upload-subtitle{
+        font-size:12px;
+    }
+
+    .upload-btn{
+        padding:12px;
+        font-size:14px;
+    }
+}
+</style>
+
+<div class="audio-upload-wrapper">
+
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == "success" %}
+        <p style="color: green;">{{ message }}</p>
+      {% elif message.tags == "error" %}
+        <p style="color: red;">{{ message }}</p>
+      {% else %}
+        <p>{{ message }}</p>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+    <div class="upload-card">
+
+        <div class="upload-card-header">
+            <h4>
+                <i class="fas fa-microphone-alt me-2"></i>
+                Audio File Details
+            </h4>
+        </div>
+
+        <div class="upload-card-body">
+
+            <form method="post" enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Audio File *
+                    </label>
+
+                    <div id="drop-zone" class="drop-zone">
+
+                        <input type="file"
+                               name="audio_file"
+                               id="audio-file-input"
+                               accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.webm,.mp4,.opus,.aac,.wma,.amr"
+                               required>
+
+                        <div id="drop-content">
+
+                            <div class="upload-icon">
+                                🎙️
+                            </div>
+
+                            <div class="upload-title">
+                                Drop audio file here or click to browse
+                            </div>
+
+                            <div class="upload-subtitle">
+                                MP3, WAV, MP4, M4A, OGG, FLAC, WEBM, OPUS
+                                <br>
+                                Maximum File Size: 25 MB
+                            </div>
+
+                        </div>
+
+                        <div id="file-selected" class="file-selected">
+
+                            <div style="font-size:40px;margin-bottom:10px;">
+                                ✅
+                            </div>
+
+                            <div id="file-name" class="file-name"></div>
+
+                            <div id="file-size" class="file-size"></div>
+
+                        </div>
+
+                    </div>
+
+                    {% if form.audio_file.errors %}
+                    <div class="text-danger mt-2">
+                        {{ form.audio_file.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit"
+                        class="upload-btn"
+                        id="submit-btn">
+                    <i class="fas fa-upload me-2"></i>
+                    Upload & Process
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const input = document.getElementById('audio-file-input');
+const dropContent = document.getElementById('drop-content');
+const fileSelected = document.getElementById('file-selected');
+const fileNameEl = document.getElementById('file-name');
+const fileSizeEl = document.getElementById('file-size');
+const dropZone = document.getElementById('drop-zone');
+const submitBtn = document.getElementById('submit-btn');
+
+function formatSize(bytes){
+    if(bytes < 1024) return bytes + ' B';
+    if(bytes < 1024 * 1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function showFile(file){
+    dropContent.style.display = 'none';
+    fileSelected.style.display = 'block';
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = formatSize(file.size);
+
+    dropZone.style.borderColor = '#22c55e';
+    dropZone.style.background = '#10241d';
+}
+
+input.addEventListener('change', function(e){
+    if(e.target.files[0]){
+        showFile(e.target.files[0]);
+    }
+});
+
+dropZone.addEventListener('dragover', function(e){
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', function(){
+    dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', function(e){
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+
+    const file = e.dataTransfer.files[0];
+
+    if(file){
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        showFile(file);
+    }
+});
+
+document.getElementById('upload-form').addEventListener('submit', function(){
+
+    submitBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-2"></i> Processing... Please wait';
+
+    submitBtn.disabled = true;
+});
+</script>
+
+{% endblock %}

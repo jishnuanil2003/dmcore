@@ -1,0 +1,266 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Work Allocate{% endblock %}
+
+{% block content %}
+
+<!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 20px; right: 10px; z-index: 99;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- /Messages -->
+
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/allocate_work.css' %}">
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container mt-4 comn_table_bg">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="text-white">Allocate Work</h5>
+    <a href="{% url 'assign_to_exec_page' %}" class="btn btn-outline-light">Assign to Executive</a>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+     <h6 class="text-white">Works Count: {{ works|length }}</h6>
+     <div class="d-flex">
+       <input type="text" class="form-control w-auto" id="searchInput" placeholder="Search...">
+       <button class="btn btn-light" id="clearSearch">Clear</button>
+     </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle" id="workTable">
+      <thead>
+        <tr class="text-center">
+          <th>No</th>
+          <th>Client Name</th>
+          <th>Start Date</th>
+          <th>Due Date</th>
+          <th>Progress</th>
+          <th>Allocated Team Lead</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for work in works %}
+        <tr class="text-center">
+          <td>{{ forloop.counter }}</td>
+          <td class="text-start table_en_md">
+            <div class="d-flex align-items-center">
+              <img src="{% if work.client.client_profile %}{{ work.client.client_profile.url }}{% else %}{% static 'img/default-profile.png' %}{% endif %}"
+                   class="rounded-circle me-2" width="40" height="40">
+              <span>{{ work.client.client_name }}</span>
+            </div>
+          </td>
+          <td class="table_en_sm">{{ work.work_create_date }}</td>
+          <td class="table_en_sm">{{ work.work_end_date }}</td>
+          <td>
+            <div class="progress">
+              <div class="progress-bar bg-success"
+                   role="progressbar"
+                   data-progress="{{ work.work_progress }}"
+                   aria-valuemin="0"
+                   aria-valuemax="100">
+              </div>
+            </div>
+          </td>
+          <td class="table_en_md">
+            {% if work.unique_assignments %}
+              {% for assign in work.unique_assignments %}
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <a href="{% url 'teamlead_tasks' assign.team_lead.id %}?client_id={{ work.client.id }}"
+                     class="text-decoration-none text-white me-2"
+                     style="font-size: small;">
+                    {{ assign.team_lead.name }}
+                  </a>
+                    <i class="fas fa-trash text-danger delete-assign-btn"
+                       data-workid="{{ assign.work_register.id }}"
+                       data-tlid="{{ assign.team_lead.id }}"
+                       title="Delete"
+                       style="cursor: pointer;">
+                    </i>
+                </div>
+              {% endfor %}
+            {% else %}
+              <span class="text-warning">Not Allocated</span>
+            {% endif %}
+          </td>
+          <td class="table_en_lmd">
+            <button class="btn btn-outline-primary btn-sm allocate-btn" data-workid="{{ work.id }}">
+              Single Allocate / Group Allocate
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Work Allocation Modal -->
+<div class="modal fade" id="allocateWorkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <form id="allocateWorkForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="work_id" id="modal_work_id">
+        <input type="hidden" name="task_id" id="hidden_task_id">
+
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title">Assign Work</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Team Lead -->
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Team Lead *</label>
+              <select class="form-select" name="team_lead" id="team_lead" required>
+                <option disabled selected>Select Team Lead</option>
+                {% for lead in team_leads %}
+                  <option value="{{ lead.id }}">{{ lead.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Task -->
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Task *</label>
+              <select class="form-select" id="task_select" name="task_id" required>
+                <option disabled selected>Select Task</option>
+              </select>
+            </div>
+
+            <!-- Lead Category -->
+            <div class="col-md-6 col-sm-12 d-none" id="lead_category_section">
+              <label class="form-label">Lead Category *</label>
+              <select class="form-select" name="category" id="category_select">
+                <option disabled selected>Select Category</option>
+              </select>
+            </div>
+           
+            <!-- Work Type -->
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Work Type</label>
+              <div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="work_type" value="single" id="work_single">
+                  <label class="form-check-label" for="work_single">Single Work</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="work_type" value="group" id="work_group" checked>
+                  <label class="form-check-label" for="work_group">Group Work</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Criteria (below category section) -->
+            <div class="col-12 d-none" id="criteria_section">
+              <label class="form-label">Verification Criteria</label>
+              <textarea class="form-control" name="criteria" placeholder="e.g.: Email and phone number should be valid..."></textarea>
+            </div>
+
+            <!-- Start and Due Dates -->
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Start Date *</label>
+              <input type="date" class="form-control" name="start_date" required>
+            </div>
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Due Date *</label>
+              <input type="date" class="form-control" name="due_date" required>
+            </div>
+
+            <!-- Target -->
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Total Target *</label>
+              <input type="number" class="form-control" name="target" min="1" required>
+            </div>
+
+            <!-- File Upload -->
+            <div class="col-md-6 col-sm-12">
+              <label class="form-label">Upload File</label>
+              <input type="file" class="form-control" name="file">
+            </div>
+            <!-- Platform Target Section -->
+            <div class="col-12" id="platform_section">
+              <label class="form-label">Platforms</label>
+              <div class="row">
+                <div class="col-md-4">
+                  <input class="form-check-input me-1" type="checkbox" id="is_instagram" name="is_instagram">
+                  <label for="is_instagram">Instagram</label>
+                  <input type="number" class="form-control mt-1 d-none" name="instagram_target" placeholder="Instagram Target">
+                </div>
+                <div class="col-md-4">
+                  <input class="form-check-input me-1" type="checkbox" id="is_facebook" name="is_facebook">
+                  <label for="is_facebook">Facebook</label>
+                  <input type="number" class="form-control mt-1 d-none" name="facebook_target" placeholder="Facebook Target">
+                </div>
+                <div class="col-md-4">
+                  <input class="form-check-input me-1" type="checkbox" id="is_x" name="is_x">
+                  <label for="is_x">Twitter</label>
+                  <input type="number" class="form-control mt-1 d-none" name="x_target" placeholder="Twitter Target">
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="col-12">
+              <label class="form-label">More About Work</label>
+              <textarea class="form-control" name="description" rows="3" placeholder="Optional details about this work..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top">
+          <button type="reset" class="btn btn-outline-light">Clear</button>
+          <button type="submit" class="btn btn-outline-success">Allocate</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'dm_head/js/allocate_work.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearSearch");
+    const rows = document.querySelectorAll("#workTable tbody tr");
+
+    function filterRows() {
+      const searchTerm = searchInput.value.toLowerCase();
+
+      rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchTerm) ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("keyup", filterRows);
+
+    clearBtn.addEventListener("click", function () {
+      searchInput.value = "";
+      filterRows();
+    });
+  });
+</script>
+
+{% endblock %}

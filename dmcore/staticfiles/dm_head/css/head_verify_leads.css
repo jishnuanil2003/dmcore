@@ -1,0 +1,21 @@
+.lead-filters .form-select,
+.lead-filters .form-control {
+  min-width: 100%;
+}
+
+@media (min-width: 992px) {
+  .lead-filters .form-select,
+  .lead-filters .form-control {
+    min-width: 150px;
+  }
+} 
+
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+
+  table {
+    page-break-inside: auto !important;
+  }
+}

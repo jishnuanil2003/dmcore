@@ -1,0 +1,285 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% load static %}
+{% block content %}
+
+
+
+<style>
+          body {
+      overflow-x: hidden;
+      
+  background-color: #12151e; 
+}
+
+    .card-custom {
+        color: white;
+        border: none;
+        border-radius: 10px;
+       
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .card-custom:hover {
+        background-color: #1f1f1f;
+    }
+
+    .card-title-section {
+        
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-icon {
+        font-size: 46px;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+        color: #cbd5e1;
+    }
+
+    @media (min-width: 992px) {
+        .row > div {
+            margin-bottom: 20px;
+            margin-left: 20px;
+        }
+    }
+
+    
+    
+</style>
+<h5 class="text-secondary" id="breadcrumb-navigation" style="margin-left: 20px;">
+    <a href="" class="text-secondary" style="text-decoration-line: none;">Dashboard</a> /
+    <a class="text-light" style="text-decoration-line: none;"> Progress / Weekly Progress</a>
+</h5>
+
+<div class="container mt-4">
+    
+        <div class="col mt-2">
+           
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0" style="margin-left: 30px;">List Of Weekly Progress</h5><br>
+                        <p style="font-size: 12px;color: gray;margin-left: 30px;">A list of weekly progress that employees work for different clients<p><br>
+                        <!-- Modal Trigger (you can delete this after integration) -->
+                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#uploadWeeklyModal" style="margin-left: 30px;">
+                            <i class="fa-solid fa-file text-war"></i>&nbsp;Weekly upload
+                        </button>
+
+
+                        <!-- Upload Weekly Modal -->
+                        <div class="modal fade" id="uploadWeeklyModal" tabindex="-1" aria-labelledby="uploadWeeklyModal" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content bg-dark text-light" style="border-radius: 10px; padding: 20px;">
+                                
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title" id="uploadWeeklyModal">Upload Weekly Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                            style="filter: invert(1);"></button>
+                                </div>
+
+                                <form method="POST" enctype="multipart/form-data" action="{% url 'tl_week_pro' %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+
+                                    <!-- Progress Type -->
+                                    <div class="mb-3">
+                                        <label>Check progress type</label><br>
+                                        <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="progressType" id="weeklyProgress" value="weekly" checked>
+                                        <label class="form-check-label" for="weeklyProgress">Weekly Progress</label>
+                                        </div>
+                                        <div class="form-check form-check-inline ms-3">
+                                        <input class="form-check-input" type="radio" name="progressType" id="monthlyProgress" value="monthly" disabled>
+                                        <label class="form-check-label" for="monthlyProgress">Monthly Progress</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- From Date -->
+                                    <div class="mb-3">
+                                        <label for="fromDate">From Date</label>
+                                        <input type="date" class="form-control" id="fromDate" name="from_date" required>
+                                    </div>
+
+                                    <!-- To Date -->
+                                    <div class="mb-3">
+                                        <label for="toDate">To Date</label>
+                                        <input type="date" class="form-control" id="toDate" name="to_date" required>
+                                    </div>
+
+                                    <!-- Progress -->
+                                    <div class="mb-3">
+                                        <label for="progress">Progress</label>
+                                        <input type="number" class="form-control" id="progress" name="progress" min="0" max="100" required>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="mb-3">
+                                        <label for="moreProgress">More about weekly progress</label>
+                                        <textarea class="form-control" id="moreProgress" name="description" rows="3"></textarea>
+                                    </div>
+
+                                    <!-- File Upload -->
+                                    <div class="mb-3">
+                                        <label for="files">Files</label><br>
+                                        <input type="file" class="form-control-file" id="files" name="files" multiple>
+                                    </div>
+
+                                    </div>
+
+                                    <div class="modal-footer border-0">
+                                    <button type="submit" class="btn btn-outline-primary mx-auto"><i class="fa-solid fa-upload"></i>&nbsp;Upload</button>
+                                    </div>
+                                </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form action="" method="get">
+                        <div class="row align-items-end mt-3 ms-auto">
+                            <div class="col-lg-3 col-md-6 mb-2">
+                                <label class="d-flex mb-1">Select Employee</label>
+                                    <select name="employee_id" class="form-control">
+                                        <option value="">-- Select Employee --</option>
+                                        {% for employee in employees %}
+                                            <option value="{{ employee.id }}" {% if employee.id|stringformat:"s" == selected_employee_id %}selected{% endif %}>
+                                                {{ employee.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 mb-2">
+                                <label class="d-flex mb-1">From Date</label>
+                                <input type="date" name="from_date" class="form-control" value="{{ from_date }}">
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 mb-2">
+                                <label class="d-flex mb-1">To Date</label>
+                                <input type="date" name="to_date" class="form-control" value="{{ to_date }}">
+                            </div>
+
+                            <div class="col-lg-1 col-md-4 mb-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="container mt-4" style="max-width: 1100px;">
+                        {% for progress in progresses %}
+                        <div class="row mb-4 p-4 border rounded" style="border: 1px solid #007bff; background-color: #1c1c1c; color: #fff;">
+                            
+                            <!-- Left Column: Name, Dates, Description -->
+                            <div class="col-md-4 d-flex flex-column justify-content-center">
+                                <i class="fa-regular fa-file"></i>
+                                <strong>{{ progress.employee.name }}</strong>
+                                <small>{{ progress.from_date }} to {{ progress.to_date }}</small>
+                                <span>{{ progress.description }}</span>
+                            </div>
+
+                            <div class="col-md-3 d-flex align-items-center">
+                                <!-- Progress Bar -->
+                                <div class="flex-grow-1 me-2" style="min-width: 0;">
+                                    <div class="progress" style="height: 20px; width: 100%;">
+                                        {% if progress.progress <= 9 %}
+                                            <div class="progress-bar bg-danger" style="width: {{ progress.progress }}%;">{{ progress.progress }}%</div>
+                                        {% elif progress.progress <= 79 %}
+                                            <div class="progress-bar bg-warning text-dark" style="width: {{ progress.progress }}%;">{{ progress.progress }}%</div>
+                                        {% else %}
+                                            <div class="progress-bar bg-success" style="width: {{ progress.progress }}%;">{{ progress.progress }}%</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Download Button Area (fixed width for layout consistency) -->
+                                <div style="width: 40px;">
+                                    {% if progress.file_list %}
+                                        <div class="d-flex flex-column gap-1">
+                                            {% for file in progress.file_list %}
+                                                <a href="{{ file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Download">
+                                                    <i class="fa-solid fa-download"></i>
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 d-flex flex-column justify-content-center">
+                                <p class="text-muted">none</p>
+                            </div>
+                            
+                            <!-- Right Column: File + Status -->
+                            <div class="col-md-2 d-flex flex-column justify-content-center" style="width: 130px;">
+                                
+
+                                {% if progress.status == 0 %}
+                                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#weeklyProgressModal{{ progress.id }}">
+                                        x Verify
+                                    </button>
+
+                                {% else %}
+                                    <button class="btn btn-outline-success" style="border: 1px solid green;"><i class="fa-solid fa-check text-success"></i>&nbsp; Verified</button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Modal: monthly Verification -->
+                        <div class="modal fade" id="weeklyProgressModal{{ progress.id }}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-top" role="document">
+                                <div class="modal-content bg-dark text-light">
+                                    <form method="POST" action="{% url 'verify_progress' progress.id %}" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="modal-header border-0">
+                                            <h5 class="modal-title">Verify Weekly Progress</h5>
+                                            <button type="button" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);">
+                                               
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>* Update the progress after verification if required.</p>
+                                            <div class="form-group">
+                                                <label>Current Progress</label>
+                                                <input type="number" class="form-control" value="{{ progress.progress }}" >
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Verified Progress</label>
+                                                <input type="number" name="progress" class="form-control" min="0" max="100" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-0">
+                                            <button type="submit" class="btn btn-outline-primary mx-auto" style="border: 1px solid blue;">Verify</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            
+            
+            
+
+        </div>
+        
+
+ 
+</div>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+

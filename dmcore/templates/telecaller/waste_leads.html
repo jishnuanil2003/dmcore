@@ -1,0 +1,109 @@
+{% extends 'telecaller/telecallersidebar.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'telecaller/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'telecaller/css/dashboard.css' %}">
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'telecaller' %}" class="text-decoration-none text-white">Dashboard</a> / Waste Leads</p>
+    </div>
+</div>
+
+<div class="container mt-5 comn_table_bg">
+  <div class="filter_main">
+    <h5 class="text-white pg_head">Waste Leads ({{ leads.count }})</h5>
+  </div>
+
+  <div class="row align-items-end justify-content-end g-2 mb-4">
+      <div class="col-md-2">
+        <select id="statusFilter" class="form-select">
+          <option value="">- Select Status -</option>
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="date" id="fromDate" class="form-control" />
+      </div>
+      <div class="col-md-2">
+        <input type="date" id="toDate" class="form-control" />
+      </div>
+      <div class="col-md-1">
+        <button id="clearFilters" class="btn btn-outline-light mob_max_btn">Clear</button>
+      </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div class="text-white">
+      Showing
+      <select id="rowCount" class="form-select form-select-sm bg-dark text-white d-inline-block w-auto">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+      </select>
+      rows
+    </div>
+    <div class="input-group w-auto">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+  
+  <div class="table-responsive">
+    <!-- <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"> -->
+    {% if leads %}
+    <table class="table table-dark table-striped table-hover" id="wasteLeadsTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Added Date</th>
+          <th>Lead Name</th>
+          <th>Email</th>
+          <th>Phone Number</th>
+          <th>Reason</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="leadTableBody">
+        {% for lead in leads %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_sm">{{ lead.lead.added_date }}</td>
+          <td class="table_en_lsm">{{ lead.lead.name }}</td>
+          <td class="table_en_lsm">{{ lead.lead.email }}</td>
+          <td class="table_en_lsm">{{ lead.lead.contact }}</td>
+          <td class="table_en_md">{{ lead.reason|default:"-" }}</td>
+          <td class="table_en_sm">
+            {% if lead.status == 1 %}Approved{% else %}Pending{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div id="noMatchRow" class="text-center text-white my-3" style="display: none;">
+      <h5>No leads match the current filters.</h5>
+    </div>
+    {% else %}
+    <div class="text-center text-white my-5">
+      <h4>No waste leads available.</h4>
+    </div>
+    {% endif %}
+  </div>
+
+<div class="d-flex justify-content-end align-items-center mt-3">
+  <nav>
+    <ul class="pagination"></ul>
+  </nav>
+</div>
+</div>
+
+<script src="{% static 'telecaller/js/waste_leads.js' %}"></script>
+
+{% endblock %}

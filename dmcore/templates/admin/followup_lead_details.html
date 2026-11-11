@@ -1,0 +1,146 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<style>
+.tab-btn {
+    border: 1px solid #2ecc71;
+    color: #2ecc71;
+    background: transparent;
+}
+.tab-btn.active {
+    background: #2ecc71;
+    color: #000;
+}
+.hidden-section {
+    display: none;
+}
+
+.history-item {
+    font-size: 14px;
+}
+
+.history-item .text-muted {
+    font-weight: 500;
+}
+
+.status-badge {
+
+    color: #3498db;
+}
+#leadTab small {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: capitalize;
+}
+
+
+
+</style>
+
+<div class="container mt-4">
+
+ 
+    <div class="card bg-dark text-white p-4 mb-3">
+        <h5 class="mb-3">{{ lead.name }} - Details</h5>
+
+ 
+        <div class="d-flex gap-2">
+            <button class="btn tab-btn active" onclick="showTab('lead')">Lead Details</button>
+            <button class="btn tab-btn" onclick="showTab('followup')">Follow Up</button>
+            <button class="btn tab-btn" onclick="showTab('history')">History</button>
+        </div>
+    </div>
+
+ 
+    <div id="leadTab" class="card bg-dark text-white p-4">
+        <h6 class="mb-3">
+            <span class="text-success">Name</span>
+            <span class="text-light"> - {{ lead.name }}</span>
+        </h6>
+
+        {% if lead_details %}
+            <div class="row mt-3">
+                {% for detail in lead_details %}
+                    {% if detail.field_name|lower != "name" %}
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <small >{{ detail.field_name }}</small> :
+                            <span class="text-light">{{ detail.field_data }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No lead details available.</p>
+        {% endif %}
+    </div>
+
+
+   
+    <div id="followupTab" class="card bg-dark text-white p-4 hidden-section">
+        <h6 class="mb-3"><span class="text-success">{{ lead.name }}</span><span class="text-light"> - FollowUp Details</span></h6>
+    </div>
+
+  
+    <div id="historyTab" class="card bg-dark text-white p-4 hidden-section">
+        <h6 class="mb-3"><span class="text-success">{{ lead.name }}</span> <span class="text-light"> - Followup History</span></h6>
+
+        {% if history %}
+            {% for h in history %}
+                <div class="history-item mb-4 pb-3 border-bottom">
+                    <p class="mb-1">
+                        <span>Allocated Date:</span>
+                        <span class="text-light">{{ h.allocated_date }}</span>
+                    </p><br>
+
+                    <p class="mb-1">
+                        <span>Allocated Hr/Tele Caller:</span>
+                        <span class="text-warning">{{ h.telecaller.name }}</span>
+                    </p><br>
+
+                    <p class="mb-1">
+                        <span>Note:</span>
+                        <span class="text-light">{{ h.note }}</span>
+                    </p><br>
+
+                    <p class="mb-0">
+                        <span>Final Status:</span>
+                        <span class="status-badge">
+                            {{ h.final_status }}
+                        </span>
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted text-center">No follow-up history found.</p>
+        {% endif %}
+    </div>
+
+
+</div>
+
+
+<script>
+function showTab(tab) {
+
+    document.getElementById('leadTab').style.display = 'none';
+    document.getElementById('followupTab').style.display = 'none';
+    document.getElementById('historyTab').style.display = 'none';
+
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    if (tab === 'lead') {
+        document.getElementById('leadTab').style.display = 'block';
+        event.target.classList.add('active');
+    } 
+    else if (tab === 'followup') {
+        document.getElementById('followupTab').style.display = 'block';
+        event.target.classList.add('active');
+    } 
+    else {
+        document.getElementById('historyTab').style.display = 'block';
+        event.target.classList.add('active');
+    }
+}
+</script>
+
+{% endblock %}

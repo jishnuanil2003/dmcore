@@ -1,0 +1,53 @@
+@import url(./colour.css);
+
+.modal-content {
+    border: none;
+}
+
+.modal-header, .modal-footer {
+    border: none;
+}
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}
+
+.modal-content {
+  border-radius: 0.5rem;
+}
+
+.progress {
+  background-color: #3a3a3a;
+  border-radius: 8px;
+}
+
+.progress-bar {
+  background-color: #28a745;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  transition: width 0.4s ease;
+}
+
+textarea:read-only,
+input:read-only {
+  background-color: #212529;
+  color: #ccc;
+}
+
+.modal-body label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.table_en_sm{
+  min-width: 130px;
+}
+.table_en_md{
+  min-width: 190px;
+}
+.table_en_lg{
+  min-width: 500px;
+}

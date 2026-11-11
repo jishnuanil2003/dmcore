@@ -1,0 +1,53 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}DM Work{% endblock %}
+
+{% block content %}
+
+
+  <div class="messages-container" style="position: fixed; top: 20px; right: 10px; z-index: 99;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/colour.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/dmwork.css' %}">
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container mt-3 ">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+    {% for i in clients %}
+        <div class="col-md-4 mb-4" >
+            <div class="card card-common">
+                <a href="{% url 'clientworkdetails' i.id %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <h5 class="mb-0">{{i.client_name}}</h5>
+                        <i class="fa-regular fa-calendar-check text-success"></i>
+                    </div>
+                    <p>By actively monitoring the progress of ongoing tasks and reviewing all task details.</p>
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+
+       
+    </div>
+</div>
+{% endblock %}

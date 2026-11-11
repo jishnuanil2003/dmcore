@@ -1,0 +1,118 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+   
+body {
+      background-color: #12151e; 
+      color: #fff;
+    }
+    .form-label {
+      color: #fff;
+    }
+    .card {
+      background-color: #1e1e1e;
+      border: none;
+    }
+    .form-control,
+    .form-control:focus,
+    .form-select {
+      background-color: #333333;
+      color: #fff;
+      border: none;
+      box-shadow: none;
+    }
+    textarea.form-control {
+      resize: vertical;
+    }
+
+    
+    input[type="file"]::file-selector-button {
+      background-color: #444;
+      color: white;
+      border: none;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    .form-control::placeholder {
+  color:rgb(101, 102, 104); /* light grey placeholder text */
+  
+}
+    
+
+
+
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="success-alert">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+
+<!-- Daily Works Form Container -->
+<div class="container my-5">
+  <h5 class="text-light mb-4">Works / Ongoing Works / <span class="fw-light">Add Daily Works</span></h5>
+
+  
+  <div class="card p-4 shadow-sm">
+    <h4 class="mb-4" style="color:white;">Daily Works</h4>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Task Name</label>
+          <input type="text" class="form-control" value="{{ task.client_task.task_name }}" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control" value="{{ today|date:'Y-m-d' }}" readonly>
+
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Title*</label>
+        <input type="text" class="form-control" name="title" placeholder="enter a title">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Daily Works*</label>
+        <textarea class="form-control" name="description" rows="4" placeholder="enter all your daily works for this task"></textarea>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Target*</label>
+          <input type="number" name="target" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Files*</label>
+          <input type="file" name="file" class="form-control" multiple>
+        </div>
+      </div>
+
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-primary btn-block">Save Work</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+<style>
+    .table th,
+.table td {
+    white-space: nowrap;
+}
+
+
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+
+
+</style>
+<div class="row mt-4">
+    <!-- Left Sidebar for Team Leads and Counts -->
+    <div class="col-lg-3 col-md-12 mb-4">
+        <div class="card text-white h-100" style="border-radius: 15px;background-color: #333333">
+            <div class="card-header text-center">
+                <h5 class="m-0">Allocated</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for lead in team_leads %}
+                    <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                        {{ lead.name }}
+                        <span class="badge bg-success rounded-pill">{{ lead.allocated_employees.count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Content Area for Allocation -->
+    <div class="col-lg-9 col-md-12">
+        <form method="POST" action="{% url 'assign_team_lead' %}">
+            {% csrf_token %}
+            <div class="row" style="background-color: #333333;border-radius: 15px;">
+                <h4 class="text-white text-center w-100 mt-3">Assign Team Lead to Executives</h4>
+                <div class="p-2 d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <label class="text-white me-2">Select Team Lead:</label>
+                        <select name="team_lead_id" class="form-select d-inline w-auto" required>
+                            <option value="" disabled selected>Select</option>
+                            {% for tl in team_leads %}
+                                <option value="{{ tl.id }}">{{ tl.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-success ms-2">Allocate</button>
+                    </div>
+                </div>
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message }}");
+    {% endfor %}
+  </script>
+{% endif %}
+
+                <div class="table-responsive p-3">
+                    <table class="table table-striped table-bordered table-dark text-white">
+                        <thead>
+                            <tr>
+                                <th>  
+                                     {% comment %} <input type="checkbox" id="selectAll"> {% endcomment %}
+                                </th>
+                                <th>No</th>
+                                <th>Employee ID</th>
+                                <th>Employee Name</th>
+                                <th>Designation</th>
+                                <th>Department</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in executives %}
+                            <tr>
+                                <td><input type="checkbox" name="executive_ids" value="{{ emp.id }}" class="executiveCheckbox"></td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>EMP0000</td>
+                                <td><i class="fas fa-user me-1 text-secondary"></i>{{ emp.name }}</td>
+                                <td>{{ emp.designation.name }}</td>
+                                <td>{{ emp.department.name }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-white">No executives found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript to toggle checkboxes -->
+<script>
+    document.getElementById('selectAll').addEventListener('click', function (event) {
+        const checkboxes = document.querySelectorAll('.executiveCheckbox');
+        checkboxes.forEach(cb => cb.checked = event.target.checked);
+    });
+</script>
+
+{% endblock content %}

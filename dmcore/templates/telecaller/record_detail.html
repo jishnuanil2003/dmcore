@@ -1,0 +1,602 @@
+{% extends "telecaller/telecallersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+/* ===== PAGE ===== */
+.record-page{
+    padding:20px;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.action-bar .btn{
+    border-radius:10px;
+    padding:8px 16px;
+    font-size:14px;
+    font-weight:500;
+    transition:.3s;
+}
+
+.action-bar .btn:hover{
+    transform:translateY(-2px);
+}
+
+/* ===== GRID ===== */
+.record-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+    align-items:start;
+    width:100%;
+}
+
+/* ===== CARDS ===== */
+.record-card{
+    background:#141b2d;
+    border:1px solid #293246;
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+
+.record-card-title{
+    color:#ffffff;
+    font-size:28px;
+    font-weight:600;
+    padding-bottom:15px;
+    margin-bottom:20px;
+    border-bottom:1px solid #293246;
+}
+
+/* Labels */
+.record-label{
+    color:#9ca3af;
+    font-size:14px;
+    font-weight:500;
+}
+
+/* Values */
+.record-value{
+    color:#ffffff;
+    font-size:14px;
+    font-weight:600;
+}
+
+/* General text */
+.dark-text{
+    color:#d1d5db;
+}
+
+.dark-muted{
+    color:#9ca3af;
+}
+
+/* ===== INFO ROWS ===== */
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+}
+
+.info-label{
+    color:#8d97a8;
+    font-size:13px;
+}
+
+.info-value{
+    color:#fff;
+    font-size:13px;
+    font-weight:500;
+    word-break:break-word;
+}
+
+/* ===== AUDIO ===== */
+.audio-box{
+    margin-top:15px;
+    padding-top:15px;
+    border-top:1px solid #2b3240;
+}
+
+.audio-box audio{
+    width:100%;
+    border-radius:10px;
+    filter:invert(.88);
+}
+
+/* ===== STATUS BADGES ===== */
+.status-badge{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* ===== CLASSIFICATION ===== */
+.classification-box{
+    text-align:center;
+    padding:15px 0;
+}
+
+.confidence-wrapper{
+    margin-top:15px;
+}
+
+.confidence-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+    color:#9ca3af;
+    font-size:12px;
+}
+
+.progress-bg{
+    height:10px;
+    background:#242b36;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,#00e5a0,#00b8ff);
+    border-radius:10px;
+}
+
+/* ===== REASON ===== */
+.reason-box{
+    background:#10141c;
+    border:1px solid #2b3240;
+    border-radius:12px;
+    padding:15px;
+    margin-top:15px;
+}
+
+.reason-title{
+    color:#8d97a8;
+    font-size:11px;
+    letter-spacing:1px;
+    margin-bottom:8px;
+}
+
+.reason-content{
+    color:#d1d5db;
+    line-height:1.7;
+}
+
+/* ===== ERROR ===== */
+.error-box{
+    background:rgba(239,68,68,.08);
+    border:1px solid rgba(239,68,68,.2);
+    border-radius:12px;
+    padding:15px;
+}
+
+.error-title{
+    color:#ef4444;
+    font-size:12px;
+    margin-bottom:8px;
+    font-weight:600;
+}
+
+/* ===== KEYWORDS ===== */
+.keyword-container{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.keyword-pill{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(0,229,160,.08);
+    border:1px solid rgba(0,229,160,.18);
+    border-radius:30px;
+    padding:8px 12px;
+}
+
+.keyword-text{
+    color:#00e5a0;
+    font-size:13px;
+    font-weight:500;
+}
+
+.keyword-count{
+    min-width:22px;
+    text-align:center;
+    background:rgba(0,229,160,.18);
+    color:#00e5a0;
+    border-radius:12px;
+    padding:2px 8px;
+    font-size:11px;
+    font-weight:600;
+}
+
+/* ===== TRANSCRIPT ===== */
+.transcript-box{
+    background:#10141c;
+    border:1px solid #2b3240;
+    border-radius:12px;
+    padding:18px;
+    max-height:500px;
+    overflow-y:auto;
+}
+
+.transcript-box::-webkit-scrollbar{
+    width:6px;
+}
+
+.transcript-box::-webkit-scrollbar-thumb{
+    background:#3b4556;
+    border-radius:10px;
+}
+
+.transcript-text{
+    color:#d1d5db;
+    line-height:1.9;
+    white-space:pre-wrap;
+    font-size:14px;
+}
+
+@media(max-width:991px){
+
+    .record-grid{
+        grid-template-columns:1fr;
+    }
+
+    .record-card{
+        padding:18px;
+    }
+
+    .record-value{
+        max-width:100%;
+        text-align:left;
+    }
+
+    .info-row{
+        flex-direction:column;
+        gap:6px;
+    }
+}
+
+
+/* ==========================
+   AI CLASSIFICATION
+========================== */
+
+.classification-badge-wrap{
+    text-align:center;
+    padding:10px 0 25px;
+}
+
+.classification-badge{
+    display:inline-block;
+    padding:12px 24px;
+    border-radius:30px;
+    font-size:15px;
+    font-weight:600;
+    color:#fff;
+    background:linear-gradient(135deg,#00c6ff,#0072ff);
+    box-shadow:0 0 15px rgba(0,114,255,.35);
+}
+
+/* Confidence */
+
+.confidence-section{
+    margin-bottom:20px;
+}
+
+.confidence-header{
+    display:flex;
+    justify-content:space-between;
+    color:#ffffff;
+    font-size:14px;
+    margin-bottom:10px;
+    font-weight:500;
+}
+
+.confidence-bar{
+    height:10px;
+    background:#2b3448;
+    border-radius:30px;
+    overflow:hidden;
+}
+
+.confidence-fill{
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        #00e676,
+        #00c853
+    );
+    border-radius:30px;
+}
+
+/* Reason */
+
+.reason-box{
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:12px;
+    padding:16px;
+}
+
+.reason-heading{
+    color:#60a5fa;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:10px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.reason-text{
+    color:#e5e7eb;
+    font-size:14px;
+    line-height:1.8;
+    text-align:left;
+}
+
+/* Error */
+
+.error-box{
+    background:rgba(239,68,68,.12);
+    border:1px solid rgba(239,68,68,.35);
+    border-radius:12px;
+    padding:18px;
+}
+
+.error-heading{
+    color:#ff6b6b;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.error-message{
+    color:#f1f5f9;
+    line-height:1.7;
+}
+
+/* Processing */
+
+.processing-box{
+    text-align:center;
+    color:#f8fafc;
+    padding:30px;
+    font-size:15px;
+    font-weight:500;
+}
+</style>
+
+<div class="record-page">
+
+<div class="action-bar">
+  <a href="{% url 'records_list' %}" class="btn btn-secondary btn-sm">← Back</a>
+  {% if record.status == 'completed' or record.status == 'failed' %}
+  <form method="post" action="{% url 'reprocess_record' record.pk %}" style="display:inline">
+    {% csrf_token %}
+    <button class="btn btn-secondary btn-sm">⟳ Reprocess</button>
+  </form>
+  {% endif %}
+  <form method="post" action="{% url 'delete_record' record.pk %}"
+        onsubmit="return confirm('Delete this record?');" style="display:inline">
+    {% csrf_token %}
+    <button class="btn btn-danger btn-sm">✕ Delete</button>
+  </form>
+</div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    {% if message.tags == "success" %}
+      <p style="color: green;">{{ message }}</p>
+    {% elif message.tags == "error" %}
+      <p style="color: red;">{{ message }}</p>
+    {% else %}
+      <p>{{ message }}</p>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+<div class="record-grid">
+
+
+  <!-- Left Column -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- Meta -->
+    <div class="record-card">
+      <div class="record-card-title">Record Info</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="flex justify-between">
+          <span class="record-label">Status</span>
+          <span class="badge badge-status-{{ record.status }}">{{ record.get_status_display }}</span>
+        </div>
+        {% if record.caller_name %}
+        <div class="flex justify-between">
+          <span class="record-label">Caller</span>
+          <span class="record-value" >{{ record.caller_name }}</span>
+        </div>
+        {% endif %}
+        {% if record.phone_number %}
+        <div class="flex justify-between">
+          <span class="record-label">Phone</span>
+          <span class="record-value">{{ record.phone_number }}</span>
+        </div>
+        {% endif %}
+        <div class="flex justify-between">
+          <span class="record-label">File</span>
+          <span class="record-value truncate" title="{{ record.file_name }}">{{ record.file_name }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="record-label">Size</span>
+          <span class="record-value">{{ record.file_size_display }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="record-label">Uploaded</span>
+          <span class="record-value">{{ record.uploaded_at|date:"d M Y, H:i" }}</span>
+        </div>
+        {% if record.processed_at %}
+        <div class="flex justify-between">
+          <span class="record-label">Processed</span>
+          <span class="record-value">{{ record.processed_at|date:"d M Y, H:i" }}</span>
+        </div>
+        {% endif %}
+        {% if record.audio_file %}
+        <div style="border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+          <div class="record-label" style="margin-bottom:8px;">Playback</div>
+          <audio controls style="width:100%; filter:invert(0.8) hue-rotate(100deg);">
+            <source src="{{ record.audio_file.url }}">
+          </audio>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Classification -->
+    <div class="record-card">
+        <div class="record-card-title">
+            AI Classification
+        </div>
+
+        {% if record.status == 'completed' %}
+
+        <!-- Classification Badge -->
+        <div class="classification-badge-wrap">
+            <span class="classification-badge">
+                {{ record.career_bucket.name }}
+            </span>
+        </div>
+
+        <!-- Confidence -->
+        {% if record.confidence_score %}
+        <div class="confidence-section">
+
+            <div class="confidence-header">
+                <span>Confidence Score</span>
+                <span>{% widthratio record.confidence_score 1 100 %}%</span>
+            </div>
+
+            <div class="confidence-bar">
+                <div class="confidence-fill"
+                    style="width:{% widthratio record.confidence_score 1 100 %}%;">
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+
+        <!-- Reason -->
+        {% if record.classification_reason %}
+        <div class="reason-box">
+
+            <div class="reason-heading">
+                Classification Reason
+            </div>
+
+            <div class="reason-text">
+                {{ record.classification_reason }}
+            </div>
+
+        </div>
+        {% endif %}
+
+        {% elif record.status == 'failed' %}
+
+        <div class="error-box">
+
+            <div class="error-heading">
+                Processing Error
+            </div>
+
+            <div class="error-message">
+                {{ record.error_message }}
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="processing-box">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Processing in progress...
+        </div>
+
+        {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Right Column -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <div class="record-card">
+      <div class="record-card-title">Detected Keywords ({{ record.keyword_count }})</div>
+      {% if record.detected_keywords %}
+      <div class="keyword-container">
+        {% for item in record.detected_keywords %}
+            <div class="keyword-pill">
+                <span class="keyword-text"># {{ item.keyword }}</span>
+                <span class="keyword-count">{{ item.count }}</span>
+            </div>
+        {% endfor %}
+        </div>
+      {% else %}
+      <div style="color:#bfc7d5; padding:12px 0; font-size:14px;">
+        No keywords detected in this conversation.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Transcript -->
+    <div class="record-card">
+      <div class="record-card-title">AI Transcript (Groq Whisper)</div>
+      {% if record.transcript %}
+      <div class="transcript-box">
+          <div class="transcript-text">
+              {{ record.transcript }}
+          </div>
+      </div>
+      {% else %}
+      <div style="padding:30px; text-align:center; color:#bfc7d5; font-size:15px;">
+        No transcript available yet.
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- ✅ AUTO REFRESH (NO UI CHANGE) -->
+<script>
+function refreshRecord() {
+    fetch(window.location.href)
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const newContent = doc.querySelector('.record-grid');
+        const currentContent = document.querySelector('.record-grid');
+
+        if (newContent && currentContent) {
+            currentContent.innerHTML = newContent.innerHTML;
+        }
+    });
+}
+
+{% if record.status == 'processing' or record.status == 'pending' %}
+setInterval(refreshRecord, 4000);
+{% endif %}
+</script>
+
+{% endblock %}

@@ -1,0 +1,392 @@
+{% extends "graphic_designer/graphic_designer_sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+
+
+    .poster-hero{
+        background: linear-gradient(135deg,#0f172a,#1e293b);
+        border: none;
+        padding: 70px 20px;
+        border-radius: 22px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 35px;
+        margin-top: 30px;
+    }
+
+
+
+    .hero-content{
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon{
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto auto 25px;
+        border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .hero-icon i{
+        font-size: 38px;
+        color: #fff;
+    }
+
+    .poster-hero h1{
+        color: #fff;
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
+
+    .poster-hero p{
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: auto;
+        line-height: 1.8;
+    }
+
+    /* =========================
+        BACK LINK
+    ========================== */
+
+    .back-link{
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: #4f46e5;
+        font-weight: 600;
+        margin-bottom: 25px;
+        transition: 0.3s;
+    }
+
+    .back-link:hover{
+        color: #7c3aed;
+        transform: translateX(-3px);
+    }
+
+    /* =========================
+        MAIN CARD
+    ========================== */
+
+    .generator-card{
+        background: #fff;
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+        border: 1px solid #eef2ff;
+    }
+
+    .card-title{
+        font-size: 2rem;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .card-subtitle{
+        color: #6b7280;
+        margin-bottom: 35px;
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+
+    /* =========================
+        FORM
+    ========================== */
+
+    .form-group{
+        margin-bottom: 25px;
+    }
+
+    .form-group label{
+        display: block;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 12px;
+    }
+
+    .form-group textarea{
+        width: 100%;
+        border: 2px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 18px 20px;
+        min-height: 180px;
+        resize: none;
+        font-size: 15px;
+        transition: 0.3s ease;
+        background: #f9fafb;
+        color: #111827;
+        line-height: 1.7;
+    }
+
+    .form-group textarea:focus{
+        outline: none;
+        border-color: #6366f1;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+    }
+
+    .form-group textarea::placeholder{
+        color: #9ca3af;
+    }
+
+    /* =========================
+        BUTTON
+    ========================== */
+
+    .generate-btn{
+        border: none;
+        background: linear-gradient(135deg,#4f46e5,#7c3aed);
+        color: #fff;
+        padding: 15px 35px;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        transition: 0.3s ease;
+        box-shadow: 0 10px 25px rgba(79,70,229,0.25);
+    }
+
+    .generate-btn:hover{
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(79,70,229,0.35);
+        color: #fff;
+    }
+
+    .generate-btn i{
+        margin-right: 8px;
+    }
+
+    /* =========================
+        RESULT SECTION
+    ========================== */
+
+    .result-section{
+        margin-top: 40px;
+        background: linear-gradient(145deg,#111827,#1f2937);
+        border-radius: 22px;
+        padding: 30px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+
+
+    .result-section h3{
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .result-content{
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 22px;
+        border-radius: 16px;
+        line-height: 1.9;
+        font-size: 15px;
+        color: #e5e7eb;
+        white-space: pre-line;
+        position: relative;
+        z-index: 2;
+    }
+
+
+
+
+
+    @media(max-width:991px){
+
+        .poster-hero h1{
+            font-size: 2.5rem;
+        }
+
+        .generator-card{
+            padding: 30px;
+        }
+    }
+
+    @media(max-width:768px){
+
+        .poster-hero{
+            padding: 55px 15px;
+            border-radius: 0 0 25px 25px;
+        }
+
+        .hero-icon{
+            width: 75px;
+            height: 75px;
+        }
+
+        .hero-icon i{
+            font-size: 30px;
+        }
+
+        .poster-hero h1{
+            font-size: 2rem;
+        }
+
+        .poster-hero p{
+            font-size: 0.95rem;
+        }
+
+        .generator-card{
+            padding: 22px 18px;
+            border-radius: 18px;
+        }
+
+        .card-title{
+            font-size: 1.6rem;
+        }
+
+        .form-group textarea{
+            min-height: 150px;
+            padding: 15px;
+        }
+
+        .generate-btn{
+            width: 100%;
+            padding: 14px;
+        }
+
+        .result-section{
+            padding: 22px 18px;
+        }
+    }
+
+    @media(max-width:480px){
+
+        .poster-hero h1{
+            font-size: 1.7rem;
+        }
+
+        .poster-hero p{
+            font-size: 0.88rem;
+        }
+
+        .card-title{
+            font-size: 1.4rem;
+        }
+
+        .result-section h3{
+            font-size: 1.2rem;
+        }
+
+        .result-content{
+            font-size: 14px;
+        }
+    }
+
+</style>
+
+<!-- HERO SECTION -->
+<div class="poster-hero">
+    <div class="container">
+        <div class="hero-content text-center">
+
+            <div class="hero-icon">
+                <i class="fas fa-palette"></i>
+            </div>
+
+            <h1>
+                Poster Generator
+            </h1>
+
+            <p>
+                Create stunning poster concepts with AI-powered design recommendations
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- BACK -->
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'poster' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <div class="generator-card">
+
+                <h2 class="card-title text-center">
+                    AI Poster Generator
+                </h2>
+
+                <p class="card-subtitle text-center">
+                    Transform your ideas into stunning poster concepts with AI
+                </p>
+
+                <form method="POST" action="">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="request_text">
+                            Describe your poster idea
+                        </label>
+
+                        <textarea
+                            name="request_text"
+                            id="request_text"
+                            rows="5"
+                            placeholder="Example: I need a gym opening poster with motivational quotes and modern design"
+                        >{{ user_input }}</textarea>
+                    </div>
+
+                    <button type="submit" class="generate-btn">
+                        <i class="fas fa-magic"></i>
+                        Generate Poster Idea
+                    </button>
+                </form>
+
+                {% if result %}
+                <div class="result-section">
+
+                    <h3 class="text-center">
+                        <i class="fas fa-lightbulb text-warning"></i>
+                        Generated Poster Concept
+                    </h3>
+
+                    <div class="result-content">
+                        {{ result }}
+                    </div>
+
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "telecaller/telecallersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'telecaller/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'telecaller/css/dashboard.css' %}">
+
+<style>
+  body {
+      overflow-x: hidden;
+      
+  background-color: #12151e;
+}
+</style>
+
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+    <!-- All Leads -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'telecaller_all_leads' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">All Leads</h5>
+            <i class="fas fa-list text-info"></i>
+          </div>
+          <pl>All allocatedleads of clients.</pl>
+        </a>
+      </div>
+    </div>
+
+    <!-- Follow Up Leads -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'telecaller_followups_page' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Follow Up Leads</h5>
+            <i class="fas fa-retweet text-warning"></i>
+          </div>
+          <p>All following leads of clients.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Waste Leads -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'telecaller_waste_leads' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Waste Leads</h5>
+            <i class="fas fa-list text-danger"></i>
+          </div>
+          <p>All wasted leads of clients.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Closed Leads -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'closed_leads_page' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Closed Leads</h5>
+            <i class="fas fa-list text-success"></i>
+          </div>
+          <p>All closed leads of clients.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Leads Report -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'telecaller_leads_report' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Leads Report</h5>
+            <i class="fas fa-chart-line text-secondary"></i>
+          </div>
+          <p>Report of leads bsed on clients.</p>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'meeting_details' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Leads Meetings Details</h5>
+            <i class="fas fa-calendar-check text-success fs-4"></i>
+          </div>
+          <p class="mb-0 text-light">
+            View and manage all  meetings details.
+          </p>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="container mt-5 comn_table_bg">
+  <div class="filter_main">
+    <h5 class="text-white pg_head">New Leads ({{ lead_count }})</h5>
+  </div>
+  
+  <div class="row align-items-end justify-content-end g-2">
+  <div class="col-md-2">
+    <!--// <label class="text-white mb-1">Select Status</label> -->
+    <select id="statusFilter" class="form-select">
+      <option value="" disabled selected>- Select Status -</option>
+      <option value="Allocated">Allocated</option>
+      <option value="Opened">Opened</option>
+      <option value="Closed">Closed</option>
+    </select>
+  </div>
+  
+  <div class="col-md-2">
+    <!--// <label class="text-white mb-1">From Date</label> -->
+    <input type="date" id="fromDate" class="form-control">
+  </div>
+  
+  <div class="col-md-2">
+    <!--// <label class="text-white mb-1">To Date</label> -->
+    <input type="date" id="toDate" class="form-control">
+  </div>
+  
+  <div class="col-md-2 d-flex align-items-end">
+    <button class="btn btn-outline-light w-100" id="clearFilters">Clear</button>
+  </div>
+  
+  
+  </div>
+
+  <div class="justify-content-between my-3">
+    <span class="text-white me-2 mt-1">Selected  <span id="selectedCount">0</span>
+    <button class="btn btn-outline-success" id="acceptSelected">Accept Leads</button>
+  </div>
+
+  <div class="d-flex justify-content-between mb-3 row  gap-4">
+    <div class="col-md-4 col-sm-12">
+      <label class="text-white me-2">Show</label>
+      <select id="rowCount" class="form-select d-inline-block w-auto bg-dark text-white">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+      <label class="text-white ms-2">rows</label>
+    </div>
+
+    <div class="input-group w-auto mb-3">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  {% if new_leads %}
+  <div class="table-responsive">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <table class="table table-dark table-hover" id="targetTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th><input type="checkbox" id="selectAll" /></th>
+          <th>Add Date</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th class="d-none">RawStatus</th>
+          <th class="d-none">AllocatedDate</th>
+        </tr>
+      </thead>
+      <tbody id="leadTableBody">
+        {% for lead in new_leads %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><input type="checkbox" class="leadCheckbox" data-id="{{ lead.id }}"></td>
+          <td class="table_en_sm">{{ lead.assign_date }}</td>
+          <td class="table_en_sm">{{ lead.lead.name }}</td>
+          <td class="table_en_sm">{{ lead.lead.email }}</td>
+          <td class="table_en_sm">{{ lead.lead.contact }}</td>
+          <td  class="table_en_sm">
+            {% if lead.status == 0 %}New Lead{% endif %}
+            {% if lead.status == 1 %}Accepted{% endif %}
+          </td>
+          <td class="d-none">{{ lead.databank.lead_status }}</td>
+          <td class="d-none">{{ lead.databank.allocated_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="d-flex justify-content-end align-items-center mt-3">
+    <nav>
+      <ul class="pagination"></ul>
+    </nav>
+  </div>
+  {% else %}
+  <div class="text-center text-white"><h4>No (new) Leads Assigned</h4></div>
+  {% endif %}
+</div>
+
+<script src="{% static 'telecaller/js/hr_dashboard.js' %}"></script>
+
+{% endblock %}

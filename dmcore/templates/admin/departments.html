@@ -1,0 +1,138 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+<div class="row mt-4" style="background-color: #333333; border-radius: 15px;">
+  <div class="col-12">
+ 
+    <div class="d-flex justify-content-between align-items-center px-3 py-3">
+      <h4 class="text-white text-center w-100 m-0">Department</h4>
+      <button class="btn btn-outline-light btn-sm position-absolute end-0 me-4" data-bs-toggle="modal" data-bs-target="#addDeptModal">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+
+
+    <div class="table-responsive p-3">
+      <table class="table table-striped table-bordered table-dark text-white">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Registered Date</th>
+            <th>Department Name</th>
+            
+            <th>Status</th>
+            <th>Actions</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          {% for dept in departments %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td style="white-space: nowrap;">{{ dept.created_at }}</td>
+
+            <td>{{ dept.name }}</td>
+            
+            <td>
+              {% if dept.active_status %}
+                <i class="fas fa-check-circle text-success"></i>
+              {% else %}
+                <i class="fas fa-times-circle text-danger"></i>
+              {% endif %}
+            </td>
+            
+            <td style="white-space: nowrap;">
+              <div class="d-flex flex-wrap gap-2">
+         
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editDepartmentModal{{ dept.id }}">
+                  <i class="fas fa-edit"></i>
+                </button>
+            
+     
+                <a href="{% url 'delete_department' dept.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                  <i class="fas fa-trash-alt"></i>
+                </a>
+              </div>
+            </td>
+            
+          </tr>
+          <div class="modal fade" id="editDepartmentModal{{ dept.id }}" tabindex="-1" aria-labelledby="editDepartmentLabel{{ dept.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-0">
+                  <h5 class="modal-title">Edit Department</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'edit_department' dept.id %}">
+                  {% csrf_token %}
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label">Department Name</label>
+                      <input type="text" class="form-control" name="dept_name" value="{{ dept.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Description</label>
+                      <textarea class="form-control" name="dept_content" rows="4" required>{{ dept.description }}</textarea>
+                    </div>
+                  </div>
+                  <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center">No departments available.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="addDeptModal" tabindex="-1" aria-labelledby="addDeptModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content text-white bg-dark">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="addDeptModalLabel">Add New Department</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="dept_name" class="form-label">Department Name</label>
+            <input type="text" class="form-control" id="dept_name" name="dept_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="dept_content" class="form-label">Department Content</label>
+            <textarea class="form-control" id="dept_content" name="dept_content" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-success">Save Department</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+ 
+  document.addEventListener('DOMContentLoaded', function () {
+    const addDeptModal = document.getElementById('addDeptModal');
+
+    addDeptModal.addEventListener('hidden.bs.modal', function () {
+      const form = addDeptModal.querySelector('form');
+      if (form) {
+        form.reset();
+      }
+    });
+  });
+</script>
+
+{% endblock content %}

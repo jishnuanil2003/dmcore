@@ -1,0 +1,840 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+      <meta name="csrf-token" content="{{ csrf_token }}">
+       <!-- Include Bootstrap Icons (only once in your base template) -->
+       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+        <!-- DataTables -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+        <!-- Buttons extension -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+        <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+        <!-- File export support -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+        <link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+        <link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+
+        color: white;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin-top: 50px;
+        background: #2e2e2e;
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+
+    h2 {
+        color: #4A90E2;
+        font-size: 22px;
+        margin-bottom: 30px;
+    }
+    
+
+
+
+
+
+    .btn-form {
+        background-color: black;
+        color: white;
+    }
+
+
+
+    .no-leads-img {
+        width: 220px;
+        margin-top: 40px;
+        
+    }
+
+
+
+.nowrap-date {
+white-space: nowrap;
+}
+
+
+    
+
+     .vertical-nav {
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        z-index: 10;
+
+        top: 56px;
+        left: 0;
+        background-color: #212529;
+        padding-top: 20px;
+        transition: 0.3s;
+    }
+    
+    .vertical-nav .nav-link {
+        padding: 10px 15px;
+        display: block;
+        font-size: 16px;
+    }
+    
+    .vertical-nav .nav-link:hover {
+        background-color: #464849;
+        color: #f8f9fa;
+    }
+
+
+@media (max-width: 768px) {
+    .container {
+            padding: 25px;
+        }
+
+        
+
+        .no-leads-img {
+            width: 160px;
+        }
+
+        h2 {
+            font-size: 18px;
+        }
+
+        
+    .table-responsive {
+        overflow-x: auto;
+        position: relative;
+    }
+
+    .table th, .table td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .form-select {
+        width: 100%;
+        max-width: none;
+    }
+
+    .btn-group .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+ 
+}
+
+@media (max-width: 480px) {
+.container {
+    padding: 20px; 
+}
+
+}
+
+
+@media (max-width: 360px) {
+.container {
+    padding: 15px; 
+}
+
+.table th, .table td {
+        font-size: 10px;
+        padding: 4px;
+    }
+
+    .btn-group .btn {
+        font-size: 8px;
+        padding: 2px 4px;
+    }
+
+    .no-leads-img {
+        width: 120px;
+    }
+}
+
+
+
+@media (max-width: 576px) {
+    #leadTable th,
+    #leadTable td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .btn-group .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    #searchInput {
+        width: 100%;
+    }
+
+    .form-select {
+        width: 100%;
+    }
+}
+
+#moreDetails div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.details-table div {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  font-size: 15px;
+}
+
+.details-table div:last-child {
+  border-bottom: none;
+}
+
+.details-table span:first-child {
+  color: #e0e0e0;
+  min-width: 120px;
+}
+
+.details-table span:last-child {
+  text-align: right;
+  color: #ffffff;
+  flex-grow: 1;
+}
+
+@media (max-width: 576px) {
+  .details-table div {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .details-table span:last-child {
+    text-align: left;
+  }
+
+  h2 {
+        font-size: 16px;
+    }
+
+  
+
+    .table th, .table td {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .btn-group .btn {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    .no-leads-img {
+        width: 140px;
+    }
+}
+
+
+
+
+.modal-content {
+  border-radius: 10px;
+}
+
+
+  #activityTrackerModal .modal-dialog {
+    max-width: 950px;
+  }
+
+  #activityTrackerModal .modal-content {
+    background-color: #1e1e2f;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  #activityTrackerContent h6 {
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+  }
+
+  #activityTrackerContent p {
+    margin-bottom: 8px;
+    font-size: 14px;
+    word-break: break-word;
+  }
+
+  #activityTrackerContent .row > div {
+    padding: 10px;
+  }
+
+ 
+  .modal-footer {
+    border-top: 1px solid #444;
+    padding-top: 10px;
+    justify-content: flex-end;
+  }
+
+
+  @media (max-width: 768px) {
+    #activityTrackerModal .modal-dialog {
+      max-width: 95%;
+      margin: 1rem;
+    }
+  }
+
+  #sortIcon{
+    cursor: pointer;
+}
+
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+/* Firefox support */
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+.status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 999px;
+    border: 2px solid;
+    text-align: center;
+    min-width: 100px;
+}
+
+.allocated-pill {
+    color: #0f92bdea;
+    border-color: #0f92bdea;
+    background-color: transparent;
+}
+
+.not-attended-pill {
+    color: #7025bb;
+    border-color: #7025bb;
+    background-color: transparent;
+}
+.opened-pill {
+    color: green;
+    border-color: green;
+    background-color: transparent;
+}
+.closed-pill {
+    color: red;
+    border-color: red;
+    background-color: transparent;
+}
+
+
+@media print {
+    body {
+        margin: 10mm;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        color: #000;
+        background: none !important;
+    }
+
+    .no-export {
+        display: none !important;
+    }
+
+    .dropdown,
+    .btn,
+    .form-control,
+    .form-select,
+    .lead-action,
+    #searchInput {
+        display: none !important;
+    }
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse;
+        border: 1px solid #000;
+    }
+
+    table th, table td {
+        border: 1px solid #000;
+        padding: 6px 10px;
+        text-align: left;
+    }
+
+    thead {
+        background-color: #f2f2f2 !important;
+    }
+
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+    }
+}
+#searchInput::placeholder {
+  color: white;
+  opacity: 1;
+}
+
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Today Followups</p>
+    </div>
+  </div>
+
+
+<div class="container-fluid mt-3 comn_table_bg">
+
+
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+        <h2 class="mb-0">Today Leads We have ({{leads.count}})</h2>
+           <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="leadMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="leadMenuButton">
+                <li>
+                <button class="dropdown-item d-flex align-items-center gap-2" type="button" onclick="printLeadTable()">
+                    <i class="bi bi-printer" style="color:#007bff;"></i> Print
+                </button>
+                </li>
+                <li>
+                <button class="dropdown-item d-flex align-items-center gap-2" type="button" onclick="exportToPDF()">
+                    <i class="bi bi-file-earmark-pdf" style="color:#e74c3c;"></i> PDF
+                </button>
+                </li>
+                <li>
+                <button class="dropdown-item d-flex align-items-center gap-2" type="button" onclick="exportToExcel()">
+                    <i class="bi bi-file-earmark-excel" style="color:#2ecc71;"></i> Excel
+                </button>
+                </li>
+            </ul>
+            </div>
+
+
+
+
+        </div>
+    </div>
+    <hr>
+
+    <form method="get" id="filterForm">
+    <div class="lead-action">
+        <div class="row g-2 align-items-end">
+
+        <div class="col-auto">
+            <a href="?reset=1" class="btn btn-sm btn-outline-light w-100">All Data</a>
+        </div>
+
+        <div class="col-12 col-md-auto">
+            <label for="hrDropdown" class="form-label mb-1">Select HR/Telecaller</label>
+            <select id="hrSelect" name="hr" class="form-select">
+                <option value="" disabled selected>- Select HR/Telecaller -</option>
+                <option value="">All</option>
+                {% for hr in hrs %}
+                <option value="{{ hr.id }}" {% if request.GET.executive == hr.id|stringformat:"s" %}selected{% endif %}>
+                    {{ hr.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+        <div class="col-auto">
+            <button type="submit" class="btn  btn-outline-primary" id="filterBtn">
+            <i class="bi bi-search"></i>
+            </button>
+        </div>
+
+        </div>
+    </div>
+    </form>
+
+    <br>
+
+    <div class="row mb-3">
+        <div class="col-12 col-md-auto ms-auto">
+        <input type="text" placeholder="Search..." class="form-control bg-dark text-white w-100 "  id="searchInput">
+        </div>
+    </div>
+
+<div class="table-responsive mt-3">
+  {% if leads %}
+    <table class="table table-bordered table-sm mb-0 table-dark table-striped table-hover" id="leadTable">
+      <thead class="custom-thead">
+        <tr>
+          <th>No</th>
+          <th class="no-export">Action</th>
+          <th>Status</th>
+          <th>Added Date</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone Number</th>
+          <th>Source</th>
+          <th>Client Name</th>
+          <th>Lead Category</th>
+        </tr>
+      </thead>
+
+      <tbody class="custom-tbody">
+        {% for item in leads %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+           <td class="no-export">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'dm_lead_details' item.databank.id %}" onclick="handleFollowUp('{{ item.id }}')">
+                                    <i class="bi bi-telephone-fill text-primary"></i> FollowUp
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'dm_lead_details' item.databank.id %}" onclick="viewDetails('{{ item.id }}')">
+                                    <i class="bi bi-file-earmark-text-fill text-success"></i> Details
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2 text-danger"
+                                        onclick="deleteLead(event, '{{ item.lead.id }}')">
+                                    <i class="bi bi-trash-fill"></i> Delete
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+          </td>
+          <td class="nowrap-date">{{ item.databank.lead_status }}
+          </td>
+
+          <td class="nowrap-date">{{ item.assign_date|date:"Y-m-d" }}</td>
+          <td>{{ item.lead.name|default:"-" }}</td>
+          <td>{{ item.lead.email|default:"-" }}</td>
+          <td><i class="bi bi-telephone"></i> {{ item.lead.contact|default:"-" }}</td>
+          <td>{{ item.lead.source|default:"-" }}</td>
+          <td class="nowrap-date">{{ item.lead.lead_category.client_task.client.client_name|default:"-" }}</td>
+          <td class="nowrap-date">{{ item.lead.lead_category.collection_for|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="text-center mt-5">
+      <img src="{% static 'img/empty.png' %}" alt="No Leads Found" class="img-fluid" style="max-width: 300px;">
+      <p class="text-muted mt-3 fs-5">No leads found for today.</p>
+    </div>
+  {% endif %}
+</div>
+
+
+
+
+<script>
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+  const button = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+  const menu = dropdown.querySelector('.dropdown-menu');
+
+  button.addEventListener('show.bs.dropdown', () => {
+ 
+    document.body.appendChild(menu);
+
+   
+    const rect = button.getBoundingClientRect();
+    menu.style.position = 'absolute';
+    menu.style.top = `${rect.bottom + window.scrollY}px`;
+    menu.style.left = `${rect.left + window.scrollX}px`;
+    menu.style.zIndex = '1050';  
+    menu.classList.add('show');  
+  });
+
+  button.addEventListener('hide.bs.dropdown', () => {
+
+    menu.classList.remove('show');
+    dropdown.appendChild(menu);
+    menu.style.position = '';
+    menu.style.top = '';
+    menu.style.left = '';
+    menu.style.zIndex = '';
+  });
+});
+
+</script>
+
+<script>
+
+
+function printLeadTable() {
+
+    const table = document.querySelector("#leadTable").cloneNode(true);
+
+    
+    for (let row of table.rows) {
+        row.deleteCell(1);
+    }
+
+    const printWindow = window.open('', '', 'height=700,width=1000');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Lead Allocation Report</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                    margin: 20px;
+                    color: #000;
+                }
+                h2 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    border: 1px solid #333;
+                }
+                th, td {
+                    border: 1px solid #333;
+                    padding: 6px 10px;
+                    text-align: left;
+                }
+                thead {
+                    background-color: #f2f2f2;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>Lead Allocation Report (Total: ${table.rows.length - 1})</h2>
+            ${table.outerHTML}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+}
+</script>
+
+
+<script>
+let leadTableInstance;
+let excelButton, pdfButton;
+
+
+$(document).ready(function () {
+    const validDataRows = $('#leadTable tbody tr').filter(function () {
+       
+        return $(this).find('td').length === $('#leadTable thead th').length;
+    });
+
+    if (validDataRows.length > 0) {
+        leadTableInstance = $('#leadTable').DataTable({
+            paging: false,
+            ordering: false,
+            info: false,
+            searching: false
+        });
+
+       
+        excelButton = new $.fn.dataTable.Buttons(leadTableInstance, {
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':not(.no-export)'
+                    },
+                    title: 'Lead Data'
+                }
+            ]
+        }).container();
+
+        pdfButton = new $.fn.dataTable.Buttons(leadTableInstance, {
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    exportOptions: {
+                        columns: ':not(.no-export)'
+                    },
+                    title: 'Lead Data'
+                }
+            ]
+        }).container();
+    }
+});
+
+
+
+
+function exportToExcel() {
+    $(excelButton).find('button').click();
+}
+
+
+function exportToPDF() {
+    $(pdfButton).find('button').click();
+}
+
+
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const table = document.getElementById("leadTable");
+        const tbody = table.querySelector("tbody");
+    
+
+        searchInput.addEventListener("keyup", function () {
+            const filter = searchInput.value.toLowerCase();
+            const rows = Array.from(tbody.querySelectorAll("tr")).filter(row => !row.querySelector("td[colspan]"));
+    
+            let found = false;
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const match = text.includes(filter);
+                row.style.display = match ? "" : "none";
+                if (match) found = true;
+            });
+    
+            
+            const noResultRow = tbody.querySelector(".no-result");
+            if (!found) {
+                if (!noResultRow) {
+                    const row = document.createElement("tr");
+                    row.classList.add("no-result");
+                    row.innerHTML = `<td colspan="11" class="text-center text-danger">No results found</td>`;
+                    tbody.appendChild(row);
+                }
+            } else if (noResultRow) {
+                noResultRow.remove();
+            }
+        });
+    
+      
+        let currentSortColumn = null;
+        let currentSortOrder = 'asc';
+    
+        const headers = table.querySelectorAll("thead th");
+    
+        headers.forEach((header, index) => {
+            const icon = header.querySelector(".sort-icon");
+            if (icon) {
+                icon.style.cursor = "pointer";
+                icon.addEventListener("click", () => {
+                    const rows = Array.from(tbody.querySelectorAll("tr")).filter(row => row.querySelectorAll("td").length >= headers.length);
+                    const order = (currentSortColumn === index && currentSortOrder === "asc") ? "desc" : "asc";
+                    currentSortColumn = index;
+                    currentSortOrder = order;
+    
+                    const sortedRows = rows.sort((a, b) => {
+                        const aText = a.querySelectorAll("td")[index]?.textContent.trim().toLowerCase() || '';
+                        const bText = b.querySelectorAll("td")[index]?.textContent.trim().toLowerCase() || '';
+    
+                        const aNum = parseFloat(aText);
+                        const bNum = parseFloat(bText);
+    
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return order === "asc" ? aNum - bNum : bNum - aNum;
+                        }
+                        return order === "asc" ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                    });
+    
+                    sortedRows.forEach(row => tbody.appendChild(row));
+                });
+            }
+        });
+    });
+    </script>
+    
+
+<script src="{% static 'datamanager/js/databank.js' %}"></script>
+
+
+
+
+
+<script>
+function deleteLead(event,leadId) {
+    if (confirm("Are you sure you want to delete this lead?")) {
+        fetch(`/dm-delete-lead/${leadId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Lead deleted successfully.");
+                location.reload();
+            } else {
+                alert("Failed to delete lead: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("An error occurred.");
+        });
+    }
+}
+</script>
+        
+{% endblock %}

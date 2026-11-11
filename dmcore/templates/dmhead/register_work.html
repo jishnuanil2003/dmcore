@@ -1,0 +1,372 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Registered Work{% endblock %}
+
+{% block content %}
+
+<!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 20px; right: 10px; z-index: 99;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- /Messages -->
+
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/register_work.css' %}">
+<script src="{% static 'dm_head/js/register_work.js' %}"></script>
+
+<div class="container mt-4 comn_table_bg">
+    <h5 class="text-white">Registered Work</h5>
+    <div class="table-responsive">
+        <table class="table table-dark table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Edit/Remove</th>
+                    <th>Client Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Progress</th>
+                    <th>Client Required Task List</th>
+                    <th>Work Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in work_data %}
+                <tr>
+                    <td class="table_en_sm">
+                      <div class="d-flex justify-content-center" style="gap: 10px;">
+                        <i class="fas fa-edit edit-work-icon text-primary" data-id="{{ item.work.id }}" title="Edit"></i>
+                        <i class="fas fa-trash delete-work-icon text-danger" data-id="{{ item.work.id }}" title="Delete"></i>
+                      </div>
+                    </td>
+                    <td class="table_en_lsm">{{ item.work.client.client_name }}</td>
+                    <td class="table_en_lsm">{{ item.work.work_create_date }}</td>
+                    <td class="table_en_lsm">{{ item.work.work_end_date }}</td>
+                    <td class="table_en_lsm">
+                        <div class="progress">
+                            <div class="progress-bar bg-success"
+                                 role="progressbar"
+                                 data-progress="{{ item.work.work_progress }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-valuenow="{{ item.work.work_progress }}">
+                                {{ item.work.work_progress }}%
+                            </div>
+                        </div>
+                    </td>
+                    <td class="table_en_lg">
+                        <span>Add More Task</span>
+                        <a href="#" class="btn btn-outline-success btn-sm" style="border-radius: 50%;" data-workid="{{ item.work.id }}" id="addTaskBtn">+</a>
+                    
+                        <ol style="padding-left: 1.2rem;">
+                            {# First loop → Lead Collection only #}
+                              {% for task in item.work.clienttask_register_set.all %}
+                              {% if task.task_name|lower == "lead collection" %}
+                              <li>
+                                  {{ task.task_name }}
+                                  <i class="fas fa-edit edit-task-icon text-primary" data-id="{{ task.id }}" title="Edit"></i>
+                                  <i class="fas fa-trash delete-task-icon text-danger" data-id="{{ task.id }}" title="Delete"></i>
+                                  <button class="btn btn-outline-success btn-sm ms-2 add-category-btn" data-taskid="{{ task.id }}">Add Category</button>
+                              
+                                  <ul style="list-style: none; padding-left: 1rem; margin-top: 10px;">
+                                      {% for cat in task.leadcategory_register_set.all %}
+                                      <li class="mb-2">
+                                          {{ cat.collection_for }}
+                                          <i class="fas fa-edit edit-category-icon text-primary ms-2" data-id="{{ cat.id }}" title="Edit"></i>
+                                          <i class="fas fa-trash delete-category-icon text-danger ms-1" data-id="{{ cat.id }}" title="Delete"></i>
+                                          <a href="{% url 'field_page' item.work.id %}" class="text-success text-decoration-none btn-sm ms-2" style="border-radius: 50%;" title="View all fields for this work">
+                                              Fields +
+                                          </a>
+                                          <span class="text-white ms-2" style="font-size: small;">(Target = {{ cat.target }})</span>
+                                      </li>
+                                      {% endfor %}
+                                  </ul>
+                              </li>
+                              {% endif %}
+                              {% endfor %}
+
+
+                            
+                            {# Second loop → All other tasks #}
+                            {% for task in item.work.clienttask_register_set.all %}
+                                {% if task.task_name|lower != "lead collection" %}
+                                <li>
+                                    {{ task.task_name }}
+                                    <i class="fas fa-edit edit-task-icon text-primary" data-id="{{ task.id }}" title="Edit"></i>
+                                    <i class="fas fa-trash delete-task-icon text-danger" data-id="{{ task.id }}" title="Delete"></i>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ol>
+                    </td>
+
+                    <td class="table_en_md">
+                        {% if item.work.work_allocate_status == 0 %}
+                            <span class="btn btn-outline-warning btn-sm">Waiting for Allocation</span>
+                        {% else %}
+                                <a href="{% url 'allocate_work_page' %}" class="btn btn-outline-success btn-sm">Allocation Done</a>
+                                
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- edit work -->
+ <div class="modal fade" id="editWorkModal" tabindex="-1" aria-labelledby="editWorkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editWorkModalLabel">Edit Work</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editWorkForm" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="work_id" id="edit_work_id">
+
+          <div class="mb-3">
+            <label for="edit_start_date" class="form-label">Start Date *</label>
+            <input type="date" class="form-control" id="edit_start_date" name="start_date" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_end_date" class="form-label">End Date *</label>
+            <input type="date" class="form-control" id="edit_end_date" name="end_date" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_work_description" class="form-label">Work Description</label>
+            <textarea class="form-control" id="edit_work_description" name="description" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_work_file" class="form-label">Upload File</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="file" class="form-control" id="edit_work_file" name="work_file">
+              <a href="#" id="edit_work_file_download" class="btn btn-outline-light btn-sm" title="Download existing file" download>
+                <i class="fas fa-download"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-outline-light">Clear Form</button>
+          <button type="submit" class="btn btn-outline-success">Edit</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- edit task -->
+ <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editTaskForm" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="task_id" id="edit_task_id">
+          <input type="hidden" name="is_common_task" id="edit_task_is_common">
+
+          <div class="mb-3">
+            <label class="form-label">Client Name</label>
+            <input type="text" class="form-control" id="edit_task_client" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Task Name</label>
+            <input type="text" class="form-control" id="edit_task_name" name="task_name">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="edit_task_description" name="task_description" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">File</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="file" class="form-control" id="edit_task_file" name="task_file">
+              <a href="#" id="edit_task_file_download" class="btn btn-outline-light btn-sm d-none" title="Download existing file" download>
+                <i class="fas fa-download"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-outline-light">Clear Form</button>
+          <button type="submit" class="btn btn-outline-success">Edit</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- add task -->
+ <div class="modal fade" id="addMoreTaskModal" tabindex="-1" aria-labelledby="addMoreTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Add More Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addMoreTaskForm" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="work_id" id="add_task_work_id">
+
+          <div class="mb-2">
+            <label class="form-label">Choose Task Type</label><br>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="task_type" value="client" id="taskTypeClient" checked>
+              <label class="form-check-label" for="taskTypeClient">Client Task Name</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="task_type" value="company" id="taskTypeCompany">
+              <label class="form-check-label" for="taskTypeCompany">Company Task Name</label>
+            </div>
+          </div>
+
+          <div class="mb-3" id="clientTaskInput">
+            <label class="form-label">Task Name *</label>
+            <input type="text" class="form-control" name="task_name_client" placeholder="Enter custom task name">
+          </div>
+
+          <div class="mb-3 d-none" id="companyTaskDropdown">
+            <label class="form-label">Select Task *</label>
+            <select class="form-select" name="task_name_company" id="taskDropdown">
+              <option selected disabled>---- Select Task ----</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="task_description" rows="4"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">File</label>
+            <input type="file" class="form-control" name="task_file">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-outline-light">Clear Form</button>
+          <button type="submit" class="btn btn-outline-success">Add Task</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- add category -->
+ <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Lead Category</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addCategoryForm" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="task_id" id="category_task_id">
+
+          <div class="mb-3">
+            <label class="form-label">Collection Head *</label>
+            <input type="text" class="form-control" name="collection_for" placeholder="e.g. Employees Interview" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Collection Description</label>
+            <textarea class="form-control" name="description" rows="4"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Lead Target</label>
+            <input type="number" class="form-control" name="target" placeholder="e.g. 100">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">File</label>
+            <input type="file" class="form-control" name="file">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-outline-light">Clear Form</button>
+          <button type="submit" class="btn btn-outline-success">Add Task</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- edit lead category -->
+ <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editCategoryModalLabel">Edit Lead Category</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="editCategoryForm" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="category_id" id="edit_category_id">
+
+          <div class="mb-3">
+            <label for="edit_category_head" class="form-label">Collection Head *</label>
+            <input type="text" class="form-control" name="collection_for" id="edit_category_head" placeholder="e.g. Employees Interview" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_category_description" class="form-label">Collection Description</label>
+            <textarea class="form-control" name="description" id="edit_category_description" rows="4"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_category_target" class="form-label">Lead Target</label>
+            <input type="number" class="form-control" name="target" id="edit_category_target" placeholder="e.g. 100">
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_category_file" class="form-label">File</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="file" class="form-control" name="file" id="edit_category_file">
+              <a href="#" id="edit_category_file_download" class="btn btn-outline-light btn-sm d-none" title="Download existing file" download>
+                <i class="fas fa-download"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-outline-light">Clear Form</button>
+          <button type="submit" class="btn btn-outline-success">Edit</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

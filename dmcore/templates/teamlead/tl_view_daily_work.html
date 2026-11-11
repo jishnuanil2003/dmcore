@@ -1,0 +1,81 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+{% block title %}View Daily Work{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'teamlead/css/common.css' %}">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-dark text-white px-3 py-2 rounded">
+    <li class="breadcrumb-item">
+      <a href="{% url 'individual_work_main' %}" class="text-decoration-none text-white-50">Individual Works</a>
+    </li>
+
+    {% if task.status == 3 %}
+      <li class="breadcrumb-item">
+        <a href="{% url 'tl_completed_works' %}" class="text-decoration-none text-white-50">Completed Works</a>
+      </li>
+    {% elif task.status == 2 %}
+      <li class="breadcrumb-item">
+        <a href="{% url 'tl_ongoing_works' %}" class="text-decoration-none text-white-50">Ongoing Works</a>
+      </li>
+    {% endif %}
+
+    <li class="breadcrumb-item active text-white" aria-current="page">
+      View Daily Work
+    </li>
+  </ol>
+</nav>
+
+
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-3">Daily Reports - {{ task.client_task.task_name }}</h5>
+
+  {% if reports %}
+  <div class="table-responsive">
+    <table class="table table-dark table-striped text-center align-middle">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Date</th>
+          <th>Title</th>
+          <th>Daily Work</th>
+          <th>File</th>
+          <th>Target Achieved</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reports %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_lsm">{{ r.collect_date|date:'d-m-Y' }}</td>
+          <td class="table_en_lsm">{{ r.title }}</td>
+          <td class="table_en_lg" style="text-align: justify;">{{ r.description }}</td>
+          <td class="table_en_lsm">
+            {% if r.file %}
+              <a class="btn btn-outline-info btn-sm" href="{{ r.file.url }}" download>Download</a>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="table_en_lsm" >{{ r.achieved_target }}</td>
+          <td class="table_en_lsm" >
+            {% if r.status == 0 %}
+              <span class="text-warning btn-sm">Pending</span>
+            {% elif r.status == 1 %}
+              <span class="text-success btn-sm">Verified</span>
+            {% else %}
+              <span class="text-danger btn-sm">Unknown</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="text-white">No daily work added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

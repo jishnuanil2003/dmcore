@@ -1,0 +1,157 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        
+        color: #fff;
+    }
+
+    .page-wrapper {
+        padding: 20px;
+    }
+
+    .poster-card {
+        max-width: 900px;
+        margin: auto;
+        background: #2b2b2b;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .poster-title {
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #ddd;
+    }
+
+    .form-control {
+        background: #1f1f1f;
+        border: 1px solid #444;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: none;
+        background: #1f1f1f;
+        color: #fff;
+    }
+
+    textarea.form-control {
+        resize: none;
+    }
+
+    .btn-submit {
+        background: #28a745;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+        background: #28a745;
+    }
+
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .poster-card {
+            padding: 20px;
+        }
+
+        .poster-title {
+            font-size: 18px;
+        }
+    }
+    ::placeholder {
+    color: #cccccc !important;
+    opacity: 1;
+}
+</style>
+
+<div class="page-wrapper">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="#" class="text-decoration-none text-white">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active text-white-50">Poster Upload</li>
+        </ol>
+    </nav>
+
+    <!-- Messages -->
+
+
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Card -->
+    <div class="poster-card">
+
+        <h4 class="poster-title">
+            <i class="bi bi-megaphone"></i> Add Poster
+        </h4>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- Title -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="Enter title" required>
+                </div>
+
+                <!-- Upload -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Poster Image</label>
+                    <input type="file" name="media" class="form-control" accept="image/*" required>
+                </div>
+
+                <!-- Content -->
+                <div class="col-12 mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea name="content" rows="4" class="form-control" placeholder="Write something..." required></textarea>
+                </div>
+
+            </div>
+
+            <!-- Button -->
+            <div class="text-end">
+                <button type="submit" class="btn btn-submit text-white">
+                    <i class="bi bi-check-circle"></i> Submit
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

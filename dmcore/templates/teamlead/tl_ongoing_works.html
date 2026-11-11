@@ -1,0 +1,250 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+{% block title %}Ongoing Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'teamlead/css/tl_ongoing_works.css' %}">
+<link rel="stylesheet" href="{% static 'teamlead/css/common.css' %}">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-dark text-white px-3 py-2 rounded">
+    <li class="breadcrumb-item"><a href="{% url 'individual_work_main' %}" class="text-decoration-none text-white-50">Individual Works</a></li>
+    <li class="breadcrumb-item active text-white" aria-current="page">Ongoing Works</li>
+  </ol>
+</nav>
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-3">Ongoing Works</h5>
+
+  <div class="input-group w-auto mb-3">
+    <input type="text" class="form-control bg-dark" placeholder="Search..." id="searchInput">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle text-center" id="targetTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Task Name</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Accepted Date</th>
+          <th>Task Detail</th>
+          <th>Add Daily Work</th>
+          <th>View Daily Works</th>
+          <th>Progress</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for work in ongoing_works %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_lsm">
+            {% if work.type == 'lead_collection' %}
+              Lead Collection<br><small><li>{{ work.task_name }}</li></small>
+            {% else %}
+              {{ work.task_name }}
+            {% endif %}
+          </td>
+          <td class="table_en_lsm">{{ work.start_date|default:"-" }}</td>
+          <td class="table_en_lsm">{{ work.end_date|default:"-" }}</td>
+          <td class="table_en_lsm">{{ work.accept_date|default:"-" }}</td>
+          <td class="table_en_lsm">
+            <button class="btn btn-outline-info btn-sm view-btn"
+              data-client="{{ work.client_name }}"
+              data-assign="{{ work.assign_date }}"
+              data-accept="{{ work.accept_date }}"
+              data-type="{{ work.type }}"
+              data-name="{{ work.task_name }}"
+              data-target="{{ work.target }}"
+              data-achieved="{{ work.achieved }}"
+              data-start="{{ work.start_date }}"
+              data-end="{{ work.end_date }}"
+              data-description="{{ work.task_description }}"
+              data-file="{{ work.file_url|default:'' }}"
+              data-instagram-show="{{ work.is_instagram|yesno:'1,0' }}"
+              data-facebook-show="{{ work.is_facebook|yesno:'1,0' }}"
+              data-twitter-show="{{ work.is_x|yesno:'1,0' }}"
+              data-instagram="{{ work.instagram_target }}"
+              data-facebook="{{ work.facebook_target }}"
+              data-twitter="{{ work.x_target }}"
+            >View</button>
+          </td>
+          <td class="table_en_lsm">
+            {% if work.type == 'normal' %}
+<a href="{% url 'add_daily_work_task' work.task_assign_id %}" class="btn btn-outline-info btn-sm">
+  Add
+</a>
+
+            {% elif work.type == 'lead_collection' and work.task_assign_id %}
+              <a href="{% url 'tl_daily_work_leads' work.task_assign_id %}" class="btn btn-outline-info btn-sm">
+                Add
+              </a>
+            {% else %}
+              <button class="btn btn-outline-secondary btn-sm" disabled>Add</button>
+            {% endif %}
+          </td>
+        <td class="table_en_lsm">
+          <a href="{% url 'tl_view_daily_work' work.task_assign_id %}" class="btn btn-outline-info btn-sm">View</a>
+        </td>
+        <td class="table_en_lsm">
+          <div class="progress" style="height: 20px;">
+            <div class="progress-bar" role="progressbar"
+                 data-progress="{{ work.progress }}"
+                 aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+        </td>
+          <td class="table_en_lsm">
+            <form method="POST" action="#">
+              {% csrf_token %}
+              <button class="btn btn-success btn-sm" disabled>Submit</button> <!--TODO: do it after lead collection thing backend logic later -->
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10">No ongoing works assigned</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: View Task Detail -->
+<div class="modal fade" id="viewTaskModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Detail</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12 mb-3">
+            <label>Client Name</label>
+            <input type="text" class="form-control" id="v_client" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Allocated Date</label>
+            <input type="text" class="form-control" id="v_allocated" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Accepted Date</label>
+            <input type="text" class="form-control" id="v_accepted" readonly>
+          </div>
+          <div class="col-12 mb-3">
+            <label>Task Name</label>
+            <input type="text" class="form-control" id="v_taskname" readonly>
+          </div>
+          <div class="col-12 mb-3">
+            <label>Task Description</label>
+            <textarea class="form-control" id="v_description" rows="3" readonly></textarea>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Start Date</label>
+            <input type="text" class="form-control" id="v_start" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>End Date</label>
+            <input type="text" class="form-control" id="v_end" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Target</label>
+            <input type="text" class="form-control" id="v_target" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Achieved</label>
+            <input type="text" class="form-control" id="v_achieved" readonly>
+          </div>
+          <div class="col-md-4 mb-3" style="display: none;">
+            <label>Instagram Target</label>
+            <input type="text" class="form-control" id="v_instagram" readonly>
+          </div>
+          <div class="col-md-4 mb-3" style="display: none;">
+            <label>Facebook Target</label>
+            <input type="text" class="form-control" id="v_facebook" readonly>
+          </div>
+          <div class="col-md-4 mb-3" style="display: none;">
+            <label>Twitter Target</label>
+            <input type="text" class="form-control" id="v_twitter" readonly>
+          </div>
+          <div class="col-12" id="v_file_box" style="display:none;">
+            <a href="#" id="v_file_link" target="_blank" class="btn btn-outline-info">Download File</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Daily Work -->
+<div class="modal fade" id="addDailyModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Daily Work</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" enctype="multipart/form-data" action="{% url 'tl_ongoing_works' %}">
+        <div class="modal-body">
+          {% csrf_token %}
+          <input type="hidden" name="task_assign_id" id="task_assign_id" readonly>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>Task Name</label>
+              <input type="text" class="form-control" name="task_name" id="d_taskname" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Date</label>
+              <input type="text" class="form-control" name="report_date" value="{{ today|date:'d-m-Y' }}" readonly>
+            </div>
+            <div class="col-12 mb-3">
+              <label>Title</label>
+              <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="col-12 mb-3">
+              <label>Daily Work</label>
+              <textarea name="work_description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Target Achieved</label>
+              <input type="number" name="achieved" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>File</label>
+              <input type="file" name="work_file" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'teamlead/js/tl_ongoing_works.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearSearch");
+    const rows = document.querySelectorAll("#targetTable tbody tr");
+
+    function filterRows() {
+      const searchTerm = searchInput.value.toLowerCase();
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("keyup", filterRows);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      filterRows();
+    });
+  });
+</script>
+{% endblock %}

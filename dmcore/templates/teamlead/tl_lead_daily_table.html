@@ -1,0 +1,151 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+
+{% block title %}Lead Collection - Add Daily Work{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'teamlead/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'teamlead/css/tl_ongoing_works.css' %}">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-dark text-white px-3 py-2 rounded">
+    <li class="breadcrumb-item">
+      <a href="{% url 'individual_work_main' %}" class="text-decoration-none text-white-50">Individual Works</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'tl_ongoing_works' %}" class="text-decoration-none text-white-50">Ongoing Works</a>
+    </li>
+    <li class="breadcrumb-item active text-white" aria-current="page">Add Daily Works</li>
+  </ol>
+</nav>
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-4">Lead Collection - Daily Work</h5>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle text-center">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Client Name</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Progress</th>
+          <th>Required Fields</th>
+          <th>Leads</th>
+          <th>Add Daily Work</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in clients %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_lsm">{{ client.client_name }}</td>
+          <td class="table_en_lsm">{{ client.from_date }}</td>
+          <td class="table_en_lsm">{{ client.due_date }}</td>
+          <td class="table_en_lsm">
+            <div class="progress" style="height: 20px;">
+            <div class="progress-bar" role="progressbar"
+                 data-progress="{{ client.progress }}"
+                 aria-valuemin="0" aria-valuemax="100">
+            </div>
+            </div>
+          </td>
+          <td class="table_en_md">
+            <ul class=" mb-0" style="list-style:decimal; text-align: justify;">
+              <li>First Name</li>
+              <li>Email</li>
+              <li>Contact Number</li>
+
+              {% for field in client.required_fields %}
+                <li>{{ field }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+          <td class="table_en_lsm">
+            <button class="btn btn-outline-warning btn-sm"
+                    onclick="window.location.href='/manage-leads/{{ team_alloc_id }}/{{ client.lead_category_id }}/'">
+              Add Leads
+            </button>
+          </td>
+          <td class="table_en_lsm">
+<a href="{% url 'add_daily_work_lead' team_alloc_id client.lead_category_id %}" class="btn btn-outline-info btn-sm">
+  Add Report
+</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">No clients found for this category</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Add Daily Work (Lead Collection) -->
+<div class="modal fade" id="addLeadDailyModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Daily Work - Lead Collection</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" enctype="multipart/form-data" action="{% url 'tl_daily_work_leads' team_alloc_id %}">
+        {% csrf_token %}
+        <input type="hidden" name="team_alloc_id" value="{{ team_alloc_id }}">
+
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label>Task</label>
+              <input type="text" class="form-control" value="Lead Collection" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label>Category</label>
+              <input type="text" class="form-control" value="{{ lead_category_name }}" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label>Date</label>
+              <input type="text" class="form-control" name="report_date" value="{{ today|date:'d-m-Y' }}" readonly>
+            </div>
+            <div class="col-12 mb-3">
+              <label>Title</label>
+              <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="col-12 mb-3">
+              <label>Daily Work</label>
+              <textarea name="work_description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Target Achieved</label>
+              <input type="number" name="achieved" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>File</label>
+              <input type="file" name="work_file" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'teamlead/js/daily_work_lead_collection.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.progress-bar').forEach(bar => {
+      const value = parseInt(bar.dataset.progress || '0');
+      bar.style.width = `${value}%`;
+      bar.innerText = `${value}%`;
+      bar.setAttribute('aria-valuenow', value);
+    });
+  });
+</script>
+
+{% endblock %}

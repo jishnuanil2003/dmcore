@@ -1,0 +1,264 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+
+<style>
+    .dark-card {
+        background: #1e1e2f;
+        border: 1px solid #2d2d44;
+        border-radius: 15px;
+    }
+
+    .dark-card .card-header {
+        background: #26263a;
+        color: #fff;
+        border-bottom: 1px solid #34344e;
+        padding: 15px 20px;
+    }
+
+    .dark-card .card-body {
+        background: #1e1e2f;
+        padding: 20px;
+    }
+
+    .google-leads-table {
+        color: #e4e6eb;
+        margin-bottom: 0;
+        min-width: 1400px;
+    }
+
+    .google-leads-table thead th {
+        background: #2c2c44;
+        color: #fff;
+        border-color: #3d3d5c;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .google-leads-table tbody td {
+        background: #232338;
+        color: #d6d8db;
+        border-color: #3d3d5c;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .google-leads-table tbody tr:hover td {
+        background: #2b2b42;
+        transition: .3s;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #1e1e2f;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius: 10px;
+    }
+
+    .table-responsive {
+        border-radius: 10px;
+    }
+
+    .no-data {
+        color: #fff;
+        padding: 30px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .dark-card .card-header h4 {
+            font-size: 18px;
+        }
+
+        .google-leads-table {
+            font-size: 12px;
+        }
+
+        .google-leads-table th,
+        .google-leads-table td {
+            padding: 10px 8px;
+        }
+    }
+</style>
+
+<style>
+    .messages-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 99999;
+    width: 350px;
+}
+</style>
+
+<!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 350px;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+<div class="container-fluid mt-4">
+    <div class="card dark-card shadow-lg">
+        <div class="card-header">
+            <h4 class="mb-0">
+                <i class="fas fa-file-alt me-2"></i>
+                Google Form Leads
+            </h4>
+
+            <div class="d-flex justify-content-end mb-3">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#googleFormModal">
+                <i class="fa fa-plus"></i> Add Google Form
+            </button>
+        </div>
+        </div>
+
+        
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table google-leads-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Source</th>
+                            <th>Qualification</th>
+                            <th>Passout Year</th>
+                            <th>Location</th>
+                            <th>Applied For</th>
+                            <th>Internship</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Experience</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for lead in leads %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ lead.name }}</td>
+                            <td>{{ lead.email }}</td>
+                            <td>{{ lead.phone }}</td>
+                            <td>{{ lead.source|default:"-" }}</td>
+                            <td>{{ lead.qualification|default:"-" }}</td>
+                            <td>{{ lead.year_of_passout|default:"-" }}</td>
+                            <td>{{ lead.location|default:"-" }}</td>
+                            <td>{{ lead.applied_for|default:"-" }}</td>
+                            <td>{{ lead.done_any_internship|default:"-" }}</td>
+                            <td>{{ lead.internship_startdate|default:"-" }}</td>
+                            <td>{{ lead.internship_enddate|default:"-" }}</td>
+                            <td>{{ lead.experience|default:"-" }}</td>
+                            <td>{{ lead.created_at|date:"d-m-Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="14" class="no-data">
+                                No Google Form Leads Found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="googleFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark text-light border-secondary">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <i class="bi bi-google me-2"></i>
+                    Upload Google Form Credentials
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Google Credentials JSON
+                        </label>
+
+                        <input type="file"
+                               name="credentials_file"
+                               accept=".json"
+                               class="form-control bg-secondary text-light border-secondary"
+                               required>
+
+                        <div class="form-text text-light opacity-75">
+                            Upload the downloaded Google Service Account JSON file.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Spreadsheet Name
+                        </label>
+
+                        <input type="text"
+                               name="sheet_name"
+                               class="form-control bg-secondary text-light border-secondary"
+                               placeholder="Form Responses"
+                               required>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-secondary">
+                    <button type="button"
+                            class="btn btn-outline-light"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        <i class="bi bi-cloud-upload me-1"></i>
+                        Upload
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+
+<!-- Styling -->
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+    .table th,
+.table td {
+    white-space: nowrap;
+}
+
+</style>
+
+<div class="row mt-4" style="background-color: #333333;border-radius: 15px;">
+    <h4 class="text-white text-center w-100 mt-3">Feedbacks</h4>
+   <form method="get" class="row g-3 text-white align-items-end mb-3 px-3">
+    <div class="col-md-4">
+        <label for="employeeSelect" class="form-label">Filter by Employee</label>
+        <select name="employee_id" id="employeeSelect" class="form-select">
+            <option value="">All Employees</option>
+            {% for emp in department_employees %}
+                <option value="{{ emp.id }}" {% if emp.id|stringformat:"s" == selected_employee %}selected{% endif %}>{{ emp.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label for="feedbackType" class="form-label">Feedback Type</label>
+        <select name="feedback_type" id="feedbackType" class="form-select">
+            <option value="all" {% if feedback_type == "all" %}selected{% endif %}>All</option>
+            <option value="given" {% if feedback_type == "given" %}selected{% endif %}>Feedback Given</option>
+            <option value="received" {% if feedback_type == "received" %}selected{% endif %}>Feedback Received</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <button type="submit" class="btn btn-success w-100">Filter</button>
+    </div>
+</form>
+
+    
+  <div class="table-responsive p-3">
+            <table class="table table-striped table-bordered table-dark text-white">
+                <thead>
+                    <tr>
+                        <th>No </th>
+                        <th>Date</th>
+                        <th>From who</th>
+                        <th>To whom</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for feed in leave %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ feed.feedback_date }}</td>
+            <td>{{ feed.from_name }}</td>
+            <td>{{ feed.employee.name }}</td>
+            <td>{{ feed.feedback_content }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center text-white">No feedback found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+            </table>
+        </div>
+</div>
+
+
+{% endblock content %}
