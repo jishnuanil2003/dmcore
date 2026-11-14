@@ -1,0 +1,44 @@
+{% extends "telecaller/telecallersidebar.html" %}
+{% block content %}
+
+<!-- Styling -->
+
+
+<div class="row mt-4" style="background-color: #333333;border-radius: 15px;">
+    
+  <!-- Card 1 -->
+  <div class="col-md-4 col-sm-6 mb-3" style="margin-top: 10px;">
+    <div class="card text-white bg-primary h-100 text-center p-3 shadow">
+      <div class="card-body">
+        <i class="fas fa-sign-in-alt fa-2x mb-2"></i>
+        <h3>3</h3>
+        <p class="card-text">Login Requests</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="col-md-4 col-sm-6 mb-3" style="margin-top: 10px;">
+    <div class="card text-white bg-success h-100 text-center p-3 shadow">
+      <div class="card-body">
+        <i class="fas fa-envelope fa-2x mb-2"></i>
+        <h3>5</h3>
+        <p class="card-text">Messages</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3 -->
+  <div class="col-md-4 col-sm-6 mb-3" style="margin-top: 10px;">
+    <div class="card text-white bg-warning h-100 text-center p-3 shadow">
+      <div class="card-body">
+        <i class="fas fa-user-check fa-2x mb-2"></i>
+        <h3>10</h3>
+        <p class="card-text">User Approvals</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

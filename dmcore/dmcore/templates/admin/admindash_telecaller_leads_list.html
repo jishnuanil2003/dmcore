@@ -1,0 +1,868 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+    .leads-page-wrapper {
+        background-color: #121212;
+        min-height: 100vh;
+        padding: 15px; 
+    }
+
+    .leads-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .page-title { 
+        color: #ffffff; 
+        font-size: 1.5rem; 
+        font-weight: 600; 
+        margin-bottom: 5px; 
+    }
+    .sub-title { 
+        color: #b0b0b0; 
+        font-size: 0.85rem; 
+        margin-bottom: 20px; 
+    }
+
+    .filter-label { 
+        color: #ffffff; 
+        font-size: 0.85rem; 
+        margin-bottom: 8px; 
+        display: block; 
+    }
+
+    .form-control, .form-select {
+        background-color: #ffffff !important;
+        border: 1px solid #ced4da !important;
+        color: #333 !important;
+        border-radius: 4px;
+        height: 38px;
+    }
+
+    .export-container {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .btn-export-icon {
+        height: 38px;
+        flex: 1; 
+        max-width: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        border: 1px solid #444;
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    .btn-excel { 
+        border-color: #1D6F42; 
+        color: #1D6F42; 
+    }
+    .btn-pdf { 
+        border-color: #E01E22; 
+        color: #E01E22; 
+    }
+    .btn-print { 
+        border-color: #FFC107; 
+        color: #FFC107; 
+    }
+
+    .btn-clear-filters {
+        background: transparent;
+        border: 1px solid #ffffff;
+        color: #ffffff;
+        height: 38px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    
+    .table-wrapper { 
+        background-color: #262626; 
+        border-radius: 4px; 
+        margin-top: 20px; 
+    }
+    .custom-table { 
+        margin-bottom: 0; 
+        border: 1px solid #333; 
+    }
+    .custom-table thead th { 
+        background-color: #1a1a1a; 
+        color: #ffffff; 
+        padding: 12px; 
+        font-size: 0.9rem; 
+    }
+    .custom-table tbody td { 
+        background-color: #262626; 
+        color: #e0e0e0; 
+        border-bottom: 1px solid #333; 
+        padding: 12px; 
+        font-size: 0.9rem; 
+    }
+
+    .search-box {
+        background: #1a1a1a !important;
+        border: 1px solid #444 !important;
+        color: white !important;
+    }
+    .search-box::placeholder {
+        color: #dfdfdf !important; 
+        opacity: 0.8;             
+        }
+    .custom-modal-dark { 
+        background-color: #1a1d21 !important; 
+        border: 1px solid #343a40; 
+        border-radius: 12px; 
+    }
+    .detail-block { 
+        background: #212529; 
+        padding: 15px; 
+        border-radius: 8px; 
+        border-left: 4px solid #0dcaf0; 
+        height: 100%; 
+    }
+    .detail-title { 
+        font-size: 0.85rem; 
+        font-weight: 700; 
+        margin-bottom: 10px; 
+    }
+    .detail-block p { 
+        font-size: 0.85rem; 
+        margin-bottom: 5px; 
+        color: #ced4da; 
+    }
+    .detail-block strong { 
+        color: #adb5bd; 
+        font-weight: 500; 
+    }
+    .custom-audio-player { 
+        height: 45px; 
+        filter: invert(100%) hue-rotate(180deg) brightness(1.2); 
+        border-radius: 50px; 
+    }
+    .custom-accordion { 
+        background: #212529; 
+        border: 1px solid #343a40 !important; 
+        border-radius: 8px !important; 
+        overflow: hidden; 
+    }
+    .accordion-trigger { 
+        width: 100%; 
+        background: none; 
+        border: none; 
+        color: #f8f9fa; 
+        padding: 12px 20px; 
+        font-size: 0.9rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        text-decoration: none; 
+    }
+    .accordion-content { 
+        background: #121417; 
+        padding: 15px; 
+        border-top: 1px solid #343a40; 
+    }
+    .accordion-trigger:not(.collapsed) .arrow { 
+        transform: rotate(180deg); 
+        transition: 0.3s; 
+    }
+    
+    
+    .timeline-simple { 
+        margin-top: 10px; 
+    }
+    .timeline-item { 
+        border-left: 2px solid #0dcaf0; 
+        padding-left: 20px; 
+        padding-bottom: 20px; 
+        position: relative; 
+    }
+    .timeline-item::before { 
+        content: ''; 
+        position: absolute; 
+        left: -7px; top: 0; 
+        width: 12px; 
+        height: 12px; 
+        background: #0dcaf0; 
+        border-radius: 50%; 
+        box-shadow: 0 0 8px rgba(13, 202, 240, 0.5); 
+    }
+    .timeline-header { 
+        font-weight: 600; 
+        color: #f8f9fa; 
+        margin-bottom: 4px; 
+        font-size: 0.9rem; 
+    }
+    .timeline-meta { 
+        font-size: 0.75rem; 
+        color: #b0b0b0; 
+        margin-bottom: 8px; 
+        display: block; 
+    }
+    .timeline-body { 
+        font-size: 0.85rem; 
+        color: #ced4da; 
+        background: #1a1d21; 
+        padding: 10px; 
+        border-radius: 6px; 
+        border: 1px solid #343a40; 
+    }
+    .timeline-status { 
+        display: inline-block; 
+        padding: 2px 8px; 
+        border-radius: 4px; 
+        font-size: 0.7rem; 
+        font-weight: 600; 
+        margin-top: 8px; 
+        text-transform: uppercase; 
+        background: rgba(13, 202, 240, 0.1); 
+        color: #0dcaf0; 
+    }
+
+    @media (max-width: 768px) {
+        .page-title { 
+            font-size: 1.25rem; 
+        }
+        .leads-container { 
+            padding: 15px; 
+        }
+        .search-group { 
+            width: 100%; 
+        }
+        .rows-nav { 
+            justify-content: flex-start !important; 
+            width: 100%; 
+        }
+        .btn-export-icon { 
+            max-width: none; 
+        }
+    }
+
+    @media print {
+        body * { 
+            visibility: hidden; 
+        }
+        .table-wrapper, .table-wrapper * { 
+            visibility: visible; 
+        }
+        .table-wrapper { 
+            position: absolute; 
+            left: 0; top: 0; 
+            width: 100%; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        body { 
+            background: white !important; 
+        }
+    }
+    @media print {
+    .custom-table th:last-child, 
+    .custom-table td:last-child {
+        display: none !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+}
+</style>
+
+    <div class="leads-container">
+        <h2 class="page-title">Assigned Leads ({{ assigned_leads.paginator.count }})</h2>
+        <p class="sub-title">Telecaller: <strong>{{ telecaller.name }}</strong></p>
+
+        <div class="filter-section mb-4">
+            <div class="row g-3">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <form id="filterForm" method="GET" class="row g-2">
+                        <div class="col-6">
+                            <label class="filter-label">From Date</label>
+                            <input type="date" name="from_date" value="{{ from_date }}" class="form-control" onchange="this.form.submit()">
+                        </div>
+                        <div class="col-6">
+                            <label class="filter-label">To Date</label>
+                            <input type="date" name="to_date" value="{{ to_date }}" class="form-control" onchange="this.form.submit()">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="filter-label">Lead Status</label>
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All</option>
+                        <option value="Allocated">Allocated</option>
+                        <option value="Unverified">Unverified</option>
+                        <option value="Verified">Verified</option>
+                        <option value="Not Allocated">Not Allocated</option>
+                        <option value="Opened">Opened</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Waste">Waste</option>
+                    </select>
+                </div>
+
+                
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="filter-label">Follow-Up Status</label>
+                    <form method="GET" action="">
+                    <select name="followup_status" id="followupFilter" class="form-select" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        <option value="Lead Joined" {% if selected_followup == "Lead Joined" %}selected{% endif %}>Lead Joined</option>
+                        <option value="Lead Closed" {% if selected_followup == "Lead Closed" %}selected{% endif %}>Closed</option>
+                        <option value="Waste Lead" {% if selected_followup == "Waste Lead" %}selected{% endif %}>Waste</option>
+                        
+                        {% for status in followup_statuses %}
+                            <option value="{{ status }}" {% if selected_followup == status %}selected{% endif %}>
+                                {{ status }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                     </form>
+                </div>
+
+               
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="filter-label">&nbsp;</label>
+                    <button type="button" onclick="clearAllFilters()" class="btn btn-secondary w-100">Clear Filters</button>
+                </div>
+                
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="filter-label">Export</label>
+                    <div class="export-container">
+                        <button type="button" onclick="exportToExcel()" class="btn-export-icon btn-excel"><i class="fas fa-file-excel"></i></button>
+                        <button type="button" onclick="exportToPDF()" class="btn-export-icon btn-pdf"><i class="fas fa-file-pdf"></i></button>
+                        <button type="button" onclick="window.print()" class="btn-export-icon btn-print"><i class="fas fa-print"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="data-nav-ui d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            
+            <div class="d-flex search-group w-100" style="max-width: 300px;">
+                <input type="text" id="tableSearch" class="form-control form-control-sm search-box" placeholder="Search...">
+                <button class="btn btn-sm btn-light ms-1">Clear</button>
+            </div>
+
+                <div class="d-flex align-items-center text-white small rows-nav">
+                    <span>Show</span>
+                    <select name="per_page" 
+                            form="filterForm" class="form-select form-select-sm mx-2" 
+                            style="width: 75px; background-color: #fff !important; color: #000 !important;"
+                            onchange="document.getElementById('filterForm').submit()">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                    </select>
+                    <span>rows</span>
+                </div>
+        </div>
+
+        <div class="table-wrapper">
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Lead Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                        <tbody id="leadTableBody">
+                            {% for item in assigned_leads %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.lead.name }}</td>
+                                <td>{{ item.lead.email|default:"N/A" }}</td>
+                                <td>{{ item.lead.contact }}</td>
+                                <td style="font-size: 1.1rem;">
+                                    {% if item.response and item.response != "No Data Availale" %}
+                                        {% if item.response == "Lead Joined" %}
+                                            <span class="text-success font-weight-bold">Lead Joined</span>
+                                        {% elif item.response == "Lead Closed" or item.response == "Waste Lead" %}
+                                            <span class="text-danger font-weight-bold">{{ item.response }}</span>
+                                        {% else %}
+                                            <span class="text-primary font-weight-bold">{{ item.response }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge badge-info" style="font-size: 0.9rem; padding: 5px 10px;">Allocated</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#leadDetailsModal"
+                                            onclick="openLeadModal('{{ item.lead.id }}')"> View
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No accepted leads found for this telecaller.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+
+            <div class="d-flex justify-content-between align-items-center mt-3 px-3">
+            <div class="text-white small">
+                Showing {{ assigned_leads.start_index|default:0 }} to {{ assigned_leads.end_index|default:0 }} of {{ total_leads_count }} leads
+            </div>
+            
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if assigned_leads.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ assigned_leads.previous_page_number }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}&lead_status={{ selected_lead_status|default:'' }}&followup_status={{ selected_followup|default:'' }}&per_page={{ per_page }}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                    {% endif %}
+
+                    {% for i in assigned_leads.paginator.page_range %}
+                        {% if assigned_leads.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                        {% elif i > assigned_leads.number|add:'-3' and i < assigned_leads.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}&lead_status={{ selected_lead_status|default:'' }}&followup_status={{ selected_followup|default:'' }}&per_page={{ per_page }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if assigned_leads.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ assigned_leads.next_page_number }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}&lead_status={{ selected_lead_status|default:'' }}&followup_status={{ selected_followup|default:'' }}&per_page={{ per_page }}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+
+
+    </div>
+
+
+
+<div class="modal fade" id="leadDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content custom-modal-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title d-flex align-items-center">
+                    <i class="fas fa-user-circle me-2 text-info"></i>
+                    <span id="modalLeadName">Lead Details</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="detail-block">
+                            <h6 class="detail-title text-info">Lead Details</h6>
+                            <p><strong>Name:</strong> <span id="detName"></span></p>
+                            <p><strong>Email:</strong> <span id="detEmail"></span></p>
+                            <p><strong>Phone:</strong> <span id="detPhone"></span></p>
+                            <p><strong>Added Date:</strong> <span id="detAddedDate"></span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-block">
+                            <h6 class="detail-title text-info">Client Details</h6>
+                            <p><strong>Client:</strong> <span id="detClientName">-</span></p>
+                            <p><strong>Business:</strong> <span id="detBusinessName">-</span></p>
+                            <p><strong>Category:</strong> <span id="detCategory"></span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-block">
+                            <h6 class="detail-title text-info">Tele Caller Details</h6>
+                            <p><strong>Assigned to:</strong> <span id="detAssignedTo"></span></p>
+                            <p><strong>Current Status:</strong> <span id="detCurrentStatus"></span></p>
+                            <p><strong>Next Follow-Up:</strong> <span id="detNextFollowUp"></span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-block">
+                            <h6 class="detail-title text-info">Lead Collected Details</h6>
+                            <p><strong>Collected by:</strong> <span id="detCollectedBy"></span></p>
+                            <p><strong>Category:</strong> <span id="detCollectionCategory"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item custom-accordion mb-2">
+                    <button class="accordion-trigger collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFollowUp">
+                        <span><i class="fas fa-edit text-info me-2"></i> Follow-Up Details</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div id="collapseFollowUp" class="collapse">
+                        <div class="accordion-content">
+                            <div id="followUpContainer">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-wrapper">
+                    <div class="accordion-item custom-accordion mb-2">
+                        <button class="accordion-trigger collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecordings">
+                            <span><i class="fas fa-microphone-alt text-info me-2"></i> Call Recordings</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </button>
+                        <div id="collapseRecordings" class="collapse">
+                            <div class="accordion-content">
+                                <div id="recordingContainer">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item custom-accordion">
+                    <button class="accordion-trigger collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHistory">
+                        <span><i class="fas fa-clock-rotate-left text-info me-2"></i> Follow-Up History</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div id="collapseHistory" class="collapse">
+                        <div class="accordion-content">
+                            <div class="timeline-simple" id="historyTimeline">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-light btn-sm px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+function getExportTable() {
+    const table = document.querySelector(".custom-table");
+    const clone = table.cloneNode(true);
+    const rows = clone.querySelectorAll('tr');
+
+    const originalRows = table.querySelectorAll('tr');
+
+    rows.forEach((row, index) => {
+        const originalRow = originalRows[index];
+
+        if (originalRow && originalRow.style.display === "none") {
+            row.remove();
+            return; 
+        }
+
+        if (row.cells.length > 0) {
+            row.deleteCell(-1); 
+        }
+    });
+
+    return clone;
+}
+function exportToExcel() {
+    const table = getExportTable();
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Leads" });
+    const ws = wb.Sheets["Leads"];
+
+    const wscols = [
+        { wch: 6 },  
+        { wch: 25 }, 
+        { wch: 30 }, 
+        { wch: 20 }, 
+        { wch: 15 }
+    ];
+    ws['!cols'] = wscols;
+
+    Object.keys(ws).forEach(cell => {
+        if (cell.replace(/[0-9]/g, '') === 'D') { 
+            ws[cell].t = 's'; 
+        }
+    });
+
+    XLSX.writeFile(wb, "Telecaller_Leads_List.xlsx");
+}
+
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt', 'a4'); 
+    
+    const telecallerName = "{{ telecaller.name }}";
+    const title = "Assigned Leads Report - Telecaller: " + telecallerName;
+
+    doc.setFontSize(16);
+    doc.setTextColor(40);
+    doc.text(title, 40, 30);
+    
+    doc.autoTable({ 
+        html: getExportTable(), 
+        startY: 50,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 5 },
+        columnStyles: {
+            3: { cellWidth: 'auto' } 
+        }
+    });
+    
+    doc.save("Telecaller_Leads_List.pdf");
+}
+</script>
+
+<script>
+    function populateLeadModal(name, email, phone, telecaller) {
+    document.getElementById('modalLeadName').innerText = "Details for: " + name;
+    document.getElementById('detName').innerText = name;
+    document.getElementById('detEmail').innerText = email || "N/A";
+    document.getElementById('detPhone').innerText = phone;
+    document.getElementById('detTelecaller').innerText = telecaller;
+    const collapses = document.querySelectorAll('.collapse');
+    collapses.forEach(c => {
+        const bsCollapse = bootstrap.Collapse.getInstance(c);
+        if(bsCollapse) bsCollapse.hide();
+    });
+}
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('.search-box');
+    const clearBtn = document.querySelector('.btn-light.ms-1');
+    const tableRows = document.querySelectorAll('.custom-table tbody tr');
+
+    const filterTable = () => {
+        const searchTerm = searchInput.value.toLowerCase();
+
+        tableRows.forEach(row => {
+            const name = row.cells[1].textContent.toLowerCase();
+            const email = row.cells[2].textContent.toLowerCase();
+            const phone = row.cells[3].textContent.toLowerCase();
+            const status = row.cells[4].textContent.toLowerCase();
+
+            if (name.includes(searchTerm) || 
+                email.includes(searchTerm) || 
+                phone.includes(searchTerm) ||
+                status.includes(searchTerm)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    };
+
+    searchInput.addEventListener('input', filterTable);
+
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        filterTable(); 
+        searchInput.focus();
+    });
+});
+
+
+
+function clearSearch() {
+    const searchInput = document.getElementById('tableSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableRows = document.querySelectorAll('.custom-table tbody tr');
+
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+    if (statusFilter) {
+        statusFilter.value = '';
+    }
+
+    tableRows.forEach(row => {
+        row.style.display = "";
+    });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('.search-box');
+    const statusFilter = document.getElementById('statusFilter'); 
+    const tableRows = document.querySelectorAll('.custom-table tbody tr');
+
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedStatus = statusFilter ? statusFilter.value.toLowerCase() : "";
+
+        tableRows.forEach(row => {
+            const name = row.cells[1].textContent.trim();
+            const email = row.cells[2].textContent.trim();
+            const phone = row.cells[3].textContent.trim();
+            const status = row.cells[4].textContent.trim().replace(/\s+/g, ' ');
+
+            const combinedRowText = `${name} ${email} ${phone} ${status}`.toLowerCase();
+            
+            const rowStatusNormalized = status.toLowerCase();
+
+            const matchesSearch = combinedRowText.includes(searchTerm);
+            
+            const matchesStatus = selectedStatus === "" || rowStatusNormalized.includes(selectedStatus);
+
+            if (matchesSearch && matchesStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', performSearch);
+    }
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', performSearch);
+    }
+
+
+    searchInput.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        statusFilter.value = ''; 
+        applyFilters();
+        searchInput.focus();
+    });
+});
+</script>
+
+
+<script>
+function openLeadModal(leadId) {
+    const followUpContainer = document.getElementById('followUpContainer');
+    const historyContainer = document.getElementById('historyTimeline');
+    const recordingContainer = document.getElementById('recordingContainer');
+
+    followUpContainer.innerHTML = '<span class="text-muted small">Loading...</span>';
+    historyContainer.innerHTML = '<span class="text-muted small">Loading...</span>';
+    recordingContainer.innerHTML = '<span class="text-muted small">Loading...</span>';
+
+    fetch(`/telecaller_get_lead_details/${leadId}/?client_id={{ client.id }}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('modalLeadName').innerText = data.name;
+            document.getElementById('detName').innerText = data.name;
+            document.getElementById('detEmail').innerText = data.email;
+            document.getElementById('detPhone').innerText = data.phone;
+            document.getElementById('detAddedDate').innerText = data.added_date;
+            
+            document.getElementById('detClientName').innerText = data.client_name; 
+            document.getElementById('detBusinessName').innerText = data.client_business;
+            
+            document.getElementById('detCategory').innerText = data.category;
+            document.getElementById('detCollectionCategory').innerText = data.category;
+            document.getElementById('detCollectedBy').innerText = data.collected_by;
+            document.getElementById('detAssignedTo').innerText = data.assigned_to;
+            document.getElementById('detCurrentStatus').innerText = data.current_status;
+            document.getElementById('detNextFollowUp').innerText = data.next_followup;
+
+            followUpContainer.innerHTML = '';
+            if (data.followups && data.followups.length > 0) {
+                data.followups.forEach(f => {
+                    followUpContainer.insertAdjacentHTML('beforeend', `
+                        <div class="follow-up-item border-bottom border-secondary mb-2 pb-2">
+                            <div class="small mb-1 fw-bold text-info">${f.telecaller}</div>
+                            <div class="small mb-1 text-light"><strong>Date:</strong> ${f.date}</div>
+                            <div class="small mb-1 text-light"><strong>Response:</strong> ${f.response}</div>
+                            <div class="small mb-1 text-light"><strong>Status:</strong> <span class="badge bg-primary">${f.status}</span></div>
+                        </div>`);
+                });
+            } else {
+                followUpContainer.innerHTML = '<span class="text-light small">No details found.</span>';
+            }
+
+            historyContainer.innerHTML = '';
+            if (data.history && data.history.length > 0) {
+                data.history.forEach(h => {
+                    historyContainer.insertAdjacentHTML('beforeend', `
+                        <div class="timeline-item mb-3 pb-2 border-bottom border-secondary">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="dot bg-info me-2" style="height: 8px; width: 8px; border-radius: 50%; display: inline-block;"></span>
+                                <span class="text-light small" style="font-size: 0.75rem;">${h.date}</span>
+                            </div>
+                            <div class="ms-3">
+                                <div class="text-info fw-bold small">${h.telecaller}</div>
+                                <div class="text-light my-1" style="font-size: 0.9rem;">Note: ${h.note}</div>
+                                <span class="badge bg-secondary" style="font-size: 0.7rem;">${h.status}</span>
+                            </div>
+                        </div>`);
+                });
+            } else {
+                historyContainer.innerHTML = '<p class="text-light small">No history available.</p>';
+            }
+
+            recordingContainer.innerHTML = '';
+            if (data.recordings && data.recordings.length > 0) {
+                data.recordings.forEach(r => {
+                    recordingContainer.insertAdjacentHTML('beforeend', `
+                        <div class="recording-item mb-3">
+                            <div class="small mb-2 fw-bold text-light">Date: ${r.date} ${r.time}</div>
+                            <audio controls class="custom-audio-player w-100">
+                                <source src="${r.file_url}" type="audio/mpeg">
+                            </audio>
+                        </div>`);
+                });
+            } else {
+                recordingContainer.innerHTML = '<span class="text-light small">No recordings found.</span>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMsg = '<span class="text-danger small">Error loading data.</span>';
+            followUpContainer.innerHTML = errorMsg;
+            historyContainer.innerHTML = errorMsg;
+            recordingContainer.innerHTML = errorMsg;
+        });
+}
+</script>
+
+<script>
+    function clearAllFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('followupFilter').value = '';
+    
+    const form = document.getElementById('filterForm');
+    form.querySelector('input[name="from_date"]').value = '';
+    form.querySelector('input[name="to_date"]').value = '';
+    window.location.href = window.location.pathname; 
+}
+</script>
+
+{% endblock content %}

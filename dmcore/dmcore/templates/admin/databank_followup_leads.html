@@ -1,0 +1,250 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .client-select {
+    max-width: 420px;   
+}
+
+
+@media (max-width: 576px) {
+    .client-select {
+        max-width: 100%;
+    }
+}
+
+
+
+</style>
+
+
+
+<div class="container mt-4">
+
+
+   
+    <div class="card p-4 bg-dark text-white rounded-xl shadow-lg">
+        <h5 class="mb-4"><span class="text-success">Foolow Up</span> Leads</h5>
+
+        <form method="get">
+            <div class="row g-3">
+
+
+                <div class="col-md-3">
+                    <label class="form-label">Client</label>
+                    <select name="client" class="form-control client-select" id="clientSelect">
+                        <option value="">-- Select --</option>
+                        {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.client_name }}</option>
+                        {% empty %}
+                            <option disabled>No Clients found</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+
+              
+                <div class="col-md-3">
+                    <label class="form-label">Lead categories</label>
+                    <select class="form-control" id="categorySelect" name="category">
+                        <option value="">Select</option>
+                    </select>
+                </div>
+
+                
+                <div class="col-md-3">
+                    <label class="form-label">Hr/Telecaller</label>
+                    <select class="form-control" id="hrSelect" name="hr">
+                        <option value="">Select</option>
+                        {% for hr in hrs %}
+                            <option value="{{ hr.id }}">{{ hr.name }}</option>
+                        {% empty %}
+                            <option disabled>No Hr found</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">FoolowUp Status</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="">Select</option>
+                        {% for sts in statuses %}
+                            <option value="{{ sts }}">{{ sts }}</option>
+                        {% empty %}
+                            <option disabled>No Status found</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+</div>
+
+<div class="container mt-4" >
+
+
+
+    <div class="card p-4 bg-dark text-white rounded-xl shadow-lg">
+        <h5 class="mb-4">Lead Data</h5>
+
+        <form method="get">
+            <div class="row g-3">
+
+
+             
+                <div class="col-md-5">
+                    <label class="form-label ">From date</label>
+                    <input type="date" class="form-control" id="fromDate" name="from_date">
+                    
+                </div>
+
+              
+                <div class="col-md-5">
+                    <label class="form-label ">To date</label>
+                    <input type="date" class="form-control" id="toDate" name="to_date">
+                </div>
+                <div class="col-md-12">
+            
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search">
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+   
+    <div class="card mt-4 bg-dark text-white rounded-xl shadow-lg">
+        <div class="table-responsive">
+            <table class="table table-dark table-bordered align-middle mb-0">
+                <thead class="text-muted small">
+                    <tr>
+                        <th>No.</th>
+                        <th>Date</th>
+                        <th>Client Name</th>
+                        <th>Lead Category</th>
+                        <th>Lead Name</th>
+                        <th>Lead Email</th>
+                        <th>Lead Contact</th>
+                        <th>Lead Source</th>
+                        <th>More Details</th>
+                        <th>Collected by</th>
+                    </tr>
+                </thead>
+                <tbody id="leadTableBody"></tbody>
+
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const clientSelect = document.getElementById('clientSelect');
+    const categorySelect = document.getElementById('categorySelect');
+    const hrSelect = document.getElementById('hrSelect');
+    const statusSelect = document.getElementById('status');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('leadTableBody');
+
+    function loadLeads() {
+        const params = new URLSearchParams({
+            client_id: clientSelect.value,
+            category: categorySelect.value,
+            hr: hrSelect.value,
+            status: statusSelect.value,
+            from_date: fromDate.value,
+            to_date: toDate.value,
+            search: searchInput.value
+        });
+
+        fetch(`/get-followup-leads/?${params}`)
+        .then(res => res.json())
+        .then(data => {
+
+            tableBody.innerHTML = '';   
+
+            if (!data.leads || data.leads.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center  py-4">
+                            No leads found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            data.leads.forEach(lead => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${lead.no}</td>
+                        <td>${lead.date}</td>
+                        <td>${lead.client}</td>
+                        <td>${lead.category}</td>
+                        <td>${lead.name}</td>
+                        <td>${lead.email}</td>
+                        <td>${lead.contact}</td>
+                        <td>${lead.source}</td>
+                        <td class="text-center">
+                            <a href="/followup-lead-details/${lead.id}/"
+                            class="btn btn-outline-success btn-sm">
+                                Details
+                            </a>
+                        </td>
+                        <td>${lead.telecaller}</td>
+                    </tr>
+                `;
+            });
+        });
+
+    }
+
+
+    clientSelect.addEventListener('change', function () {
+        const clientId = this.value;
+        categorySelect.innerHTML = '<option value="">Loading...</option>';
+
+        fetch(`/get-client-data/?client_id=${clientId}`)
+            .then(res => res.json())
+            .then(data => {
+                categorySelect.innerHTML = '<option value="">Select</option>';
+                data.categories.forEach(cat => {
+                    categorySelect.innerHTML += `
+                        <option value="${cat.id}">
+                            ${cat.collection_for}
+                        </option>`;
+                });
+            });
+
+        loadLeads();
+    });
+
+
+    [categorySelect, hrSelect, statusSelect, fromDate, toDate].forEach(el => {
+        el.addEventListener('change', loadLeads);
+    });
+
+    searchInput.addEventListener('keyup', loadLeads);
+});
+</script>
+
+
+
+
+
+{% endblock %}

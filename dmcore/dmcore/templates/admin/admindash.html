@@ -1,0 +1,91 @@
+    {% extends "admin/adminsidebar.html" %}
+    {% block content %}
+
+
+    <style>
+        .client-card {
+            border-radius: 12px;
+            border: 1px solid #e3e6f0;
+            transition: all 0.2s ease;
+            max-height: 160px;
+            overflow: hidden;
+        }
+
+        .client-card:hover {
+            border-color: #4e73df;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .profile-img {
+            width: 85px;
+            height: 85px;
+            object-fit: cover;
+            border: 3px solid #fff;
+        }
+
+        .client-info-list i {
+            width: 20px; 
+        }
+
+        .text-truncate {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            {% for client in clients %}
+            <div class="col-lg-6 col-xl-4 mb-3"> 
+                <a href="{% url 'admindash_client_details' client.id %}" class="text-decoration-none">
+                <div class="card shadow-sm h-100 client-card" style="background-color: #212529;border: none;color: white;">
+                    <div class="row no-gutters align-items-center">
+                        
+                        <div class="col-4 text-center p-3">
+                            {% if client.client_profile %}
+                                <img src="{{ client.client_profile.url }}" class="rounded-circle img-fluid profile-img shadow-sm" alt="Profile">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ client.client_name }}&background=4e73df&color=fff" class="rounded-circle img-fluid profile-img shadow-sm" alt="Avatar">
+                            {% endif %}
+                        </div>
+
+                        <div class="col-8">
+                            <div class="card-body p-3">
+                                <h5 class="card-title font-weight-bold  mb-1 text-truncate">{{ client.client_name }}</h5>
+                                <p class="text-primary small font-weight-bold mb-2 text-truncate">
+                                    <i class="fas fa-building mr-1"></i> {{ client.client_business_name|default:"Individual Client" }}
+                                </p>
+                                
+                                <div class="client-info-list">
+                                    <div class="small mb-1 text-truncate">
+                                        <i class="fas fa-envelope fa-fw mr-2 text-light"></i>{{ client.client_email_primary }}
+                                    </div>
+                                    <div class="small mb-1">
+                                        <i class="fas fa-phone fa-fw mr-2 text-light"></i>{{ client.client_phone }}
+                                    </div>
+                                    <div class="small text-truncate">
+                                        <i class="fas fa-map-marker-alt fa-fw mr-2 text-light"></i>{{ client.client_place }}, {{ client.client_state }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-user-slash fa-3x text-light mb-3"></i>
+                <p class="text-light">No clients registered under this company yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+    {% endblock content %}

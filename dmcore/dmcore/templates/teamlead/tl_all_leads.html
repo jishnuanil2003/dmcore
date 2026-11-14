@@ -1,0 +1,1307 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% load static %}
+{% block content %}
+  
+       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+        <link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+        <link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+
+        color: white;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin-top: 50px;
+    
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+
+    h2 {
+        color: #4A90E2;
+        font-size: 22px;
+        margin-bottom: 30px;
+    }
+    
+
+
+.bg-purple {
+    background-color: #a855f7 !important; 
+    color: white !important;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+}
+
+
+.btn-outline-purple {
+    border: 1px solid #a855f7;
+    color: #a855f7;
+    background-color: transparent;
+    border-radius: 6px;
+}
+
+.btn-outline-purple:hover {
+    background-color: #a855f7;
+    color: #fff;
+}
+
+
+
+    .btn-form {
+        background-color: white;
+        color: black;
+    }
+
+
+
+    .no-leads-img {
+        width: 220px;
+        margin-top: 40px;
+        
+    }
+
+
+
+.nowrap-date {
+white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+.btn-group .btn {
+    border-radius: 0.5rem;
+    margin-left: 5px;
+    color: #ffffff !important;          
+    border-color: #777 !important;     
+    background-color: transparent;
+}
+
+.btn-outline-light:hover {
+    background-color: #5c5c5c !important;
+    border-color: #aaa !important;
+}
+
+.btn-outline-secondary {
+    color: #bbb !important;
+    border-color: #555 !important;
+    background-color: transparent;
+}
+
+.btn-outline-secondary:disabled {
+    opacity: 0.4;
+    color: #999 !important;
+}
+
+@media (max-width: 576px) {
+    #leadTable th,
+    #leadTable td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .btn-group .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    #searchInput {
+        width: 100%;
+    }
+
+    .form-select {
+        width: 100%;
+    }
+}
+
+#moreDetails div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.details-table div {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  font-size: 15px;
+}
+
+.details-table div:last-child {
+  border-bottom: none;
+}
+
+.details-table span:first-child {
+  color: #e0e0e0;
+  min-width: 120px;
+}
+
+.details-table span:last-child {
+  text-align: right;
+  color: #ffffff;
+  flex-grow: 1;
+}
+
+@media (max-width: 576px) {
+  .details-table div {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .details-table span:last-child {
+    text-align: left;
+  }
+
+  h2 {
+        font-size: 16px;
+    }
+
+  
+
+    .table th, .table td {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .btn-group .btn {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    .no-leads-img {
+        width: 140px;
+    }
+}
+
+
+
+
+.modal-content {
+  border-radius: 10px;
+}
+
+
+#activityTrackerModal .modal-dialog {
+  max-width: 950px;
+}
+
+#activityTrackerModal .modal-content {
+  background-color: #1e1e2f;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+#activityTrackerModal .modal-title {
+  font-weight: 600;
+}
+
+#activityTrackerContent h5 {
+  font-size: 18px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+#activityTrackerContent h6 {
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+  color: #5bc0de;
+}
+
+#activityTrackerContent p {
+  font-size: 14px;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+#activityTrackerContent .row > div {
+  padding: 10px;
+}
+
+
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.history-item {
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+
+.waste-section i {
+  font-size: 1.1rem;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+
+@media (max-width: 768px) {
+  #activityTrackerModal .modal-dialog {
+    max-width: 95%;
+    margin: 1rem;
+  }
+
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+  
+  .modal-footer {
+    border-top: 1px solid #444;
+    padding-top: 10px;
+    justify-content: flex-end;
+  }
+
+
+
+  #sortIcon{
+    cursor: pointer;
+}
+
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+</style>
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="" class="text-decoration-none text-white">Dashboard</a></li>
+        <li class="breadcrumb-item active text-white-50" aria-current="page">Leads</li>
+    </ol>
+</nav>
+
+
+<div class="container-fluid mt-3 comn_table_bg">
+    <div class="container-fluid py-4">
+        
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+   
+        <h2 class="mb-0">Leads List ({{ total_leads }})</h2>
+    
+        
+        <div class="d-flex gap-2">
+            <button class="btn btn-dark btn-sm" id="downloadExcel">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+            
+            <button class="btn btn-danger btn-sm" id="downloadPDF"><i class="bi bi-file-earmark-pdf"></i> PDF </button>
+        </div>
+        
+    </div>
+    <hr>
+    
+
+
+        <div class="lead-action">
+          <div class="row g-2">
+              <div class="col-auto">
+                  <button class="btn btn-light btn-sm" style="width: 40px; height: 30px;" data-bs-toggle="modal" data-bs-target="#userGuideModal">
+                      <i class="bi bi-journal-text"></i>
+                  </button>
+              </div>
+      
+              <div class="col-12 col-md-auto">
+                  <form id="perPageForm" method="get">
+                    <select name="per_page" id="recordsPerPage" class="form-select form-select-sm w-100" style="max-width: 100px;" onchange="document.getElementById('perPageForm').submit();">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                        <option value="150" {% if per_page == 150 %}selected{% endif %}>150</option>
+                        <option value="250" {% if per_page == 250 %}selected{% endif %}>250</option>
+                        <option value="500" {% if per_page == 500 %}selected{% endif %}>500</option>
+                        <option value="1000" {% if per_page == 1000 %}selected{% endif %}>1000</option>
+                    </select>
+                </form>
+              </div>
+
+              <div class="col-12 col-md-auto">
+                <select id="clientDropdown" class="form-select form-select-sm w-100">
+                    <option value="">Select Client</option>
+                    {% for client in clients %}
+                        <option value="{{ client.id }}">{{ client.client_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <select id="categoryDropdown" class="form-select form-select-sm w-100">
+                    <option value="">Select Category</option>
+                </select>
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <select id="executiveDropdown" class="form-select form-select-sm w-100">
+                    <option value="">Executive</option>
+                    {% for emp in employee_list %}
+                        <option value="{{ emp.id }}">{{ emp.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <select id="statusDropdown" name="lead_status" class="form-select form-select-sm w-100">
+                    <option value="">Lead Status</option>
+                    <option value="unverify">unverify</option>
+                    <option value="Verified">Verified</option>
+                    <option value="repeated">repeated</option>
+                    <option value="waste">waste</option>
+                    <option value="transfered">transfered</option>
+               
+                </select>
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <input type="date" id="fromDate" class="form-control form-control-sm w-100">
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <input type="date" id="toDate" class="form-control form-control-sm w-100">
+            </div>
+    
+            <div class="col-auto">
+                <button class="btn btn-sm btn-outline-primary" id="filterBtn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </div><br>
+
+        {% if leads %}
+        <div class="row mb-3">
+          <div class="col-12 col-md-auto ms-auto">
+              <input type="text" class="form-control bg-dark w-100 text-light" placeholder="Search..." id="searchInput">
+          </div>
+      </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-sm mb-0 table-dark table-striped table-hover text-center" id="leadTable">
+                <thead class="custom-thead">
+                    <tr>
+                        <th>No <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Collected by|Created On  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Name  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Email  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Contact  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Status  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Quick Action</th>
+                    </tr>
+                </thead>
+                <tbody class="custom-tbody">
+                    {% for lead in leads %}
+                    <tr data-source="{{ lead.source }}">
+                        <td>{{ forloop.counter0|add:leads.start_index }}</td>
+                        <td class="nowrap-date"> {{lead.collected_by}} ( {{ lead.added_date }} | {{ lead.added_time|time:"H:i:s" }} )</td>
+                        <td>{{ lead.name }}</td>
+                        <td>{{ lead.email }}</td>
+                        <td><i class="bi bi-telephone"></i> {{ lead.contact }}</td>
+                
+                        <td>
+                            {% if lead.waste_data == 1 %}
+                            <span class="badge badge-pill bg-danger text-white"> Waste</span>
+                            {% elif lead.status == 0 %}
+                            <span class="badge badge-pill bg-primary text-white"> unverify</span>
+                            {% else %}
+                            <span class="badge badge-pill bg-success text-white"> Verified</span>
+                            
+                            {% endif %}
+                        </td>
+                        <!-- Quick Action -->
+                        <td>
+                            <button class="btn btn-outline-purple view-lead-btn" data-lead-id="{{ lead.id }}">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                            <button class="btn btn-light view-activity-btn" data-lead-id="{{ lead.id }}">
+                                <i class="bi bi-file-earmark"></i>
+                            </button>
+                            <button class="btn btn-light view-repeated-btn" data-lead-id="{{ lead.id }}">
+                                Repeated
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        
+
+
+
+        <div class="d-flex justify-content-center justify-content-md-end align-items-center mt-3 flex-wrap gap-2">
+            <div class="btn-group" role="group">
+                {% if leads.has_previous %}
+                    <a class="btn btn-outline-light btn-sm" href="?page={{ leads.previous_page_number }}&per_page={{ per_page }}" title="Previous">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-secondary btn-sm" disabled title="Previous">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                {% endif %}
+        
+                <button class="btn btn-outline-light btn-sm text-white fw-semibold" disabled>
+                    Page {{ leads.number }} of {{ leads.paginator.num_pages }}
+                </button>
+        
+                {% if leads.has_next %}
+                    <a class="btn btn-outline-light btn-sm" href="?page={{ leads.next_page_number }}&per_page={{ per_page }}" title="Next">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-secondary btn-sm" disabled title="Next">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+
+        
+    {% else %}
+        <img src="{% static 'img/empty.png' %}" class="img-fluid d-block mx-auto mt-5" alt="No Leads Found" style="max-height: 300px;">
+    {% endif %}
+</div> 
+</div>
+
+
+
+<script> 
+
+document.getElementById('downloadExcel').addEventListener('click', function () {
+    const table = document.getElementById('leadTable');
+    if (!table) {
+        alert('No table found to export!');
+        return;
+    }
+
+    
+    const rows = [['Collected By', 'Added Date', 'Added Time', 'Name', 'Email', 'Contact', 'Lead Source']];
+    for (let i = 1; i < table.rows.length; i++) {
+        const row = table.rows[i];
+        const collectedText = row.cells[1]?.innerText || '';
+        const collectedParts = collectedText.match(/(.*?)\s*\(\s*(.*?)\s*\|\s*(.*?)\s*\)/);
+        const collectedBy = collectedParts ? collectedParts[1].trim() : '';
+        const addedDate = collectedParts ? collectedParts[2].trim() : '';
+        const addedTime = collectedParts ? collectedParts[3].trim() : '';
+        const name = row.cells[2]?.innerText.trim() || '';
+        const email = row.cells[3]?.innerText.trim() || '';
+        const contact = row.cells[4]?.innerText.replace('📞', '').trim() || '';
+        const leadSource = row.dataset.source || '—';
+
+        rows.push([collectedBy, addedDate, addedTime, name, email, contact, leadSource]);
+    }
+
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+
+
+    const colWidths = [
+        { wch: 20 }, 
+        { wch: 15 }, 
+        { wch: 12 }, 
+        { wch: 20 }, 
+        { wch: 30 }, 
+        { wch: 15 }, 
+        { wch: 20 }  
+    ];
+    ws['!cols'] = colWidths;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Leads List");
+
+    XLSX.writeFile(wb, "Leads_List.xlsx");
+});
+
+
+
+document.getElementById('downloadPDF').addEventListener('click', function () {
+    const table = document.getElementById('leadTable');
+    if (!table) {
+        alert('No table found to export!');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const columns = ["Collected By", "Added Date", "Added Time", "Name", "Email", "Contact", "Lead Source"];
+    const data = [];
+
+    for (let i = 1; i < table.rows.length; i++) {
+        const row = table.rows[i];
+        const collectedText = row.cells[1]?.innerText || '';
+        const collectedParts = collectedText.match(/(.*?)\s*\(\s*(.*?)\s*\|\s*(.*?)\s*\)/);
+        const collectedBy = collectedParts ? collectedParts[1].trim() : '';
+        const addedDate = collectedParts ? collectedParts[2].trim() : '';
+        const addedTime = collectedParts ? collectedParts[3].trim() : '';
+        const name = row.cells[2]?.innerText.trim() || '';
+        const email = row.cells[3]?.innerText.trim() || '';
+        const contact = row.cells[4]?.innerText.replace('📞', '').trim() || '';
+        const leadSource = row.dataset.source || '—';
+
+        data.push([collectedBy, addedDate, addedTime, name, email, contact, leadSource]);
+    }
+
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const title = "Leads List";
+    const textWidth = doc.getTextWidth(title);
+    const textX = (pageWidth - textWidth) / 2;
+
+    doc.setFontSize(14);
+    doc.text(title, textX, 15);
+
+
+    doc.autoTable({
+        startY: 22,
+        head: [columns],
+        body: data,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [22, 160, 133] },
+        theme: 'grid'
+    });
+
+    doc.save("Leads_List.pdf");
+});
+</script>
+
+
+
+<!-- For Excel Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- For PDF Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+
+
+<!-- Modal of userguide -->
+<div class="modal fade" id="userGuideModal" tabindex="-1" aria-labelledby="userGuideModalLabel" aria-hidden="true"> 
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-light" style="border-radius: 10px;">
+      
+      
+      <div class="modal-header border-0 d-flex justify-content-between align-items-center">
+        <h5 class="modal-title" id="userGuideModalLabel">User Guide</h5>
+        <button type="button" class="btn p-0 border-0 ms-auto" data-bs-dismiss="modal" aria-label="Close">
+          <span style="color: red; font-size: 2rem;">&times;</span>
+        </button>
+      </div>
+      <hr>
+
+   
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <h6><u>How to use filter options ?</u></h6>
+
+        <h6 class="mt-3"><strong>Purpose of the "Number of Data per Page" Select Box</strong></h6><br>
+        <p>
+          The "Number of Data per Page" select box is a user interface element designed to allow users to control how many data entries are displayed on each page of a paginated list. This functionality is particularly useful when viewing large datasets, as it provides flexibility and control over the amount of data presented at one time.
+        </p><br>
+
+        <h6 class="mt-3"><strong>How to Use the Select Box</strong></h6><br>
+        <p><strong>Locate the Select Box:</strong> The select box is labeled with a tooltip that reads "Number of data per page". It is typically found at the top or bottom of a data table or list.</p><br>
+        
+        <p><strong>Current Selection:</strong> If you have previously chosen a number, that number will be selected and displayed as the current selection. For example, if you previously selected 50, you will see "50" as the selected option.</p><br>
+
+        <p><strong>Default Options:</strong> The select box provides several predefined options for the number of data entries to display per page. The available options are:</p><br>
+        <ul>
+          <li>20</li><li>50</li><li>100</li><li>150</li><li>200</li><li>250</li><li>500</li><li>1000</li>
+        </ul><br>
+
+        <h6 class="mt-3"><strong>Selecting an Option:</strong></h6><br>
+        <ul>
+          <li>Click on the select box to view the dropdown list of options.</li>
+          <li>Click on your preferred option. For instance, if you want to see 100 data entries per page, select "100".</li>
+          <li><strong>Effect of Selection:</strong> Once you make a selection, the data table or list will automatically update to show the specified number of entries per page. This helps in managing the data view and improves navigation through large datasets.</li>
+        </ul><br>
+
+        <h6 class="mt-3">Use Case Scenarios:</h6><br>
+        <p><strong>Minimal Data View:</strong> If you prefer to see fewer data entries at a time for quicker loading times or easier viewing, you might choose 20 or 50.</p>
+        <p><strong>Comprehensive Data View:</strong> If you need to view more data entries at once without navigating through multiple pages, you might choose 250, 500, or even 1000.</p>
+        <p><strong>Tooltip Information:</strong> Hover over the select box to see a tooltip with additional information about its purpose ("Number of data per page").</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal fade" id="leadDetailsModal" tabindex="-1" aria-labelledby="leadDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark text-light rounded-3 border-0 px-3 py-2">
+  
+    
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="leadDetailsModalLabel">Lead Details</h5>
+          <button type="button" class="btn p-0 border-0 ms-auto" data-bs-dismiss="modal" aria-label="Close">
+            <span style="color: red; font-size: 2rem;">&times;</span>
+        </button>
+        </div>
+  
+        
+        <div class="modal-body">
+         
+            <div class="mb-3">
+                <h6 class="fw-bold mb-2">Basic Details</h6>
+                <div class="d-flex justify-content-between">
+                <span><i class="bi bi-person-fill me-1"></i><span id="leadName">-</span></span>
+                <span><i class="bi bi-telephone-fill me-1"></i><span id="leadContact">-</span></span>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                <span><i class="bi bi-envelope-fill me-1"></i><span id="leadEmail">-</span></span>
+                </div>
+            
+                
+                <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+                <span id="verifyStatus" ></span>
+                <span class="badge bg-light" id="wasteStatus"></span>
+                <span class="badge bg-secondary" id="incompleteStatus">Not Marked as Incompleted</span>
+                </div>
+            </div><hr>
+        
+            <!-- More Details -->
+            <div>
+            <h6 class="fw-bold mb-2">More Details</h6><br>
+            <div id="moreDetails" class="px-2">
+            
+            </div>
+            </div>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  
+ 
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".view-lead-btn").forEach(button => {
+        button.addEventListener("click", function () {
+          const leadId = this.getAttribute("data-lead-id");
+  
+          fetch(`/get-lead-details-tl/${leadId}/`)
+            .then(response => response.json())
+            .then(data => {
+           
+              document.getElementById("leadName").textContent = data.name;
+              document.getElementById("leadEmail").textContent = data.email;
+              document.getElementById("leadContact").textContent = data.contact;
+              document.getElementById("verifyStatus").textContent = data.verified ? "Lead is Verified" : "Lead is Unverified";
+              document.getElementById("verifyStatus").classList.toggle("text-danger", !data.verified);
+              document.getElementById("verifyStatus").classList.toggle("text-success", data.verified);
+
+              document.getElementById("wasteStatus").textContent = data.waste_data ? "Lead is waste" : "Lead is not a waste";
+              document.getElementById("wasteStatus").classList.toggle("text-success", !data.waste_data);
+              document.getElementById("wasteStatus").classList.toggle("text-danger", data.waste_data);
+
+              document.getElementById("incompleteStatus").textContent = data.incomplete_status ? "Marked as Incompleted" : "Not Marked as Incompleted";
+              document.getElementById("incompleteStatus").classList.toggle( !data.incomplete_status);
+              document.getElementById("incompleteStatus").classList.toggle("text-danger", data.incomplete_status);
+  
+      
+              const moreDetailsDiv = document.getElementById("moreDetails");
+              moreDetailsDiv.innerHTML = "";
+              for (const [key, value] of Object.entries(data.extra_fields)) {
+                const row = document.createElement("div");
+                row.className = "d-flex justify-content-between";
+                row.innerHTML = `<span>${key}</span><span>: ${value}</span>`;
+                moreDetailsDiv.appendChild(row);
+              }
+  
+   
+              new bootstrap.Modal(document.getElementById("leadDetailsModal")).show();
+            });
+        });
+      });
+    });
+  </script> 
+
+  <script>
+    const clientCategoryMap = JSON.parse('{{ client_category_json|escapejs }}');
+
+    
+    document.getElementById('clientDropdown').addEventListener('change', function () {
+        const clientId = this.value;
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        categoryDropdown.innerHTML = '<option value="">Select Category</option>';
+
+        if (clientCategoryMap[clientId]) {
+            clientCategoryMap[clientId].forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                categoryDropdown.appendChild(option);
+            });
+        }
+    });
+
+   
+    document.getElementById('filterBtn').addEventListener('click', function () {
+        const clientId = document.getElementById('clientDropdown').value;
+        const categoryId = document.getElementById('categoryDropdown').value;
+        const executiveId = document.getElementById('executiveDropdown').value;
+        const status = document.getElementById('statusDropdown').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+
+   
+        const params = new URLSearchParams();
+        if (clientId) params.append('client_id', clientId);
+        if (categoryId) params.append('category_id', categoryId);
+        if (executiveId) params.append('executive_id', executiveId);
+        if (status) params.append('lead_status', status);
+        if (fromDate) params.append('from_date', fromDate);
+        if (toDate) params.append('to_date', toDate);
+
+
+        window.location.href = `?${params.toString()}`;
+    });
+
+    
+    window.addEventListener('DOMContentLoaded', () => {
+        const selectedClient = document.getElementById('clientDropdown').value;
+        if (selectedClient) {
+            document.getElementById('clientDropdown').dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
+
+  
+
+
+  
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            const searchTerm = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll("#leadTable tbody tr");
+            let matchCount = 0;
+    
+            rows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                const isMatch = rowText.includes(searchTerm);
+                row.style.display = isMatch ? '' : 'none';
+                if (isMatch) matchCount++;
+            });
+    
+            // Optionally show a "No results found" row
+            const tbody = document.querySelector("#leadTable tbody");
+            const existingNoResults = document.querySelector("#leadTable tbody .no-results");
+    
+            if (matchCount === 0 && !existingNoResults) {
+                const noRow = document.createElement('tr');
+                noRow.classList.add("no-results");
+                noRow.innerHTML = `<td colspan="7" class="text-center text-danger">No matching leads found.</td>`;
+                tbody.appendChild(noRow);
+            } else if (matchCount > 0 && existingNoResults) {
+                existingNoResults.remove();
+            }
+        });
+    </script>
+
+  
+   
+ <!-- Activity Tracker Modal -->
+ <div class="modal fade" id="activityTrackerModal" tabindex="-1" aria-labelledby="activityTrackerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="activityTrackerModalLabel">Activity Tracker</h5>
+          <button type="button" class="btn p-0 border-0 ms-auto" data-bs-dismiss="modal" aria-label="Close">
+            <span style="color: red; font-size: 2rem;">&times;</span>
+        </button>
+        </div>
+  
+        <div class="modal-body" id="activityTrackerContent">
+          <!-- Dynamic Lead Details will be loaded here -->
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="printButton">
+            <i class="bi bi-printer"></i> Print
+          </button>
+          <button type="button" class="btn btn-danger" id="downloadPdfButton">
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+     <div class="modal fade" id="ExistModal" tabindex="-1" aria-labelledby="ExistModalModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-dialog-centered modal-lg" >
+      <div class="modal-content" style="background-color: black;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="ExistModalLabel" >Exist Leads</h5>
+          <button type="button" class="btn p-0 border-0 ms-auto" data-bs-dismiss="modal" aria-label="Close" onclick="location.reload()">
+            <span style="color: red; font-size: 2rem;">&times;</span>
+        </button>
+        </div>
+  
+
+            <table style="background-color: black;" id="ExistTable">
+              <thead>
+                <th>SL No</th>
+              <th>Collected On</th>
+              <th>Collected By</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              </thead>
+              <tbody>
+
+              </tbody>
+            </table>
+
+      </div>
+    </div>
+  </div>
+  <!-- Script to Load Details -->
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.view-activity-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const leadId = this.getAttribute('data-lead-id');
+
+      fetch(`/lead-details/${leadId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const lead = data.lead;
+
+            // Followup Track
+            const followupHtml = lead.followup_track.length
+              ? lead.followup_track.map(f => `
+                <div class="border-bottom pb-2 mb-2">
+                  <p><strong>Connected On:</strong> ${f.connected_on}</p>
+                  <p><strong>Contact By:</strong> ${f.contact_by}</p>
+                  <p><strong>Status:</strong> ${f.status}</p>
+                  <p><strong>Response:</strong> ${f.response}</p>
+                </div>
+              `).join('')
+              : `<p></p>`;
+
+            // History Track
+       
+            const historyHtml = lead.history_track.length
+              ? `<div class="history-grid">
+                  ${lead.history_track
+                    .map(
+                      (h) => `
+                    <div class="history-item">
+                      <p><strong>Allocated On:</strong> ${h.allocated_on}</p>
+                      <p><strong>Note:</strong> ${h.note}</p>
+                    </div>
+                    <div class="history-item">
+                      <p><strong>Allocated To:</strong> ${h.allocated_to}</p>
+                      <p><strong>Final Status:</strong> ${h.final_status}</p>
+                    </div>
+                  `
+                    )
+                    .join('')}
+                </div>`
+              : `<p>-</p>`;
+
+
+            // Lead More Details
+            const moreDetails = lead.more_details.map(
+              d => `<p><i class="bi bi-dot"></i> ${d.field_name}: ${d.field_data}</p>`
+            ).join('');
+
+            let wasteLeadHtml = `<p>-</p>`;
+            if (lead.waste_data) {
+              const confirmationIcon =
+                lead.waste_data.confirmation === 1
+                  ? `<i class="bi bi-check-circle-fill text-success"></i> Head`
+                  : `<i class="bi bi-x-circle-fill text-danger"></i> Head`;
+
+              wasteLeadHtml = `
+                <p><strong>${confirmationIcon}</strong></p>
+                <p><strong>Marked By:</strong> Telecaller (${lead.waste_data.telecaller_name})</p>
+                <p><strong>Reason:</strong> ${lead.waste_data.reason}</p>
+                <p><strong>Head Reason:</strong> ${lead.waste_data.head_reason}</p>
+              `;
+            }
+
+            // Modal Content
+            const content = `
+              <div class="container-fluid text-light" id="activityContentToExport">
+                <div class="row">
+                  <!-- Left Column -->
+                  <div class="col-md-4 border-end">
+                    <h5 class="fw-bold mb-3">Lead Details</h5>
+                    <p><strong>Name:</strong> ${lead.name}</p>
+                    <p><strong>Email:</strong> ${lead.email}</p>
+                    <p><strong>Contact:</strong> ${lead.contact}</p>
+
+                    <h6 class="fw-bold mt-4">Client Details</h6>
+                    <p><strong>Client:</strong> ${lead.client_details.client_name}</p>
+                    <p><strong>Category:</strong> ${lead.client_details.lead_category}</p>
+
+                    <h6 class="fw-bold mt-4">Lead More Details</h6>
+                    ${moreDetails || '<p>-</p>'}
+                  </div>
+
+                  <!-- Middle Column (Activity Panel) -->
+                  <div class="col-md-5">
+                    <h5 class="fw-bold mb-3">Activity Panel</h5>
+
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">Followup Track</h6>
+                      ${followupHtml}
+                    </div>
+
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">History Track</h6>
+                      <div class="row">
+                        ${lead.history_track.map(h => `
+                          <div class="col-md-6">
+                            <p><strong>Allocated On:</strong> ${h.allocated_on}</p>
+                            <p><strong>Allocated To:</strong> ${h.allocated_to}</p>
+                          </div>
+                          <div class="col-md-6">
+                            <p><strong>Note:</strong> ${h.note}</p>
+                            <p><strong>Final Status:</strong> ${h.final_status}</p>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h6 class="text-danger fw-bold">Waste Lead Reason</h6>
+                      ${wasteLeadHtml}
+                    </div>
+                  </div>
+
+                  <!-- Right Column (Collected / Allocated Info) -->
+                  <div class="col-md-3">
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">Lead Collected By</h6>
+                      <p><strong>${lead.collected_by}</strong></p>
+                      <p>${lead.added_date} - ${lead.added_time}</p>
+                    </div>
+
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">Lead Allocated To</h6>
+                      <p><strong>${lead.allocated_to}</strong></p>
+                      <p>${lead.allocated_date} - ${lead.allocated_time}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+
+
+
+            document.getElementById('activityTrackerContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('activityTrackerModal')).show();
+          } else {
+            alert('Failed to load lead details.');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+  });
+
+
+
+  
+
+// Print Button
+document.getElementById('printButton').addEventListener('click', function () {
+  const content = document.getElementById('activityContentToExport').innerHTML;
+  const myWindow = window.open('', '', 'width=900,height=700');
+  myWindow.document.write(`
+    <html>
+      <head>
+        <title>Lead Details</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+        <style>
+          body { background-color: #ffffff; color: #000000; padding: 20px; font-family: Arial, sans-serif; }
+          h6 { font-weight: bold; margin-top: 20px; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+          p { margin-bottom: 8px; font-size: 14px; }
+          .section { margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        <h3 style="text-align: center; margin-bottom: 30px;">Lead Details Report</h3>
+        <div class="container">
+          <div class="row">
+            ${content}
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+  myWindow.document.close();
+  myWindow.focus();
+  myWindow.print();
+});
+
+
+document.getElementById('downloadPdfButton').addEventListener('click', function () {
+  const content = document.getElementById('activityContentToExport');
+
+// Create a container to hold the printable content
+const printable = document.createElement('div');
+printable.innerHTML = `
+  <html>
+    <head>
+      <title>Lead Details Report</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+      <style>
+        body {
+          background-color: #fff;
+          color: #000;
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+        h3 {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        h6 {
+          font-weight: bold;
+          margin-top: 20px;
+          font-size: 16px;
+          border-bottom: 1px solid #ccc;
+          padding-bottom: 5px;
+        }
+        p {
+          font-size: 14px;
+          margin-bottom: 6px;
+        }
+        .row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+        }
+        .col-md-6 {
+          flex: 1;
+          min-width: 300px;
+        }
+      </style>
+    </head>
+    <body>
+      <h3>Lead Details Report</h3>
+      <div class="row">
+        ${content.innerHTML}
+      </div>
+    </body>
+  </html>
+`;
+
+  html2pdf().from(printable).set({
+    margin: 0.5,
+    filename: 'lead-details.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  }).save();
+});
+
+
+  });
+  </script>
+  
+  <!-- Import html2pdf.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('#leadTable th');
+
+    headers.forEach((header, index) => {
+        const icon = header.querySelector('i');
+        if (icon) {
+            header.addEventListener('click', function () {
+                const table = header.closest('table');
+                const tbody = table.querySelector('tbody');
+                const rowsArray = Array.from(tbody.querySelectorAll('tr'));
+                const ascending = icon.classList.contains('asc');
+
+                // Remove sort classes from all icons
+                document.querySelectorAll('#leadTable i').forEach(i => {
+                    i.classList.remove('asc', 'desc');
+                    i.classList.remove('fa-caret-up', 'fa-caret-down');
+                    i.classList.add('fa-caret-down');
+                });
+
+                // Apply sort class to the clicked icon
+                icon.classList.toggle('asc', !ascending);
+                icon.classList.toggle('desc', ascending);
+                icon.classList.toggle('fa-caret-up', !ascending);
+                icon.classList.toggle('fa-caret-down', ascending);
+
+                // Sorting
+                rowsArray.sort((rowA, rowB) => {
+                    let cellA = rowA.querySelectorAll('td')[index]?.innerText.trim().toLowerCase();
+                    let cellB = rowB.querySelectorAll('td')[index]?.innerText.trim().toLowerCase();
+
+                    // Special handling if column is Date
+                    if (index === 0) {
+                        cellA = new Date(cellA);
+                        cellB = new Date(cellB);
+                        return ascending ? cellB - cellA : cellA - cellB;
+                    }
+
+                    if (!isNaN(cellA) && !isNaN(cellB)) {  // If it's numeric (like contact)
+                        return ascending ? cellB - cellA : cellA - cellB;
+                    }
+
+                    return ascending
+                        ? cellB.localeCompare(cellA)
+                        : cellA.localeCompare(cellB);
+                });
+
+                // Re-append sorted rows
+                rowsArray.forEach(row => tbody.appendChild(row));
+            });
+        }
+    });
+});
+
+</script> 
+ 
+
+<script>
+    async function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+    
+        // Step 1: Fetch data from Django API
+        const response = await fetch('/export-leads-pdf/');  // <-- your Django API URL
+        const data = await response.json();
+        const leads = data.leads;
+    
+        // Step 2: Setup PDF columns
+        const columns = [
+            { header: "Collected By", dataKey: "collected_by" },
+            { header: "Added Date", dataKey: "added_date" },
+            { header: "Added Time", dataKey: "added_time" },
+            { header: "Name", dataKey: "name" },
+            { header: "Email", dataKey: "email" },
+            { header: "Contact", dataKey: "contact" },
+            { header: "Lead Source", dataKey: "lead_source" },
+        ];
+    
+        // Step 3: Generate PDF
+        doc.text("Leads Report", 80, 10);
+    
+        doc.autoTable({
+            columns: columns,
+            body: leads,
+            startY: 20,
+            theme: 'striped',
+            styles: { fontSize: 8 },
+            headStyles: {
+                fillColor: [22, 160, 133],
+                textColor: 255,
+                halign: 'center',
+            },
+            bodyStyles: {
+                halign: 'center',
+            }
+        });
+    
+        doc.save('leads.pdf');
+    }
+    </script>
+    <script>
+  document.querySelectorAll('.view-repeated-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const leadId = this.getAttribute('data-lead-id');
+
+      fetch(`/Get_Repeated_Leads/${leadId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const lead = data.leads;
+            const tbody = document.querySelector('#ExistTable tbody');
+                    lead.forEach((item,index) => {
+                    const Row = `
+                    <tr>
+                      <td>${index+1}</td>
+                        <td>${item.added_date}</td>
+                        <td>${item.collected_by__name}</td>
+                        <td>${item.name}</td>
+                        <td>${item.email}</td>
+                        <td>${item.contact}</td>
+                    </tr>
+                    `;
+                        tbody.insertAdjacentHTML('beforeend',Row);
+                    });
+          
+            new bootstrap.Modal(document.getElementById('ExistModal')).show();
+          } else {
+            alert('Failed to load lead details.');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+  });
+</script>
+         
+{% endblock %}

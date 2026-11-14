@@ -1,0 +1,234 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Assign to Executive{% endblock %}
+
+{% block content %}
+
+<!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 20px; right: 10px; z-index: 99;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- /Messages -->
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/allocate_work.css' %}">
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-3">Assign to Executives</h5>
+  <div class="input-group w-auto mb-3">
+    <input type="text" class="form-control" placeholder="Search..." id="searchInput">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle" id="targetTable">
+      <thead class="text-center">
+        <tr>
+          <th>No</th>
+          <th>Client Name</th>
+          <th>Start Date</th>
+          <th>Due Date</th>
+          <th>Team Lead</th>
+          <th>Task Details</th>
+          <th>Task</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in structured_assignments %}
+        <tr class="text-center">
+          <td>{{ forloop.counter }}</td>
+          <td class="text-start table_en_md">
+            <div class="d-flex align-items-center">
+              <img src="{% if row.client_profile %}{{ row.client_profile }}{% else %}{% static 'img/default-profile.png' %}{% endif %}" class="rounded-circle me-2" width="40" height="40">
+              <span>{{ row.client_name }}</span>
+            </div>
+          </td>
+          <td class="table_en_sm">{{ row.start_date }}</td>
+          <td class="table_en_sm">{{ row.due_date }}</td>
+          <td class="table_en_sm">{{ row.team_lead }}</td>
+          <td class="table_en_sm">
+            <button class="btn btn-sm btn-outline-info view-task-btn"
+              data-clientname="{{ row.client_name }}"
+              data-taskname="{{ row.task_name }}"
+              data-date="{{ row.start_date|date:'Y-m-d' }}"
+              data-assignid="{{ row.assign_id }}"
+              data-is-category="{{ row.is_category|yesno:'1,0' }}"
+              {% if row.is_category %}
+                data-categoryid="{{ row.category_id }}"
+                data-categoryname="{{ row.category_name }}"
+              {% else %}
+                data-taskid="{{ row.task_id }}"
+              {% endif %}>
+              View
+            </button>
+          </td>
+          <td class="table_en_md">
+            {{ row.task_name }}
+            {% if row.is_category %}<br><small>{{ row.category_name }}</small>{% endif %}
+          </td>
+          <td class="table_en_sm">
+            <button class="btn btn-sm btn-outline-success assign-btn"
+              data-taskid="{{ row.task_id|default:'' }}"
+              data-categoryid="{{ row.category_id|default:'' }}"
+              data-is-category="{{ row.is_category|yesno:'1,0' }}"
+              data-taskname="{{ row.task_name }}"
+              data-teamleadid="{{ row.team_lead_id }}"
+              data-teamallocid="{{ row.assign_id }}">
+              Assign
+            </button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted">No tasks found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- modals -->
+<!-- view task details -->
+<div class="modal fade" id="viewTaskDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Client Name</label>
+          <input type="text" id="view_client_name" class="form-control" readonly>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Tasks</label>
+          <ul id="view_task_details" class="text-white"></ul>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Allocated Date</label>
+          <input type="date" id="view_allocated_date" name="start_date" class="form-control" readonly>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Task Description</label>
+          <textarea id="view_description" class="form-control" rows="3" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- assign tasks -->
+<div class="modal fade" id="assignExecModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <form method="POST" enctype="multipart/form-data" id="assignExecForm">
+        {% csrf_token %}
+        <input type="hidden" name="task_id" id="assign_task_id">
+        <input type="hidden" name="team_allocation_id" id="team_allocation_id">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Assign to Employees</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-2">
+            <label>Task</label>
+            <input type="text" id="assign_task_name_display" class="form-control" readonly>
+          </div>
+          
+          <div class="mb-2 d-none" id="lead_category_dropdown_container">
+            <label>Lead Category</label>
+            <select name="lead_category" id="lead_category_dropdown" class="form-select" required>
+              <option selected disabled>Select Category</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label>Select Employee</label>
+            <select name="executive" id="exec_dropdown" class="form-select" required>
+              <option selected disabled>Select Employee</option>
+              <!-- Options will be loaded via JS -->
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label>Start Date</label>
+            <input type="date" name="start_date" class="form-control" required>
+          </div>
+
+          <div class="mb-2">
+            <label>Due Date</label>
+            <input type="date" name="due_date" class="form-control" required>
+          </div>
+
+          <div class="mb-2">
+            <label>Target</label>
+            <input type="number" name="target" class="form-control" required>
+          </div>
+
+          <div class="mb-2">
+            <label>More About Work</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+          </div>
+          <!-- File Upload + Download -->
+          <div class="mb-2">
+            <label>File</label>
+            <input type="file" name="file" class="form-control">
+            <div class="mt-2" id="work_file_download_link" style="display: none;">
+              <a href="#" class="btn btn-outline-light btn-sm" target="_blank" id="download_file_btn">Download Existing File</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" id="clearAssignExecBtn">Clear</button>
+          <button type="submit" class="btn btn-outline-success">Assign</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script src="{% static 'dm_head/js/assign_exec.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearSearch");
+    const rows = document.querySelectorAll("#targetTable tbody tr");
+
+    function filterRows() {
+      const searchTerm = searchInput.value.toLowerCase();
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("keyup", filterRows);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      filterRows();
+    });
+  });
+</script>
+{% endblock %}

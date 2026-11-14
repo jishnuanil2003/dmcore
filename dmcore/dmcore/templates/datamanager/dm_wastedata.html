@@ -1,0 +1,57 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block title %}Data Manager Dashboard{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/dashboard.css' %}">
+
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Waste Data Management</p>
+    </div>
+  </div>
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+
+    <div class="col-md-4 mb-4"> 
+  <div class="card card-common">
+    <a href="{% url 'dm_pending_wastedata' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+        <h5 class="mb-0">Waste Data Check</h5>
+        <i class="fas fa-hourglass-half text-white card-icon"></i>
+      </div>
+      <p>List of leads marked as waste and waiting for conformation.</p>
+    </a>
+  </div>
+</div>
+
+<div class="col-md-4 mb-4">
+  <div class="card card-common">
+    <a href="{% url 'dm_approved_wastedata' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+        <h5 class="mb-0">Approved Wasted Data</h5>
+        <i class="fas fa-check-circle text-success card-icon"></i>
+      </div>
+      <p>Click to view all approved wasted leads of different clients.</p>
+    </a>
+  </div>
+</div>
+
+
+
+
+  </div>
+</div>
+
+
+{% endblock content %}

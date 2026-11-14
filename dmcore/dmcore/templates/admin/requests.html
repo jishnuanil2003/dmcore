@@ -1,0 +1,66 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<!-- Styling -->
+
+<style>
+    @media (max-width: 576px) {
+        .btn-mobile-margin {
+            margin-top: 5px; /* Adjust as needed */
+        }
+    }
+    
+</style>
+<div class="row mt-4" style="background-color: #333333;border-radius: 15px;">
+    <h4 class="text-white text-center w-100 m-0">Login requests</h4>
+    <div class="table-responsive p-3">
+        <table class="table table-striped table-bordered table-dark text-white">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Employee Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Designation</th>
+                    <th>Dashboard</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employee_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ emp.name }}</td>
+                    <td>{{ emp.email }}</td>
+                    <td>{{ emp.contact_number }}</td>
+                    <td>{{ emp.designation.name }}</td>
+                    <td>{{ emp.designation.dashboard_id }}</td>
+
+                    <td>
+                        <form action="{% url 'accept_user' emp.login.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                        </form>
+                        <form action="{% url 'decline_user' emp.login.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm btn-mobile-margin">Decline</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center" style="color: white;">No records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+
+
+        </table>
+    </div>
+    
+  
+</div>
+
+
+{% endblock content %}

@@ -1,0 +1,335 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+<style>
+
+  .lead-action .form-label {
+    color: #fff !important;
+    font-weight: 500;
+  }
+
+  .lead-action .form-control {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #444;
+    border-radius: 8px;
+  }
+
+  .lead-action .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: none;
+  }
+
+
+.export-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.export-buttons .btn {
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+
+.btn-all {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+}
+.btn-all:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+
+.btn-pdf {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+}
+.btn-pdf:hover {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+}
+
+
+.btn-excel {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+}
+.btn-excel:hover {
+  background-color: #007bff !important;
+  color: #fff !important;
+}
+
+
+
+  table.dataTable {
+    color: #fff;
+  }
+
+  table.dataTable th,
+  table.dataTable td {
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+ 
+  @media (max-width: 768px) {
+    .export-buttons {
+      justify-content: center;
+      margin-top: 10px;
+    }
+  }
+
+
+ 
+
+</style>
+
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Platform Leads</p>
+    </div>
+  </div>
+
+
+<div class="container-fluid mt-3 comn_table_bg">
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+    <h5 class="text-white mb-0">
+    {{ platform_name|default:"All Platforms" }} Lead List - [ 
+    <span class="text-info">{{ leads|length }}</span> ]
+    </h5>
+
+    <div class="export-buttons">
+      <a href="{% url 'dm_platform_lead_details' %}?platform={{ platform_name|urlencode }}"  class="text-decoration-none text-white">
+  <button type="button" class="btn btn-all">
+    <i class="bi bi-file-earmark-text me-1"></i> All Data
+  </button>
+</a>
+      <button class="btn btn-pdf"><i class="bi bi-filetype-pdf me-1"></i> PDF</button>
+      <button class="btn btn-excel"><i class="bi bi-filetype-xls me-1"></i> Excel</button>
+    </div>
+  </div>
+
+
+  <form method="get" id="filterForm">
+    <input type="hidden" name="platform" value="{{ platform_name }}">
+    <div class="lead-action">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label for="fromDate" class="form-label mb-1">From Date</label>
+          <input type="date" id="fromDate" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="toDate" class="form-label mb-1">To Date</label>
+          <input type="date" id="toDate" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
+        </div>
+
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-primary mt-3">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+
+   <div class="row mb-3">
+        <div class="col-12 col-md-auto ms-auto">
+        <input type="text" placeholder="Search..." class="form-control bg-dark text-white w-100 "  id="searchInput">
+        </div>
+    </div>
+  <hr class="border-secondary mt-4">
+
+  {% if leads %}
+  <div class="table-responsive mt-3">
+    <table id="dataBankTable" class="table table-dark table-striped table-hover align-middle">
+
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Collected Date</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Client Name</th>
+          <th>Collected For</th>
+          <th>Collected By</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in leads %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ entry.generated_date }}</td>
+          <td>{{ entry.lead.name }}</td>
+          <td>{{ entry.lead.email }}</td>
+          <td>{{ entry.lead.contact }}</td>
+          <td>{{ entry.lead.lead_category.client_task.client.client_name }}</td>
+          <td>{{ entry.lead.lead_category.collection_for }}</td>
+          <td>{{ entry.lead.collected_by }}</td>
+          <td>{{ entry.lead_status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+    <p id="noRecords" class="text-danger text-center mt-3 fw-bold" style="display: none;">
+      No records found.
+    </p>
+
+  </div>
+
+  {% else %}
+  <div class="text-white text-center mt-5">
+    <h4>No leads found.</h4>
+  </div>
+  {% endif %}
+</div>
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const pdfBtn = document.querySelector(".btn-pdf");
+  const excelBtn = document.querySelector(".btn-excel");
+
+
+  pdfBtn.addEventListener("click", function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt', 'a4'); 
+    const table = document.querySelector("#dataBankTable");
+
+    doc.text("{{ platform_name|default:'All Platforms' }} Lead List", 40, 40);
+    doc.autoTable({
+      html: table,
+      startY: 60,
+      theme: 'grid',
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      styles: { fontSize: 8, cellPadding: 3 },
+    });
+
+    doc.save("Lead_List_{{ platform_name|default:'All' }}.pdf");
+  });
+
+
+  excelBtn.addEventListener("click", function() {
+    const table = document.getElementById("dataBankTable");
+
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table, { raw: true });
+
+  
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+      const cellAddress = XLSX.utils.encode_cell({ r: R, c: 1 }); 
+      const cell = ws[cellAddress];
+      if (cell && typeof cell.v === 'string' && cell.v.match(/^\d{4}-\d{2}-\d{2}/)) {
+        cell.t = 's'; 
+      }
+    }
+
+
+    const columnWidths = [
+      { wch: 6 },  
+      { wch: 15 },  
+      { wch: 20 },  
+      { wch: 25 }, 
+      { wch: 15 },  
+      { wch: 25 }, 
+      { wch: 20 },  
+      { wch: 20 }, 
+      { wch: 15 }  
+    ];
+    ws['!cols'] = columnWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, "Leads");
+    XLSX.writeFile(wb, "Lead_List_{{ platform_name|default:'All' }}.xlsx");
+  });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("searchInput");
+  const table = document.getElementById("dataBankTable");
+  const rows = table.getElementsByTagName("tr");
+  const noRecords = document.getElementById("noRecords");
+
+  searchInput.addEventListener("keyup", function () {
+    const filter = searchInput.value.toLowerCase();
+    let visibleCount = 0;
+
+
+    for (let i = 1; i < rows.length; i++) {
+      const cells = rows[i].getElementsByTagName("td");
+      let rowMatch = false;
+
+     
+      for (let j = 0; j < cells.length; j++) {
+        const cell = cells[j];
+        if (cell && cell.textContent.toLowerCase().includes(filter)) {
+          rowMatch = true;
+          break;
+        }
+      }
+
+      
+      if (rowMatch) {
+        rows[i].style.display = "";
+        visibleCount++;
+      } else {
+        rows[i].style.display = "none";
+      }
+    }
+
+    
+    if (visibleCount === 0) {
+      noRecords.style.display = "block";
+    } else {
+      noRecords.style.display = "none";
+    }
+  });
+});
+</script>
+
+
+
+{% endblock content %}

@@ -1,0 +1,808 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+       <!-- Include Bootstrap Icons (only once in your base template) -->
+       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+        <link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+        <link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+
+        color: white;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin-top: 50px;
+    
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+
+    h2 {
+        color: #4A90E2;
+        font-size: 22px;
+        margin-bottom: 30px;
+    }
+    
+
+
+
+
+
+
+    .btn-form {
+        background-color: white;
+        color: black;
+    }
+
+
+
+    .no-leads-img {
+        width: 220px;
+        margin-top: 40px;
+        
+    }
+
+
+
+.nowrap-date {
+white-space: nowrap;
+}
+
+
+.btn-group .btn {
+    border-radius: 0.5rem;
+    margin-left: 5px;
+    color: #ffffff !important;        
+    border-color: #777 !important;      
+    background-color: transparent;
+}
+
+.btn-outline-light:hover {
+    background-color: #5c5c5c !important;
+    border-color: #aaa !important;
+}
+
+.btn-outline-secondary {
+    color: #bbb !important;
+    border-color: #555 !important;
+    background-color: transparent;
+}
+
+.btn-outline-secondary:disabled {
+    opacity: 0.4;
+    color: #999 !important;
+}
+
+@media (max-width: 576px) {
+    #leadTable th,
+    #leadTable td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .btn-group .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    #searchInput {
+        width: 100%;
+    }
+
+    .form-select {
+        width: 100%;
+    }
+}
+
+
+
+
+
+
+.modal-content {
+  border-radius: 10px;
+}
+
+
+#activityTrackerModal .modal-dialog {
+  max-width: 950px;
+}
+
+#activityTrackerModal .modal-content {
+  background-color: #1e1e2f;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+#activityTrackerModal .modal-title {
+  font-weight: 600;
+}
+
+#activityTrackerContent h5 {
+  font-size: 18px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+#activityTrackerContent h6 {
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+  color: #5bc0de;
+}
+
+#activityTrackerContent p {
+  font-size: 14px;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+#activityTrackerContent .row > div {
+  padding: 10px;
+}
+
+/* History Track grid layout */
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.history-item {
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+/* Waste Lead Reason */
+.waste-section i {
+  font-size: 1.1rem;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  #activityTrackerModal .modal-dialog {
+    max-width: 95%;
+    margin: 1rem;
+  }
+
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+  /* Modal Footer */
+  .modal-footer {
+    border-top: 1px solid #444;
+    padding-top: 10px;
+    justify-content: flex-end;
+  }
+
+
+
+  #sortIcon{
+    cursor: pointer;
+}
+
+/* Light, thin scrollbar inside modal */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+/* Firefox support */
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+</style>
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="" class="text-decoration-none text-white">Dashboard</a></li>
+        <li class="breadcrumb-item active text-white-50" aria-current="page">Leads Tracker</li>
+    </ol>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid mt-3 comn_table_bg">
+    <div class="container-fluid py-4">
+        
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <!-- Heading -->
+        <h2 class="mb-0">Leads Tracker ({{ total_leads }})</h2>
+
+        
+    </div>
+    <hr>
+    
+
+        <!-- Action Buttons -->
+        <div class="lead-action">
+          <div class="row g-2">
+                <div class="col-12 col-md-auto">
+                  <form id="perPageForm" method="get">
+                    <select name="per_page" id="recordsPerPage" class="form-select form-select-sm w-100" style="max-width: 100px;" onchange="document.getElementById('perPageForm').submit();">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                        <option value="150" {% if per_page == 150 %}selected{% endif %}>150</option>
+                        <option value="250" {% if per_page == 250 %}selected{% endif %}>250</option>
+                        <option value="500" {% if per_page == 500 %}selected{% endif %}>500</option>
+                        <option value="1000" {% if per_page == 1000 %}selected{% endif %}>1000</option>
+                    </select>
+                </form>
+              </div>
+
+            <div class="col-12 col-md-auto">
+                <select id="statusDropdown" name="lead_status" class="form-select form-select-sm w-100">
+                    <option value="">Lead Status</option>
+                    <option value="Not Attended">Not Attended</option>
+                    <option value="Allocated">Allocated</option>
+                    <option value="Opened">Opened</option>
+                    <option value="Recalled">Recalled</option>
+                    <option value="Joined">Joined</option>
+                    <option value="Closed">Closed</option>
+                  
+                </select>
+            </div>
+
+            <div class="col-12 col-md-auto">
+                <select id="statusDropdown2" name="lead_status2" class="form-select form-select-sm w-100">
+                    <option value="">Followup Status</option>
+                    <option value="Marked as waste">Marked as waste</option>
+                    {% for sts in followup_status %}
+                        <option value="{{ sts }}">{{ sts }}</option>
+                    {% endfor %}
+                    <option value="No Updation">No Updation</option>
+          
+                </select>
+            </div>
+
+              <div class="col-12 col-md-auto">
+                <select id="clientDropdown" class="form-select form-select-sm w-100">
+                    <option value="">Select Client</option>
+                    {% for client in clients %}
+                        <option value="{{ client.id }}">{{ client.client_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <select id="categoryDropdown" class="form-select form-select-sm w-100">
+                    <option value="">Select Category</option>
+                </select>
+            </div>
+
+    
+            <div class="col-12 col-md-auto">
+                <input type="date" id="fromDate" class="form-control form-control-sm w-100">
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <input type="date" id="toDate" class="form-control form-control-sm w-100">
+            </div>
+
+
+            <div class="col-12 col-md-auto">
+                <select id="telecallerDropdown" class="form-select form-select-sm w-100">
+                    <option value="">Telecaller</option>
+                    {% for hr in telecaller_list %}
+                        <option value="{{ hr.id }}">{{ hr.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+    
+            <div class="col-12 col-md-auto">
+                <input type="date" id="fromDate2" class="form-control form-control-sm w-100">
+            </div>
+    
+            <div class="col-12 col-md-auto">
+                <input type="date" id="toDate2" class="form-control form-control-sm w-100">
+            </div>
+    
+            <div class="col-auto">
+                <button class="btn btn-sm btn-outline-primary" id="filterBtn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </div><br>
+
+        {% if leads %}
+        <div class="row mb-3">
+          <div class="col-12 col-md-auto ms-auto">
+              <input type="text" class="form-control bg-dark w-100 text-light" placeholder="Search..." id="searchInput">
+          </div>
+      </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-sm mb-0 table-dark table-striped table-hover text-center" id="leadTable">
+                <thead class="custom-thead">
+                    <tr>
+                        <th>No <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Track <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Transfer Date  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Lead Name  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Email  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                        <th>Contact  <i id=sortIcon class="fa fa-caret-down"></i></th>
+                
+                    </tr>
+                </thead>
+                <tbody class="custom-tbody">
+                    {% for lead in leads %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:leads.start_index }}</td>
+                        <td>
+                            <button class="btn btn-light view-activity-btn" data-lead-id="{{ lead.id }}">
+                                <i class="bi bi-file-earmark"></i>
+                            </button>
+                            
+                        </td>
+                        <td class="nowrap-date"> {{ lead.transfer_date}} | Collected on - {{ lead.added_date }}  </td>
+                        <td>{{ lead.name }}</td>
+                        <td>{{ lead.email }}</td>
+                        <td><i class="bi bi-telephone"></i> {{ lead.contact }}</td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        
+
+
+
+        <div class="d-flex justify-content-center justify-content-md-end align-items-center mt-3 flex-wrap gap-2">
+            <div class="btn-group" role="group">
+                {% if leads.has_previous %}
+                    <a class="btn btn-outline-light btn-sm" href="?page={{ leads.previous_page_number }}&per_page={{ per_page }}" title="Previous">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-secondary btn-sm" disabled title="Previous">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                {% endif %}
+        
+                <button class="btn btn-outline-light btn-sm text-white fw-semibold" disabled>
+                    Page {{ leads.number }} of {{ leads.paginator.num_pages }}
+                </button>
+        
+                {% if leads.has_next %}
+                    <a class="btn btn-outline-light btn-sm" href="?page={{ leads.next_page_number }}&per_page={{ per_page }}" title="Next">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-secondary btn-sm" disabled title="Next">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+
+        
+    {% else %}
+        <img src="{% static 'img/empty.png' %}" class="img-fluid d-block mx-auto mt-5" alt="No Leads Found" style="max-height: 300px;">
+    {% endif %}
+</div> 
+</div>
+
+
+
+
+
+
+
+
+  
+ 
+
+
+  <script>
+    const clientCategoryMap = JSON.parse('{{ client_category_json|escapejs }}');
+
+    // Dynamically populate category on client change
+    document.getElementById('clientDropdown').addEventListener('change', function () {
+        const clientId = this.value;
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        categoryDropdown.innerHTML = '<option value="">Select Category</option>';
+
+        if (clientCategoryMap[clientId]) {
+            clientCategoryMap[clientId].forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                categoryDropdown.appendChild(option);
+            });
+        }
+    });
+
+    // Filter button click event
+    document.getElementById('filterBtn').addEventListener('click', function () {
+        const clientId = document.getElementById('clientDropdown').value;
+        const categoryId = document.getElementById('categoryDropdown').value;
+        const status = document.getElementById('statusDropdown').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        const fromDate2 = document.getElementById('fromDate2').value;
+        const toDate2 = document.getElementById('toDate2').value;
+        const telecallerId = document.getElementById('telecallerDropdown').value;
+        const status2 = document.getElementById('statusDropdown2').value;
+        
+        // Build query params
+        const params = new URLSearchParams();
+        if (clientId) params.append('client_id', clientId);
+        if (categoryId) params.append('category_id', categoryId);
+        if (status) params.append('lead_status', status);
+        if (fromDate) params.append('from_date', fromDate);
+        if (toDate) params.append('to_date', toDate);
+        if (fromDate2) params.append('from_date2', fromDate2);
+        if (toDate2) params.append('to_date2', toDate2);
+        if (telecallerId) params.append('telecaller_id', telecallerId);
+        if (status2) params.append('followup_status', status2);
+        // Redirect with query params
+        window.location.href = `?${params.toString()}`;
+    });
+
+    // Auto trigger category fill if client is pre-selected
+    window.addEventListener('DOMContentLoaded', () => {
+        const selectedClient = document.getElementById('clientDropdown').value;
+        if (selectedClient) {
+            document.getElementById('clientDropdown').dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
+
+  
+
+
+  
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            const searchTerm = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll("#leadTable tbody tr");
+            let matchCount = 0;
+    
+            rows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                const isMatch = rowText.includes(searchTerm);
+                row.style.display = isMatch ? '' : 'none';
+                if (isMatch) matchCount++;
+            });
+    
+            // Optionally show a "No results found" row
+            const tbody = document.querySelector("#leadTable tbody");
+            const existingNoResults = document.querySelector("#leadTable tbody .no-results");
+    
+            if (matchCount === 0 && !existingNoResults) {
+                const noRow = document.createElement('tr');
+                noRow.classList.add("no-results");
+                noRow.innerHTML = `<td colspan="7" class="text-center text-danger">No matching leads found.</td>`;
+                tbody.appendChild(noRow);
+            } else if (matchCount > 0 && existingNoResults) {
+                existingNoResults.remove();
+            }
+        });
+    </script>
+
+  
+   
+ <!-- Activity Tracker Modal -->
+ <div class="modal fade" id="activityTrackerModal" tabindex="-1" aria-labelledby="activityTrackerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="activityTrackerModalLabel">Activity Tracker</h5>
+          <button type="button" class="btn p-0 border-0 ms-auto" data-bs-dismiss="modal" aria-label="Close">
+            <span style="color: red; font-size: 2rem;">&times;</span>
+        </button>
+        </div>
+  
+        <div class="modal-body" id="activityTrackerContent">
+          <!-- Dynamic Lead Details will be loaded here -->
+        </div>
+  
+        <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Script to Load Details -->
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.view-activity-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const leadId = this.getAttribute('data-lead-id');
+
+      fetch(`/lead-details/${leadId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const lead = data.lead;
+
+            // Followup Track
+            const followupHtml = lead.followup_track.length
+              ? lead.followup_track.map(f => `
+                <div class="border-bottom pb-2 mb-2">
+                  <p><strong>Connected On:</strong> ${f.connected_on}</p>
+                  <p><strong>Contact By:</strong> ${f.contact_by}</p>
+                  <p><strong>Status:</strong> ${f.status}</p>
+                  <p><strong>Response:</strong> ${f.response}</p>
+                </div>
+              `).join('')
+              : `<p></p>`;
+
+            // History Track
+       
+            const historyHtml = lead.history_track.length
+              ? `<div class="history-grid">
+                  ${lead.history_track
+                    .map(
+                      (h) => `
+                    <div class="history-item">
+                      <p><strong>Allocated On:</strong> ${h.allocated_on}</p>
+                      <p><strong>Note:</strong> ${h.note}</p>
+                    </div>
+                    <div class="history-item">
+                      <p><strong>Allocated To:</strong> ${h.allocated_to}</p>
+                      <p><strong>Final Status:</strong> ${h.final_status}</p>
+                    </div>
+                  `
+                    )
+                    .join('')}
+                </div>`
+              : `<p>-</p>`;
+
+
+            // Lead More Details
+            const moreDetails = lead.more_details.map(
+              d => `<p><i class="bi bi-dot"></i> ${d.field_name}: ${d.field_data}</p>`
+            ).join('');
+
+            let wasteLeadHtml = `<p>-</p>`;
+            if (lead.waste_data) {
+              const confirmationIcon =
+                lead.waste_data.confirmation === 1
+                  ? `<i class="bi bi-check-circle-fill text-success"></i> Head`
+                  : `<i class="bi bi-x-circle-fill text-danger"></i> Head`;
+
+              wasteLeadHtml = `
+                <p><strong>${confirmationIcon}</strong></p>
+                <p><strong>Marked By:</strong> Telecaller (${lead.waste_data.telecaller_name})</p>
+                <p><strong>Reason:</strong> ${lead.waste_data.reason}</p>
+                <p><strong>Head Reason:</strong> ${lead.waste_data.head_reason}</p>
+              `;
+            }
+
+            // Modal Content
+            const content = `
+              <div class="container-fluid text-light" id="activityContentToExport">
+                <div class="row">
+                  <!-- Left Column -->
+                  <div class="col-md-4 border-end">
+                    <h5 class="fw-bold mb-3">Lead Details</h5>
+                    <p><strong>Name:</strong> ${lead.name}</p>
+                    <p><strong>Email:</strong> ${lead.email}</p>
+                    <p><strong>Contact:</strong> ${lead.contact}</p>
+
+                    <h6 class="fw-bold mt-4">Client Details</h6>
+                    <p><strong>Client:</strong> ${lead.client_details.client_name}</p>
+                    <p><strong>Category:</strong> ${lead.client_details.lead_category}</p>
+
+                    <h6 class="fw-bold mt-4">Lead More Details</h6>
+                    ${moreDetails || '<p>-</p>'}
+                  </div>
+
+                  <!-- Middle Column (Activity Panel) -->
+                  <div class="col-md-5">
+                    <h5 class="fw-bold mb-3">Activity Panel</h5>
+
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">Followup Track</h6>
+                      ${followupHtml}
+                    </div>
+
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">History Track</h6>
+                      <div class="row">
+                        ${lead.history_track.map(h => `
+                          <div class="col-md-6">
+                            <p><strong>Allocated On:</strong> ${h.allocated_on}</p>
+                            <p><strong>Allocated To:</strong> ${h.allocated_to}</p>
+                          </div>
+                          <div class="col-md-6">
+                            <p><strong>Note:</strong> ${h.note}</p>
+                            <p><strong>Final Status:</strong> ${h.final_status}</p>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h6 class="text-danger fw-bold">Waste Lead Reason</h6>
+                      ${wasteLeadHtml}
+                    </div>
+                  </div>
+
+                  <!-- Right Column (Collected / Allocated Info) -->
+                  <div class="col-md-3">
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">Lead Collected By</h6>
+                      <p><strong>${lead.collected_by}</strong></p>
+                      <p>${lead.added_date} - ${lead.added_time}</p>
+                    </div>
+
+                    <div class="mb-3">
+                      <h6 class="text-info fw-bold">Lead Allocated To</h6>
+                      <p><strong>${lead.allocated_to}</strong></p>
+                      <p>${lead.allocated_date} - ${lead.allocated_time}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+
+
+
+            document.getElementById('activityTrackerContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('activityTrackerModal')).show();
+          } else {
+            alert('Failed to load lead details.');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+  });
+
+
+
+  });
+  </script>
+  
+
+    
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('#leadTable th');
+
+    headers.forEach((header, index) => {
+        const icon = header.querySelector('i');
+        if (icon) {
+            header.addEventListener('click', function () {
+                const table = header.closest('table');
+                const tbody = table.querySelector('tbody');
+                const rowsArray = Array.from(tbody.querySelectorAll('tr'));
+                const ascending = icon.classList.contains('asc');
+
+                // Remove sort classes from all icons
+                document.querySelectorAll('#leadTable i').forEach(i => {
+                    i.classList.remove('asc', 'desc');
+                    i.classList.remove('fa-caret-up', 'fa-caret-down');
+                    i.classList.add('fa-caret-down');
+                });
+
+                // Apply sort class to the clicked icon
+                icon.classList.toggle('asc', !ascending);
+                icon.classList.toggle('desc', ascending);
+                icon.classList.toggle('fa-caret-up', !ascending);
+                icon.classList.toggle('fa-caret-down', ascending);
+
+                // Sorting
+                rowsArray.sort((rowA, rowB) => {
+                    let cellA = rowA.querySelectorAll('td')[index]?.innerText.trim().toLowerCase();
+                    let cellB = rowB.querySelectorAll('td')[index]?.innerText.trim().toLowerCase();
+
+                    // Special handling if column is Date
+                    if (index === 0) {
+                        cellA = new Date(cellA);
+                        cellB = new Date(cellB);
+                        return ascending ? cellB - cellA : cellA - cellB;
+                    }
+
+                    if (!isNaN(cellA) && !isNaN(cellB)) {  // If it's numeric (like contact)
+                        return ascending ? cellB - cellA : cellA - cellB;
+                    }
+
+                    return ascending
+                        ? cellB.localeCompare(cellA)
+                        : cellA.localeCompare(cellB);
+                });
+
+                // Re-append sorted rows
+                rowsArray.forEach(row => tbody.appendChild(row));
+            });
+        }
+    });
+});
+
+</script> 
+ 
+
+<script>
+    async function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+    
+        // Step 1: Fetch data from Django API
+        const response = await fetch('/export-leads-pdf/');  // <-- your Django API URL
+        const data = await response.json();
+        const leads = data.leads;
+    
+        // Step 2: Setup PDF columns
+        const columns = [
+            { header: "Collected By", dataKey: "collected_by" },
+            { header: "Added Date", dataKey: "added_date" },
+            { header: "Added Time", dataKey: "added_time" },
+            { header: "Name", dataKey: "name" },
+            { header: "Email", dataKey: "email" },
+            { header: "Contact", dataKey: "contact" },
+            { header: "Lead Source", dataKey: "lead_source" },
+        ];
+    
+        // Step 3: Generate PDF
+        doc.text("Leads Report", 80, 10);
+    
+        doc.autoTable({
+            columns: columns,
+            body: leads,
+            startY: 20,
+            theme: 'striped',
+            styles: { fontSize: 8 },
+            headStyles: {
+                fillColor: [22, 160, 133],
+                textColor: 255,
+                halign: 'center',
+            },
+            bodyStyles: {
+                halign: 'center',
+            }
+        });
+    
+        doc.save('leads.pdf');
+    }
+    </script>
+    
+         
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .clear-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #3f8cff;
+        font-size: 1.2rem;
+    }
+
+    .task-link {
+        color: #3f8cff;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .task-link:hover {
+        text-decoration: none;
+    }
+
+    @media screen and (max-width: 768px) {
+        .table th, .table td {
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.375rem 0.5rem;
+        }
+
+        .search-wrapper input {
+            font-size: 0.9rem;
+        }
+
+        .modal-dialog {
+            max-width: 95%;
+            margin: 1.75rem auto;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+    }
+
+    .task-modal .modal-content {
+        background-color: #333;
+        color: white;
+        border-radius: 10px;
+    }
+
+    .task-modal .modal-header {
+        border-bottom: 1px solid #444;
+    }
+
+    .task-modal .modal-body {
+        padding: 1.5rem;
+    }
+
+    .task-modal .section-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #aaa;
+    }
+
+    .task-box {
+        background-color: #444;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .assignment-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .assignment-table th,
+    .assignment-table td {
+        padding: 12px;
+        border: 1px solid #555;
+    }
+
+    .assignment-table th {
+        background-color: #3f8cff;
+        color: white;
+        text-align: left;
+    }
+
+    .employee-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .progress {
+        height: 20px;
+        background-color: #e5e5e5;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        border-radius: 4px;
+        text-align: center;
+        font-size: 0.8rem;
+        line-height: 20px;
+    }
+
+    .social-media-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .social-tag {
+        background-color: #3f8cff;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .progress-bar-danger {
+        background-color: #dc3545;
+    }
+
+    .progress-bar-warning {
+        background-color: #ffc107;
+    }
+
+    .progress-bar-success {
+        background-color: #28a745;
+    }
+</style>
+
+<div class="main-content">
+    <div class="container-fluid py-4">
+        <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="" class="text-secondary">Work</a> /
+            <span class="text-light">Work Progress Monitor</span>
+        </h5>
+
+        <div class="bg-dark rounded-4 p-4 mt-4">
+            <h5 class="text-light mb-4"><b>Work Progress Monitor</b></h5>
+
+            <div class="search-wrapper mb-4">
+                <input type="text" id="employee-search" class="form-control" placeholder="Search here.." onkeyup="filterEmployees()">
+                <span id="clear-search" class="clear-icon d-none" onclick="clearSearch()"><b>&times;</b></span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-dark align-middle text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Task</th>
+                            <th>Start Date</th>
+                            <th>Due Date</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if assigned_work %}
+                            {% for work in assigned_work %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{% if work.client_task.client.client_profile %}{{ work.client_task.client.client_profile.url }}{% else %}{% static 'img/default-profile.png' %}{% endif %}" class="rounded-circle" width="40" height="40">
+                                            <span>{{ work.client_task.client.client_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="task-link"  data-bs-toggle="modal" data-bs-target="#taskDetailsModal{{ work.id }}">
+                                            {{ work.client_task.task_name }}
+                                        </span>
+                                        <ul class="list-unstyled mb-0">
+                                            {% if work.client_task.task_name|lower == "lead collection" %}
+                                            <ul class="list-unstyled ps-3">
+                                                {% for cat in work.client_task.leadcategory_register_set.all %}
+                                                    <li>• {{ cat.collection_for }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </ul>
+                                    </td>
+                                    <td>{{ work.start_date }}</td>
+                                    <td>{{ work.due_date }}</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" 
+                                                role="progressbar"
+                                                data-progress="{{ work.progress }}"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">Result not found!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Task Assign Details Modals -->
+{% if assigned_work %}
+    {% for work in assigned_work %}
+    <div class="modal fade task-modal" id="taskDetailsModal{{ work.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Task Assigned</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="section-title">Task Details</h6>
+                    <div class="task-box">
+                            <div class="table-responsive">
+                                <table class="assignment-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Assigned To</th>
+                                            <th>Start Date</th>
+                                            <th>Due Date</th>
+                                            <th>Target</th>
+                                            <th>Achieved Target</th>
+                                            <th>Progress</th>
+                                        {% if work.work_assign.is_instagram or work.work_assign.is_facebook or work.work_assign.is_x %}  
+                                            <th>Social Media</th>
+                                            <th>Target</th>
+                                        {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="employee-info">
+                                                    <img src="{% if work.executive.profile_pic %}{{ work.executive.profile_pic.url }}{% else %}{% static 'img/default-profile.png' %}{% endif %}" class="rounded-circle" width="40" height="40">
+                                                    <span>{{ work.executive.name }}</span>
+                                                </div>
+                                            </td>
+                                            <td style="text-wrap: nowrap;">{{ work.start_date|date:"F j, Y" }}</td>
+                                            <td style="text-wrap: nowrap;">{{ work.due_date|date:"F j, Y" }}</td>
+                                            <td>{{ work.target }}</td>
+                                            <td>{{ work.target_achieved }}</td>
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar"
+                                                        role="progressbar"
+                                                        data-progress="{{ work.progress }}"
+                                                        aria-valuemin="0"
+                                                        aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                          {% if work.work_assign.is_instagram or work.work_assign.is_facebook or work.work_assign.is_x %}  
+                                            <td>
+                                                <div class="social-media-tags">
+                                                    {% if work.work_assign.is_instagram %}
+                                                    <span >Instagram</span>
+                                                    {% endif %}
+                                                    {% if work.work_assign.is_facebook %}
+                                                    <span >Facebook</span>
+                                                    {% endif %}
+                                                    {% if work.work_assign.is_x %}
+                                                    <span>Twitter</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="social-media-targets">
+                                                    {% if work.work_assign.is_instagram %}
+                                                    <div>{{ work.work_assign.instagram_target }}</div>
+                                                    {% endif %}
+                                                    {% if work.work_assign.is_facebook %}
+                                                    <div>{{ work.work_assign.facebook_target }}</div>
+                                                    {% endif %}
+                                                    {% if work.work_assign.is_x %}
+                                                    <div>{{ work.work_assign.x_target }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<script>
+    function filterEmployees() {
+        const input = document.getElementById('employee-search');
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll('table tbody tr');
+        const clearBtn = document.getElementById('clear-search');
+
+        clearBtn.classList.toggle('d-none', filter === '');
+
+        rows.forEach(row => {
+            let match = false;
+            for (let cell of row.cells) {
+                if (cell.textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                    break;
+                }
+            }
+            row.style.display = match || filter === '' ? '' : 'none';
+        });
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('employee-search');
+        input.value = '';
+        filterEmployees();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            const progress = parseFloat(bar.getAttribute('data-progress')) || 0;
+            bar.style.width = progress + '%';
+            bar.setAttribute('aria-valuenow', progress);
+            bar.textContent = progress + '%';
+
+            if (progress <= 10) {
+                bar.classList.add('progress-bar-danger');
+            } else if (progress > 10 && progress <= 80) {
+                bar.classList.add('progress-bar-warning');
+            } else {
+                bar.classList.add('progress-bar-success');
+            }
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+.admin-clients-wrap {
+  padding-top: 10px;
+}
+
+/* reuse same card style as Works */
+.works-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 22px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  min-height: 150px;
+}
+
+
+.works-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  height: 6rem;
+}
+
+.works-card-title {
+  color: #ffffffe6;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.works-card-count {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.works-card-sub {
+  color: #ffffff8c;
+  font-size: 13px;
+  max-width: 240px;
+}
+
+.works-card-icon {
+  font-size: 44px;
+  opacity: 0.95;
+}
+
+/* icon colors */
+.works-icon-new { color: #ff4d4f; }
+.works-icon-ongoing { color: #0d6efd; }
+.works-icon-completed { color: #198754; }

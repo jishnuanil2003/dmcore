@@ -1,0 +1,51 @@
+@import url(./colour.css);
+
+.form-container,
+.table-container {
+    background-color: var(--form-bg);
+    color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px #00000033;
+}
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}
+
+.table_en_sm{
+  min-width: 80px;
+}
+
+.breadcrumb {
+    font-size: 1.1rem;
+}
+
+.breadcrumb-item a {
+    color: #ffffffb3;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: #ffffffe6;
+}
+
+.breadcrumb-item.active {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .table_en_md{
+        min-width: 290px;
+    }
+}

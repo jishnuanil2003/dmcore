@@ -1,0 +1,157 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+
+    color: #fff;
+  }
+
+  .page-wrapper {
+    padding: 20px;
+  }
+
+  .promo-card {
+    max-width: 950px;
+    margin: auto;
+    background: #2b2b2b;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  }
+
+  .page-title {
+    font-weight: 600;
+    margin-bottom: 25px;
+  }
+
+  .form-label {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 6px;
+  }
+
+  .form-control {
+    background: #1f1f1f;
+    border: 1px solid #555;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .form-control:focus {
+    border-color: #20c997;
+    box-shadow: none;
+    background: #1f1f1f;
+    color: #fff;
+  }
+
+  textarea.form-control {
+    resize: none;
+  }
+
+  ::placeholder {
+    color: #bbb !important;
+    opacity: 1;
+  }
+
+  .btn-submit {
+    background: #28a745;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    transition: 0.3s;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+    background: #28a745;
+  }
+
+  .breadcrumb-text {
+    color: #aaa;
+    font-size: 14px;
+  }
+
+
+  @media (max-width: 768px) {
+    .promo-card {
+      padding: 20px;
+    }
+
+    .page-title {
+      font-size: 18px;
+    }
+  }
+</style>
+
+<div class="page-wrapper">
+
+  <!-- Breadcrumb -->
+  <div class="mb-3">
+    <p class="breadcrumb-text">Dashboard / Add Promotional Work</p>
+  </div>
+
+  <!-- Messages -->
+
+
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+  <!-- Card -->
+  <div class="promo-card">
+
+    <h4 class="page-title">
+      <i class="bi bi-megaphone"></i> Add Promotional Work
+    </h4>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="row g-3">
+
+        <!-- Title -->
+        <div class="col-md-6 col-12">
+          <label class="form-label">Title</label>
+          <input type="text" name="title" class="form-control" placeholder="Enter title" required>
+        </div>
+
+        <!-- Upload -->
+        <div class="col-md-6 col-12">
+          <label class="form-label">Poster / Video</label>
+          <input type="file" name="media" class="form-control">
+        </div>
+
+        <!-- Content -->
+        <div class="col-12">
+          <label class="form-label">Content</label>
+          <textarea name="content" rows="4" class="form-control" placeholder="Write promotional content..." required></textarea>
+        </div>
+
+      </div>
+
+      <!-- Submit -->
+      <div class="text-end mt-4">
+        <button type="submit" class="btn btn-submit text-white">
+          <i class="bi bi-check-circle"></i> Submit
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

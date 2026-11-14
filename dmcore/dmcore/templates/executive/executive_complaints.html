@@ -1,0 +1,202 @@
+{% extends 'executive/executivesidebar.html' %}
+{% block content %}
+<style>
+    body {
+        background-color: #12151e; 
+        color: #ffffff; /* Optional: sets default text color */
+    }
+
+    #main-content {
+        margin-top: 20px;
+    }
+
+    @media (max-width: 576px) {
+        #main-content {
+            margin-top: 100px;
+        }
+    }
+
+    .custom-card {
+        background-color: #333333;
+        border: none !important;
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+    }
+
+    .custom-card:hover {
+        background-color: #333333;
+    }
+
+    .custom-card p {
+        color: rgb(192, 192, 192);
+    }
+    select {
+        appearance: auto !important; 
+    }
+</style>
+
+
+        <!-- Bootstrap Toast Container -->
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="toast align-items-center text-white {% if message.tags == 'error' %}bg-danger{% else %}bg-success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Left column -->
+        <div class="col-md-4 col-sm-12 mt-3">
+            <div class="custom-card mb-3" id="addBtn" style="cursor: pointer;">
+                <h3>Add Complaints &nbsp; <i class="fa-solid fa-arrow-up-right-from-square"></i></h3>
+                <p>Register all your complaints here.</p>
+            </div>
+            <div class="custom-card" id="viewBtn" style="cursor: pointer;background-color: #333333;">
+                <h3>View Complaints &nbsp; <i class="fa-solid fa-arrow-up-right-from-square"></i></h3>
+                <p>View all your registered conplaints status.</p>
+            </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="col-md-8 col-sm-12  mt-3">
+            <!-- Feedback Form Card -->
+            <div id="addFormDiv" class="custom-card mb-3">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        Add Complaints
+                    </h4>
+                    <form action="{% url 'executive_add_complaints' %}" method="post" class="pt-3">
+                        {% csrf_token %}
+                        <input type="text" name="complaint_head" placeholder="complaints regarding.." class="form-control">
+
+                        <textarea cols="5" rows="5" placeholder="Enter details..." class="form-control mt-3" name="complaint_details"></textarea>
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="fa-solid fa-file"></i> Complaint Register
+                        </button>
+                    </form>
+            </div>
+
+                <!-- Feedback Table Card -->
+            <div id="viewTableDiv" class="custom-card p-3" style="display: none; background-color: rgba(76, 78, 78, 0.5); border-radius: 12px;">
+               <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+                    <h4 class="text-light mb-2 mb-md-0">Complaints View</h4>
+                </div>
+
+
+                <div class="table-responsive">
+            <table class="table table-bordered table-dark table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Complaints</th>
+
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    {% for cm in complaints %}
+                    <tr>
+                        <!-- Complaint Date -->
+                        <td>{{ cm.complaint_date|date:"Y-m-d" }}</td>
+                
+                        <!-- Complaint Details -->
+                        <!-- Complaint Details -->
+                        <td>
+                            <div class="d-flex w-100">
+                                <!-- File Icon -->
+                                <div class="me-3">
+                                    <i class="fa fa-file fa-2x text-primary"></i>
+                                </div>
+
+                                <!-- Complaint Info Wrapper -->
+                                <div class="flex-grow-1">
+                                    <!-- Full-width Info Box -->
+                                    <div class="pb-2" style="border-bottom: 1px solid rgb(154, 154, 154);width: 100%;">
+                                        <strong class="d-block">{{ cm.compaint_head }}</strong>
+                                        <span>{{ cm.compaint_content }}</span>
+                                    </div>
+
+                                    <!-- Status Below -->
+                                    <div class="mt-2">
+                                        {% if cm.status == 'pending' %}
+                                            <span class="text-light">
+                                                <i class="fa fa-clock me-1"></i> Pending
+                                            </span>
+                                        {% else %}
+                                            <span>
+                                                <i class="fa fa-check-circle me-1"></i>
+                                                Action Taken - {{ cm.action }} on {{ cm.action_date|date:"Y-m-d" }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const addBtn = document.getElementById("addBtn");
+        const viewBtn = document.getElementById("viewBtn");
+        const addFormDiv = document.getElementById("addFormDiv");
+        const viewTableDiv = document.getElementById("viewTableDiv");
+
+        // Show form by default
+        addFormDiv.style.display = "block";
+        viewTableDiv.style.display = "none";
+
+        addBtn.addEventListener("click", function () {
+            addFormDiv.style.display = "block";
+            viewTableDiv.style.display = "none";
+        });
+
+        viewBtn.addEventListener("click", function () {
+            addFormDiv.style.display = "none";
+            viewTableDiv.style.display = "block";
+        });
+    });
+</script>
+
+
+<script>
+    function filterFeedback() {
+        const selected = document.getElementById('feedbackFilter').value;
+        const rows = document.querySelectorAll('#feedbackTableBody tr');
+
+        rows.forEach(row => {
+            const type = row.getAttribute('data-type');
+            row.style.display = (type === selected) ? '' : 'none';
+        });
+    }
+
+    // Run after the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('feedbackFilter').value = 'given'; // Ensure the correct option is selected
+        filterFeedback(); // Show only 'given' feedback rows
+    });
+</script>
+
+
+
+{% endblock %}

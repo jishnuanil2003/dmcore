@@ -1,0 +1,372 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<style>
+.attendance-card{
+    background:#333333;
+    border:none;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+.page-header{
+    background:#2a2a2a;
+    color:#fff;
+    padding:18px 25px;
+    border-bottom:1px solid #444;
+}
+
+.page-header h4{
+    margin:0;
+    font-weight:600;
+}
+
+.card-body{
+    background:#333333;
+}
+
+.summary-card{
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover{
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.45);
+}
+
+.summary-card .card-body{
+    background: transparent !important;
+    padding: 25px;
+}
+
+.summary-icon{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.summary-icon i{
+    font-size: 26px;
+    color: #fff;
+}
+
+.summary-title{
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.summary-value{
+    color: #fff;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+}
+
+.summary-label{
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.table-dark-custom{
+    color:#f5f5f5;
+    margin-bottom:0;
+}
+
+.table-dark-custom thead th{
+    background:#2a2a2a;
+    color:#fff;
+    border-color:#4a4a4a;
+    text-align:center;
+    padding:14px;
+    white-space:nowrap;
+}
+
+.table-dark-custom tbody td{
+    background:#333333;
+    color:#f5f5f5;
+    border-color:#4a4a4a;
+    text-align:center;
+    vertical-align:middle;
+    padding:12px;
+}
+
+.table-dark-custom tbody tr:hover td{
+    background:#404040;
+    transition:0.3s;
+}
+
+.badge-hours{
+    background:#4a4a4a;
+    color:#fff;
+    padding:6px 12px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+.empty-row{
+    color:#cfcfcf;
+    padding:25px !important;
+}
+
+.table-responsive{
+    border-radius:12px;
+    overflow:hidden;
+}
+
+@media (max-width: 768px){
+
+    .container-fluid{
+        padding-left:10px;
+        padding-right:10px;
+    }
+
+    .attendance-card{
+        border-radius:12px;
+    }
+
+    .page-header{
+        padding:12px 15px;
+        text-align:center;
+    }
+
+    .page-header h4{
+        font-size:16px;
+        line-height:1.4;
+    }
+
+    .summary-card{
+        margin-bottom:15px;
+    }
+
+    .summary-card .card-body{
+        padding:18px;
+        text-align:center;
+    }
+
+    .summary-icon{
+        width:50px;
+        height:50px;
+        margin:0 auto 12px;
+    }
+
+    .summary-icon i{
+        font-size:20px;
+    }
+
+    .summary-title{
+        font-size:12px;
+    }
+
+    .summary-value{
+        font-size:28px;
+    }
+
+    .table-dark-custom{
+        font-size:12px;
+        min-width:700px;
+    }
+
+    .table-dark-custom th,
+    .table-dark-custom td{
+        padding:8px;
+        white-space:nowrap;
+    }
+
+    .badge-hours{
+        font-size:11px;
+        padding:4px 8px;
+    }
+}
+
+@media (max-width: 576px){
+
+    .summary-value{
+        font-size:24px;
+    }
+
+    .page-header h4{
+        font-size:15px;
+    }
+
+    .table-responsive{
+        border-radius:8px;
+    }
+}
+
+.table-responsive{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="card shadow attendance-card">
+
+        <div class="page-header">
+            <h4>
+                <i class="fas fa-user-clock me-2"></i>
+                Telecaller Attendance
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-4">
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                    <div class="card summary-card h-100">
+                        <div class="card-body">
+                            <div class="summary-icon">
+                                <i class="fas fa-calendar-times"></i>
+                            </div>
+
+                            <div class="summary-title">
+                                Total Leave Days
+                            </div>
+
+                            <h2 class="summary-value">
+                                {{ approved_leave_days }}
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <form method="GET" class="row g-3 mb-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label text-light">Employee</label>
+                    <select name="employee" class="form-select bg-dark text-light border-secondary">
+                        <option value="">All Employees</option>
+
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}"
+                            {% if selected_employee == emp.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ emp.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label text-light">From Date</label>
+                    <input type="date"
+                        name="from_date"
+                        value="{{ from_date }}"
+                        class="form-control bg-dark text-light border-secondary">
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label text-light">To Date</label>
+                    <input type="date"
+                        name="to_date"
+                        value="{{ to_date }}"
+                        class="form-control bg-dark text-light border-secondary">
+                </div>
+
+                <div class="col-lg-2 col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Filter
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="table-responsive">
+
+                <table class="table table-dark-custom align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Sl No</th>
+                            <th>Employee Name</th>
+                            <th>Date</th>
+                            <th>1st Login</th>
+                            <th>Last Logout</th>
+                            <th>Working Hours</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for attendance in attendance_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+
+                            <td>
+                                <strong>{{ attendance.employee }}</strong>
+                            </td>
+
+                            <td>
+                                {{ attendance.date|date:"d M Y" }}
+                            </td>
+
+                            <td>
+                                {% if attendance.first_login_time %}
+                                    {{ attendance.first_login_time|date:"h:i A" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if attendance.last_logout_time %}
+                                    {{ attendance.last_logout_time|date:"h:i A" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if attendance.total_working_hours %}
+                                    <span class="badge-hours">
+                                        {{ attendance.total_working_hours }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-row text-center">
+                                No Attendance Records Found
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

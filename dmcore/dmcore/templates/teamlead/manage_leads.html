@@ -1,0 +1,542 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+{% block title %}Manage Leads{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'teamlead/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'teamlead/css/manage_leads.css' %}">
+<!-- <script src="{% static 'teamlead/js/manage_leads.js' %}"></script> -->
+
+<!-- CDN: Add to manage_leads.html -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-dark text-white px-3 py-2 rounded">
+    <li class="breadcrumb-item">
+      <a href="{% url 'individual_work_main' %}" class="text-decoration-none text-white-50">Individual Works</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'tl_ongoing_works' %}" class="text-decoration-none text-white-50">Ongoing Works</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'tl_daily_work_leads' team_alloc_id %}" class="text-decoration-none text-white-50">Add Daily Works</a>
+    </li>
+    <li class="breadcrumb-item active text-white" aria-current="page">Add Leads</li>
+  </ol>
+</nav>
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-3">Lead Management</h5>
+
+  <div class="mb-3 d-flex flex-wrap gap-2 gap-sm-3 gap-md-2 buttons-responsive">
+    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addLeadModal">Data Form</button>
+
+    <a href="{% url 'download_lead_template_tl' team_alloc_id %}"
+       class="btn btn-outline-light btn-sm">
+        Download Excel Format
+    </a>
+
+    <form method="POST" action="{% url 'upload_leads_excel' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="team_alloc_id" value="{{ team_alloc_id }}">
+      <label class="btn btn-outline-danger btn-sm mb-0 upload-btn-custom">
+        Upload Leads
+        <input type="file" name="excel_file" hidden onchange="this.form.submit()" accept=".xlsx,.xls">
+      </label>
+    </form>
+    <a href="{% url 'download_leads_excel' lead_category_id team_alloc_id %}" class="btn btn-outline-info btn-sm">Download Leads</a>
+    <a href="{% url 'remove_duplicate_TL' lead_category_id %}"
+       class="btn btn-outline-light btn-sm">
+        Remove Duplicates
+    </a>
+  </div>
+
+  <div class="input-group w-auto mb-3">
+    <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  {% if leads %}
+  <div class="table-responsive">
+    <table id="leadTable" class="table table-dark table-striped table-hover align-middle text-center" id="targetTable">
+      <thead>
+        <tr>
+          <th class="text-center">Collected On</th>
+          <th class="text-center">Name</th>
+          <th class="text-center">Email</th>
+          <th class="text-center">Contact</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Repeated</th>
+          <th class="nosort">Quick Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead, _ in leads %}
+        <tr>
+          <td class="table_en_md">{{ lead.added_date|date:"d-M-y" }} | {{ lead.added_time }}</td>
+          <td class="table_en_md">{{ lead.name }}</td>
+          <td class="table_en_md">{{ lead.email }}</td>
+          <td class="table_en_lsm">{{ lead.contact }}</td>
+          <td>
+            <span class="badge bg-purple">{{ lead.status|yesno:"Verified,New" }}</span>
+          </td>
+          <td>
+            <span class="badge bg-purple">{{ lead.repeated_status|yesno:"Yes,No" }}</span>
+          </td>
+          <td  class="table_en_sm">
+            <button class="btn btn-outline-info btn-sm show-lead-details" data-id="{{ lead.id }}">+</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="text-white">No leads added yet.</p>
+  {% endif %}
+</div>
+
+<!-- Add Lead Modal -->
+<div class="modal fade" id="addLeadModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Lead</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addLeadForm">
+        {% csrf_token %}
+        <input type="hidden" name="team_alloc_id" value="{{ team_alloc_id }}">
+        <div class="modal-body row">
+          <div class="col-md-6 mb-3"><label>Name *</label><input class="form-control" name="name" required></div>
+          <div class="col-md-6 mb-3">
+             <label>Email *</label>
+            <input class="form-control" name="email" id="lead_email" required>
+            <div id="email_error" class="text-danger small mt-1"></div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Contact Number *</label>
+            <input class="form-control" name="contact_number" id="lead_contact" required>
+            <div id="contact_error" class="text-danger small mt-1"></div>
+          </div>
+          {% for field in required_fields %}
+          <div class="col-md-6 mb-3">
+            <label>{{ field }} *</label>
+            <input class="form-control" name="dynamic_{{ field|slugify }}" required>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="duplicateLeadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Duplicate Lead Found
+                </h5>
+                <button class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <p class="text-warning">
+                    A lead with the same Email or Contact already exists.
+                </p>
+
+                <table class="table table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="duplicateLeadBody">
+
+                    </tbody>
+                </table>
+
+                <p class="mt-3 text-danger">
+                    Do you still want to save this lead?
+                </p>
+
+            </div>
+
+            <div class="modal-footer border-secondary">
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button class="btn btn-warning"
+                        id="confirmDuplicateSave">
+                    Save Anyway
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Lead Details Offcanvas -->
+<div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="leadDetailCanvas">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Lead Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+    <h6 class="mb-3 border-bottom pb-1">Basic Details</h6>
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <span class="text-white">Name</span>
+      <span id="ld_name" class="fw-semibold text-white"></span>
+    </div>
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <span class="text-white">Contact</span>
+      <span id="ld_contact" class="text-white"></span>
+    </div>
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <span class="text-white">Email</span>
+      <span id="ld_email" class="text-white text-truncate" style="max-width: 60%;"></span>
+    </div>
+    <div class="mb-3">
+      <span id="ld_verified" class="text-danger">Unverified</span>
+      <span id="ld_waste" class="text-secondary">Not a waste</span>
+      <span id="ld_incomplete" class="text-success text-dark">Not Marked as incomplete</span>
+    </div>
+    <hr>
+    <h6>More Details</h6>
+    <div id="ld_more"></div>
+  </div>
+</div>
+
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+  const emailInput = document.getElementById("lead_email");
+  const contactInput = document.getElementById("lead_contact");
+  const emailError = document.getElementById("email_error");
+  const contactError = document.getElementById("contact_error");
+
+  const form = document.getElementById("addLeadForm");
+  const duplicateModal = new bootstrap.Modal(document.getElementById("duplicateLeadModal"));
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const phoneRegex = /^\d{10}$/;
+
+  function validateEmail() {
+    const value = emailInput.value.trim();
+
+    if (!value) {
+      emailError.textContent = "Email is required.";
+      return false;
+    }
+
+    if (!emailRegex.test(value)) {
+      emailError.textContent = "Enter a valid email.";
+      return false;
+    }
+
+    emailError.textContent = "";
+    return true;
+  }
+
+  function validateContact() {
+    const value = contactInput.value.trim();
+
+    if (!value) {
+      contactError.textContent = "Contact number is required.";
+      return false;
+    }
+
+    if (!phoneRegex.test(value)) {
+      contactError.textContent = "Enter a valid 10-digit phone number.";
+      return false;
+    }
+
+    contactError.textContent = "";
+    return true;
+  }
+
+  emailInput.addEventListener("input", validateEmail);
+  contactInput.addEventListener("input", validateContact);
+
+  function saveLead(forceSave = false) {
+
+    const data = new FormData(form);
+
+    if (forceSave) {
+      data.append("force_save", "1");
+    }
+
+    fetch("/add-lead/", {
+      method: "POST",
+      body: data,
+    })
+      .then(res => res.json())
+      .then(data => {
+
+        if (data.duplicate) {
+
+          const tbody = document.getElementById("duplicateLeadBody");
+          tbody.innerHTML = "";
+
+          data.leads.forEach(function (lead) {
+
+              tbody.innerHTML += `
+                  <tr>
+                      <td>${lead.name || "-"}</td>
+                      <td>${lead.email || "-"}</td>
+                      <td>${lead.contact || "-"}</td>
+                  </tr>
+              `;
+
+          });
+
+   
+
+          duplicateModal.show();
+          return;
+        }
+
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.message || "Unable to save lead.");
+        }
+
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Something went wrong.");
+      });
+
+  }
+
+  form.addEventListener("submit", function (e) {
+
+    e.preventDefault();
+
+    if (!validateEmail() || !validateContact()) {
+      return;
+    }
+
+    saveLead(false);
+
+  });
+
+  document.getElementById("confirmDuplicateSave").addEventListener("click", function () {
+
+    duplicateModal.hide();
+
+    saveLead(true);
+
+  });
+
+  // ============================
+  // Offcanvas details
+  // ============================
+
+  document.querySelectorAll(".show-lead-details").forEach((btn) => {
+
+    btn.addEventListener("click", () => {
+
+      const leadId = btn.dataset.id;
+
+      fetch(`/get-lead-details/${leadId}/`)
+        .then((res) => res.json())
+        .then((data) => {
+
+          if (data.success) {
+
+            const l = data.lead;
+
+            document.getElementById("ld_name").innerText = l.name;
+            document.getElementById("ld_contact").innerText = l.contact;
+            document.getElementById("ld_email").innerText = l.email;
+
+            const verifiedBadge = document.getElementById("ld_verified");
+
+            if (l.verified) {
+              verifiedBadge.className = "badge text-success";
+              verifiedBadge.innerText = "Verified";
+            } else {
+              verifiedBadge.className = "badge text-danger";
+              verifiedBadge.innerText = "Unverified";
+            }
+
+            const wasteBadge = document.getElementById("ld_waste");
+            wasteBadge.className = l.waste ? "badge text-danger" : "badge text-secondary";
+            wasteBadge.innerText = l.waste ? "Marked as Waste" : "Not a waste";
+
+            const incompleteBadge = document.getElementById("ld_incomplete");
+            incompleteBadge.className = l.incomplete ? "badge text-danger" : "badge text-success";
+            incompleteBadge.innerText = l.incomplete ? "Marked as Incomplete" : "Not Marked as Incomplete";
+
+            const detailsDiv = document.getElementById("ld_more");
+            detailsDiv.innerHTML = "";
+
+            data.details.forEach((item) => {
+              const p = document.createElement("p");
+              p.innerHTML = `<strong>${item.field_name}</strong> : ${item.field_data}`;
+              detailsDiv.appendChild(p);
+            });
+
+            new bootstrap.Offcanvas(document.getElementById("leadDetailCanvas")).show();
+
+          }
+
+        });
+
+    });
+
+  });
+
+  // ============================
+  // DataTable
+  // ============================
+
+  $("#leadTable").DataTable({
+    searching: false,
+    ordering: true,
+    paging: false,
+    info: false,
+    order: [],
+    columnDefs: [{ orderable: false, targets: "nosort" }]
+  });
+
+  // ============================
+  // Search
+  // ============================
+
+  document.getElementById("searchInput").addEventListener("input", function () {
+
+    const filter = this.value.toLowerCase();
+
+    document.querySelectorAll("#leadTable tbody tr").forEach(row => {
+
+      row.style.display = row.innerText.toLowerCase().includes(filter)
+        ? ""
+        : "none";
+
+    });
+
+  });
+
+  document.getElementById("clearSearch").addEventListener("click", function () {
+
+    document.getElementById("searchInput").value = "";
+
+    document.querySelectorAll("#leadTable tbody tr").forEach(row => {
+
+      row.style.display = "";
+
+    });
+
+  });
+
+});
+</script>
+
+
+
+<div class="modal fade" id="duplicateExcelModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Duplicate Leads Found
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <p class="text-warning">
+                    Some uploaded leads already exist.
+                    Do you want to save them anyway?
+                </p>
+
+                <table class="table table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for lead in duplicate_leads %}
+                        <tr>
+                            <td>{{ lead.existing_name }}</td>
+                            <td>{{ lead.existing_email }}</td>
+                            <td>{{ lead.existing_contact }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <form method="POST"
+                      action="{% url 'confirm_excel_duplicates' %}">
+                    {% csrf_token %}
+                    <input type="hidden"
+                           name="team_alloc_id"
+                           value="{{ team_alloc_id }}">
+
+                    <button class="btn btn-warning">
+                        Save Anyway
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{% if duplicate_leads %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    new bootstrap.Modal(
+        document.getElementById("duplicateExcelModal")
+    ).show();
+});
+</script>
+{% endif %}
+
+{% endblock %}

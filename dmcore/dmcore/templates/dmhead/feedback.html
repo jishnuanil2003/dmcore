@@ -1,0 +1,335 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+<style>
+        body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+<div class="row mb-4">
+    <div class="col-12"  style="margin-top:20px;">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-secondary">Dashboard</a></li>
+                <li class="breadcrumb-item active text-secondary" aria-current="page">Feedback</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% if messages %}
+<div class="container mt-5 messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show auto-hide-toast mt-3" role="alert">
+        <div class="alert-content">
+            {% if message.tags == 'success' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            {% elif message.tags == 'warning' %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            {% else %}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<style>
+    .messages-container {
+        position: fixed;
+        top: 30px;  /* Increased from 20px */
+        right: 20px;
+        z-index: 1100;
+        max-width: 400px;
+    }
+    
+    .alert {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;  /* Slightly increased padding */
+        margin-bottom: 15px;  /* Increased from 10px */
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .alert-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-grow: 1;
+    }
+    
+    .alert-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;  /* Small adjustment for vertical alignment */
+    }
+    
+    .alert-success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border-left: 4px solid #22c55e;
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-left: 4px solid #0ea5e9;
+    }
+    
+    .alert-warning {
+        background-color: #fefce8;
+        color: #854d0e;
+        border-left: 4px solid #facc15;
+    }
+    
+    .alert-danger, .alert-error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .btn-close {
+        padding: 0.5rem;
+        opacity: 0.7;
+        margin-top: -4px;  /* Better alignment with text */
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Auto-hide animation */
+    .auto-hide-toast {
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease;
+    }
+    
+    .auto-hide-toast.hide {
+        opacity: 0;
+        transform: translateX(20%);
+    }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select all alert messages with the class 'auto-hide-toast'
+    const alerts = document.querySelectorAll('.auto-hide-toast');
+
+    alerts.forEach(alert => {
+      // Set a timeout to hide the alert after 5 seconds (5000ms)
+      setTimeout(() => {
+        alert.classList.add('hide'); // Add the 'hide' class for fade-out animation
+        setTimeout(() => alert.remove(), 500); // Remove the alert from the DOM after fade-out
+      }, 5000);
+    });
+  });
+</script>
+<div class="row">
+ 
+    <div class="col-md-4">
+       
+        <div class="card bg-dark text-light mb-4" style="border-radius: 12px; border: 1px solid #222;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title m-0">Feedback View</h5>
+                    <a href="#" class="btn btn-outline-success btn-sm view-feedback-btn" style="border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <p class="card-text text-secondary" style="font-size: 14px;">To view all employees feedbacks</p>
+            </div>
+        </div>
+        
+       
+        <div class="card bg-dark text-light mb-4" style="border-radius: 12px; border: 1px solid #222;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title m-0">Add Feedback</h5>
+                    <a href="#" class="btn btn-outline-success btn-sm add-feedback-btn" style="border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <p class="card-text text-secondary" style="font-size: 14px;">To add feedbacks to employees</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-8">
+       
+        <div id="view-feedback-section" class="card bg-dark text-light" style="border-radius: 12px; border: 1px solid #222; display: none;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="card-title m-0">Feedback View</h5>
+                    <form method="get" id="filterForm" class="d-inline">
+                        <select name="type" id="transactionType" class="form-select bg-dark text-light" style="max-width: 180px; border: 1px solid #444;" >
+                            <option value="All" {% if selected_type == 'All' %}selected{% endif %}>All</option>
+                            <option value="Given" {% if selected_type == 'Given' %}selected{% endif %}>Given</option>
+                            <option value="Received" {% if selected_type == 'Received' %}selected{% endif %}>Received</option>
+                        </select>
+                    </form>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-dark text-white">
+                        <thead>
+                            <tr class="text-secondary">
+                                <th>Date</th>
+                                <th>Feedback By</th>
+                                <th>Feedback To</th>
+                                <th>Feedback</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+{% for fb in feedbacks %}
+<tr>
+    <td class="text-white">{{ fb.feedback_date|date:"F d, Y" }}</td>
+
+    
+    <td class="text-white">{{ fb.from_name }}</td>
+
+    
+    <td class="text-white">
+        {% if fb.employee %}
+            {{ fb.employee.name }}
+        {% else %}
+            Unknown
+        {% endif %}
+    </td>
+
+    <td class="text-white">{{ fb.feedback_content }}</td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="text-center text-muted">No feedback available.</td>
+</tr>
+{% endfor %}
+</tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+      
+        <div id="add-feedback-section" class="card bg-dark text-light" style="border-radius: 12px; border: 1px solid #222;">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Feedback Add</h5>
+                
+                <form method="POST" action="{% url 'feedback' %}">
+    {% csrf_token %}
+    <div class="mb-4">
+        <div class="input-group">
+            <select name="employee_id" required class="form-select bg-dark text-light" style="border: 1px solid #444; border-radius: 4px 0 0 4px; padding: 8px 12px;">
+                <option disabled selected>Select Employee</option>
+                {% for employee in employees %}
+                    <option value="{{ employee.id }}">{{ employee.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary" style="border-radius: 0 4px 4px 0;">Add</button>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <textarea name="feedback_content" required class="form-control bg-dark text-light" rows="6" placeholder="Enter feedback..." style="border: 1px solid #444; border-radius: 4px;"></textarea>
+    </div>
+</form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const viewFeedbackBtn = document.querySelector('.view-feedback-btn');
+    const addFeedbackBtn = document.querySelector('.add-feedback-btn');
+    const viewFeedbackSection = document.getElementById('view-feedback-section');
+    const addFeedbackSection = document.getElementById('add-feedback-section');
+    
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasFilterParam = urlParams.has('type');
+    
+    // If there's a filter parameter, show view section, otherwise show add section
+    if (hasFilterParam) {
+        viewFeedbackSection.style.display = 'block';
+        addFeedbackSection.style.display = 'none';
+    } else {
+        viewFeedbackSection.style.display = 'none';
+        addFeedbackSection.style.display = 'block';
+    }
+    
+    // Event handlers for the buttons
+    viewFeedbackBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        viewFeedbackSection.style.display = 'block';
+        addFeedbackSection.style.display = 'none';
+        
+        // Store the current section in localStorage
+        localStorage.setItem('feedbackSection', 'view');
+    });
+    
+    addFeedbackBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        viewFeedbackSection.style.display = 'none';
+        addFeedbackSection.style.display = 'block';
+        
+        // Store the current section in localStorage
+        localStorage.setItem('feedbackSection', 'add');
+        
+        // Remove filter parameter from URL if present
+        if (hasFilterParam) {
+            const url = new URL(window.location);
+            url.searchParams.delete('type');
+            window.history.replaceState({}, '', url);
+        }
+    });
+
+    // Handle dropdown filtering
+    const selectBox = document.getElementById("transactionType");
+    const filterForm = document.getElementById("filterForm");
+
+    if (selectBox && filterForm) {
+        selectBox.addEventListener("change", function () {
+            const value = this.value;
+            console.log("Selected type:", value);
+            
+            // Store that user is viewing feedback section
+            localStorage.setItem('feedbackSection', 'view');
+            
+            // Auto-submit the form to filter the data
+            filterForm.submit();
+        });
+    }
+});
+</script>
+
+{% endblock content %}

@@ -1,0 +1,91 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+{% block title %}Lead Collection Dashboard{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-3">Clients For Lead Collection</h5>
+
+  <div class="card p-3 bg-dark text-white">
+    <div class="d-flex justify-content-end mb-3">
+      <div class="input-group w-auto mb-2">
+        <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+        <button class="btn btn-light" id="clearSearch">Clear</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-dark table-bordered text-center align-middle" id="leadTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Client Name</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Lead Category</th>
+              <th>Fields</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for group in grouped_clients %}
+              {% for row in group.records %}
+                <tr>
+                  {% if forloop.first %}
+                  <td rowspan="{{ group.records|length }}">{{ group.no }}</td>
+                  <td class="table_en_lsm" rowspan="{{ group.records|length }}">{{ group.client_name }}</td>
+                  {% endif %}
+                  <td class="table_en_lsm">{{ row.start_date|date:"M d, Y" }}</td>
+                  <td class="table_en_lsm">{{ row.end_date|date:"M d, Y" }}</td>
+                  <td class="table_en_lmd">
+                    <a href="{% url 'verify_leads_page' row.team_alloc_id row.lead_category_id %}" class="btn btn-outline-warning btn-sm">{{ row.category_name }} Collected Data</a>
+                  </td>
+                  <td>
+                    <button class="btn btn-outline-light btn-sm" data-bs-toggle="offcanvas" data-bs-target="#fieldCanvas{{ row.lead_category_id }}">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                
+                    <!-- Offcanvas -->
+                    <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="fieldCanvas{{ row.lead_category_id }}">
+                      <div class="offcanvas-header">
+                        <h5 class="offcanvas-title">Fields for {{ row.category_name }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                      </div>
+                      <div class="offcanvas-body">
+                        {% if row.fields %}
+                        <h6 class="text-start">Fields :</h6>
+                          <ul class="list-group list-group-flush">
+                            {% for f in row.fields %}
+                              <li class="list-group-item bg-dark text-white text-start">
+                                <strong>{{ f.name }}</strong>
+                                <!-- {% if f.description %}<br><small>{{ f.description }}</small>{% endif %} -->
+                              </li>
+                            {% endfor %}
+                          </ul>
+                        {% else %}
+                          <p>No additional fields added for this category.</p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'dm_head/js/leads.js' %}"></script>
+{% endblock %}
+

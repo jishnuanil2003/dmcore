@@ -1,0 +1,140 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% block content %}   
+<style>
+        body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+    
+    input[type="checkbox"] {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #0d6efd;
+        border-radius: 3px;
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        background-color: white;
+    }
+
+    input[type="checkbox"]:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    input[type="checkbox"]::after {
+        content: "✔";
+        font-size: 12px;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+    }
+
+    input[type="checkbox"]:checked::after {
+        display: block;
+    }
+
+    select {
+        appearance: auto !important;
+    }
+
+  #main-content {
+    margin-top: 10px !important; /* Only if truly needed */
+  }
+      @media (max-width: 576px) {
+        #main-content {
+            margin-top: 70px !important; 
+        }
+    }
+
+</style>
+
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast align-items-center text-white {% if message.tags == 'error' %}bg-danger{% else %}bg-success{% endif %} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="main-content">
+    <br><br>
+    <div class="container mt-4 pb-3" style="background-color: #333333;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap pt-3 pb-1">
+            <h3 class="me-3 text-light">Employee Schedule Filter List</h3>
+        </div>
+
+        <!-- Filter Form -->
+        <form method="GET" class="mt-3">
+            <div class="d-flex flex-wrap gap-2 w-100">
+                <div class="col-12 col-md-auto">
+                    <select class="form-control w-100 h-100" name="employee_id" id="employee">
+                        <option value="" selected>-----Select Employee----</option>
+                        {% for employee in employees %}
+                            <option value="{{ employee.id }}" {% if selected_employee_id == employee.id|stringformat:"s" %}selected{% endif %}>
+                                {{ employee.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-auto">
+                    <input type="date" name="start_date" class="form-control w-100 h-100" value="{{ start_date|default_if_none:'' }}">
+                </div>
+                <div class="col-12 col-md-auto">
+                    <input type="date" name="end_date" class="form-control w-100 h-100" value="{{ end_date|default_if_none:'' }}">
+                </div>
+                <div class="col-12 col-md-auto">
+                    <button type="submit" class="btn w-100 h-100 d-flex justify-content-center align-items-center" style="border: 1px solid #0d6efd; background-color: transparent;">
+                        <i class="fa-solid fa-magnifying-glass" style="color: #0d6efd;"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <h3 class="text-light mt-5">Schedule ({{ selected_employee_name }})</h3>
+
+        <!-- Schedule Table -->
+        {% if selected_employee_id or start_date or end_date %}
+        <div class="row mt-4 pb-3">
+            <div class="col-md-12 col-sm-12 mt-2">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-dark" id="myDayTable1">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Task / Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                                <tr {% if schedule.schedule_status == 'completed' %}style="text-decoration: line-through; color: gray;"{% endif %}>
+                                    <td>{{ schedule.schedule_date }} <br> {{ schedule.start_time }} to {{ schedule.end_time }}</td>
+                                    <td>{{ schedule.schedule_head }} <br> <span style="font-style: italic;"> ({{ selected_employee_name }})</span> <br> {{ schedule.todo_content }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-light">No schedules found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

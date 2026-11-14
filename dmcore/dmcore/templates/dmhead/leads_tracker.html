@@ -1,0 +1,260 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Leads Tracker{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/leads_tracker.css' %}">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <div class="d-flex justify-content-between align-items-center mb-3 print-hide">
+    <h5 class="text-white mb-0">
+      Leads Tracker ({{ total_lead_count }})
+    </h5>
+    <button class="btn btn-outline-success btn-sm" id="downloadExcelBtn">Excel</button>
+  </div>
+
+<div class="row g-2 align-items-end mb-3 text-white">
+  <div class="col-md-2">
+    <label class="form-label">Client</label>
+    <select id="clientFilter" class="form-select form-select-sm">
+      <option value="">All</option>
+      {% for client in clients %}
+        <option value="{{ client.client_name }}">{{ client.client_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Category</label>
+    <select id="categoryFilter" class="form-select form-select-sm" disabled>
+      <option value="">All</option>
+      {% for category in categories %}
+        <option value="{{ category.collection_for }}" data-client="{{ category.client_task.client.client_name }}">
+          {{ category.collection_for }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Executive</label>
+    <select id="executiveFilter" class="form-select form-select-sm">
+      <option value="">All</option>
+      {% for emp in employees %}
+        <option value="{{ emp.name }}">{{ emp.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">From Date</label>
+    <input type="date" id="startDateFilter" class="form-control form-control-sm" />
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">To Date</label>
+    <input type="date" id="endDateFilter" class="form-control form-control-sm" />
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Telecaller</label>
+    <select id="telecallerFilter" class="form-select form-select-sm">
+      <option value="">All</option>
+      {% for tc in telecallers %}
+        <option value="{{ tc.name }}">{{ tc.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Assign From</label>
+    <input type="date" id="assignFromDate" class="form-control form-control-sm" />
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Assign To</label>
+    <input type="date" id="assignToDate" class="form-control form-control-sm" />
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Lead Status</label>
+    <select id="statusFilter" class="form-select form-select-sm">
+      <option value="">All</option>
+      <option value="Not Allocated">Not Allocated</option>
+      <option value="Allocated">Allocated</option>
+      <option value="Opened">Opened</option>
+      <option value="Recalled">Recalled</option>
+      <option value="Joined">Joined</option>
+      <option value="Closed">Closed</option>
+      <option value="Waste">Waste</option>
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Follow-up Status1</label>
+    <select id="followupStatusFilter" class="form-select form-select-sm">
+      <option value="">All</option>
+      {% for status in followup_statuses %}
+        <option value="{{ status.status_name }}">{{ status.status_name }}</option>
+      {% endfor %}
+      <option value="No Updation">No Updation</option>
+      <option value="Marked as Waste">Marked as Waste</option>
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Follow-up Status2</label>
+    <select id="followupStatusFilter2" class="form-select form-select-sm">
+      <option value="">All</option>
+      {% for status in followup_statuses %}
+        <option value="{{ status.status_name }}">{{ status.status_name }}</option>
+      {% endfor %}
+      <option value="No Updation">No Updation</option>
+      <option value="Marked as Waste">Marked as Waste</option>
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Follow-up Status3</label>
+    <select id="followupStatusFilter3" class="form-select form-select-sm">
+      <option value="">All</option>
+      {% for status in followup_statuses %}
+        <option value="{{ status.status_name }}">{{ status.status_name }}</option>
+      {% endfor %}
+      <option value="No Updation">No Updation</option>
+      <option value="Marked as Waste">Marked as Waste</option>
+    </select>
+  </div>
+
+  <div class="col-md-2 d-flex align-items-end">
+    <button id="clearFilter" class="btn btn-outline-light btn-sm w-100">Clear Filters</button>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <label class="text-white">Show</label>
+      <select id="showDropdown" class="form-select form-select-sm">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <span class="text-white ms-2">rows</span>
+    </div>
+
+    <div class="input-group w-auto">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-hover align-middle text-center" id="leadsTable">
+      <thead>
+        <tr>
+          <th class="text-center">#</th>
+          <th class="nosort text-center">Track</th>
+          <th class="table_en_lsm text-center">Transfer Date</th>
+          <th class="table_en_lsm text-center">Lead Name</th>
+          <th class="table_en_lsm text-center">Email</th>
+          <th class="table_en_lsm text-center">Phone Number</th>
+          <th class="table_en_lsm text-center">Final Response | Status</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="7" class="text-center py-4 text-white">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+<!--? Offcanvas -->
+<div class="offcanvas offcanvas-end wide-canvas bg-dark text-white" tabindex="-1" id="leadDetailsCanvas">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Lead Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="mb-3">
+          <h6 class="text-info">Lead Details</h6>
+          <p>Name: <strong id="leadName">-</strong></p>
+          <p>Email: <span id="leadEmail">-</span></p>
+          <p>Phone: <span id="leadPhone">-</span></p>
+          <p>Added Date: <span id="leadAddedDate">-</span></p>
+        </div>
+
+        <div class="mb-3">
+          <h6 class="text-info">Client Details</h6>
+          <p>Client: <span id="clientName">-</span></p>
+          <p>Business: <span id="clientBusiness">-</span></p>
+          <p>Category: <span id="clientCategory">-</span></p>
+        </div>
+
+        <div class="mb-3">
+          <h6 class="text-info">Collected Details</h6>
+          <p>Collected by: <span id="collectedByName">-</span></p>
+          <p>Category: <span id="collectedCategory">-</span></p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="accordion" id="followupAccordion">
+
+          <div class="accordion-item bg-dark text-white">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                Follow-Up Details
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse">
+              <div class="accordion-body" id="followupDetailsContent">---</div>
+            </div>
+          </div>
+
+          <div class="accordion-item bg-dark text-white">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                Follow-Up History
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse">
+              <div class="accordion-body" id="followupHistoryContent">---</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const leadData = JSON.parse('{{ leads_json|safe|escapejs }}');
+</script>
+<script src="{% static 'dm_head/js/leads_tracker.js' %}"></script>
+
+
+{% endblock %}

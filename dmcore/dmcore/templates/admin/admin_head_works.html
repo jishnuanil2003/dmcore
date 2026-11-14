@@ -1,0 +1,93 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+
+{% block title %}Head{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/admin_head_works.css' %}">
+
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a> / 
+      <a href="{% url 'admin_works' %}" class="text-decoration-none text-white">Works</a> / Head Works</p>
+    </div>
+  </div>
+
+
+<div class="container-fluid head-works-wrap comn_table_bg">
+
+  <div class="card top-select-card">
+    <div class="card-body">
+      <h6 class="mb-3 text-white">Select Head</h6>
+      <select id="headSelect" class="form-select head-select">
+        <option value="">Select</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="contentArea" class="row mt-3 d-none">
+    <div class="col-md-4 col-sm-12 mb-3">
+
+      <div class="work-card clickable" data-view="clients">
+        <div class="work-card-title">Clients</div>
+        <div class="work-card-sub">All details of clients registered by Head</div>
+        <div class="work-card-icon">↗</div>
+      </div>
+
+      <div class="work-card clickable" data-view="client-works">
+        <div class="work-card-title">Client Works</div>
+        <div class="work-card-sub">All work details of clients</div>
+        <div class="work-card-icon">↗</div>
+      </div>
+
+      <div class="work-card clickable" data-view="assigned">
+        <div class="work-card-title">Works Assigned</div>
+        <div class="work-card-sub">All work details assigned by Head to team leads</div>
+        <div class="work-card-icon">↗</div>
+      </div>
+
+    </div>
+
+    <div class="col-md-8 col-sm-12 mb-3">
+      <div class="card table-card">
+        <div class="card-body">
+          <div class="table-head">
+            <h6 id="tableTitle" class="mb-3 text-white">Client Details</h6>
+
+            <div class="filters">
+              <div class="filter-item">
+                <label>From date</label>
+                <input type="date" id="fromDate" class="form-control">
+              </div>
+              <div class="filter-item">
+                <label>To date</label>
+                <input type="date" id="toDate" class="form-control">
+              </div>
+              <div class="filter-item filter-btn">
+                <button id="applyFilterBtn" class="btn btn-sm btn-light">Apply</button>
+                <button id="resetFilterBtn" class="btn btn-sm btn-outline-light">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-bordered table-hover align-middle head-works-table">
+              <thead id="tableThead"></thead>
+              <tbody id="tableTbody"></tbody>
+            </table>
+          </div>
+
+          <div id="emptyState" class="empty-state d-none">
+            No data found.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="{% static 'admin/js/admin_head_works.js' %}"></script>
+{% endblock %}

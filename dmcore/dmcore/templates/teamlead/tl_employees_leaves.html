@@ -1,0 +1,127 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% block content %}
+<style>
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .square-btn {
+        width: 30px;     
+        height: 30px;
+        padding: 0;
+        text-align: center;
+        vertical-align: middle;
+        font-weight: bold;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
+<div class="main-content">
+    <div class="container-fluid mt-4 mb-4">
+         <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="/teamlead" class="text-secondary">Dashboard</a> /
+            <a href="{% url 'tl_employees_section' %}" class="text-secondary">Employee Section</a> /
+            <a class="text-light">Employees Leave</a>
+        </h5>
+        <div class="container-fluid" style="background-color: #333333;padding-top: 22px;padding-bottom: 22px;padding-left: 25px;padding-right: 25px;margin-top: 33px;border-radius: 20px;">
+            <h5 class="text-light"><b>Leave</b></h5>
+            <form method="GET" class="mt-4">
+                <div class="row">
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="employee-id" class="form-label text-light">Employee</label>
+                            <select name="employee_id" id="employee-id" class="form-control">
+                                <option value="">-- Select Employee --</option>
+                                {% for a in allocation %}
+                                    <option value="{{a.employee.id}}" {% if request.GET.employee_id == a.employee.id|stringformat:"s" %}selected{% endif %}>{{a.employee.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="from-date" class="form-label text-light">From Date</label>
+                            <input type="date" class="form-control" id="from-date" name="from_date" value="{{ request.GET.from_date }}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="to-date" class="form-label text-light">To Date</label>
+                            <input type="date" class="form-control" id="to-date" name="to_date" value="{{ request.GET.to_date }}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4"style="display: flex;align-items: end;">
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-dark"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 9%;">No</th>
+                            <th scope="col" style="width: 11%;min-width: 122px;">Employee Id</th>
+                            <th scope="col" style="width: 14%;min-width: 144px;">Employee Name</th>
+                            <th scope="col" style="width: 11%;">Designation</th>
+                            <th scope="col" style="width: 11%;text-align: center;">Days</th>
+                            <th scope="col" style="width: 11%;min-width: 111px;">From Date</th>
+                            <th scope="col" style="width: 11%;min-width: 111px">To Date</th>
+                            <th scope="col" style="width: 11%;min-width: 111px;">Leave Type</th>
+                            <th scope="col" style="width: 11%;text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if leave %}
+                            {% for l in leave %}
+                                <tr>
+                                    <td style="width: 9%;">
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td style="width: 11%;">
+                                        EMP0000
+                                    </td>
+                                    <td style="width: 14%;">
+                                        <i class="fa-solid fa-user" style="margin-right: 10px;"></i>{{ l.employee.name }}
+                                    </td>
+                                    <td style="width: 11%;">
+                                        {{ l.employee.designation.name }}
+                                    </td>
+                                    <td style="width: 11%;text-align: center;">
+                                        <button class="btn btn-outline-danger square-btn">{{ l.number_of_days }}</button>
+                                    </td>
+                                    <td style="width: 11%;">
+                                        {{ l.start_date }}
+                                    </td>
+                                     <td style="width: 11%;">
+                                        {{ l.end_date }}
+                                    </td>
+                                     <td style="width: 11%;">
+                                        {{ l.leave_type }}
+                                    </td>
+                                    <td style="width: 11%;text-align: center;">
+                                        {% if l.status == 'pending' %} <button class="btn btn-outline-warning btn-sm">Pending</button>
+                                        {% elif l.status == 'approved' %} <button class="btn btn-outline-success btn-sm">Approved</button>
+                                        {% elif l.status == 'rejected' %} <button class="btn btn-outline-danger btn-sm">Rejected</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" style="text-align: center;">No leaves found!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>                        
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

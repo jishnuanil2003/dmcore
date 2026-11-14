@@ -1,0 +1,207 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+
+
+<link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a></li>
+    <li class="breadcrumb-item active text-white-50" aria-current="page">Follow Up</li>
+  </ol>
+</nav>
+
+<div class="container-fluid mt-3 comn_table_bg">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-white">Follow Up Leads (<span>{{ leads|length }}</span>)</h4>
+    <div>
+      <button class="btn btn-outline-success me-2" id="addFollowStatusBtn"><i class="fas fa-file-circle-plus"></i></button>
+      <button class="btn btn-outline-danger" id="bulkDeleteBtn"><i class="fas fa-trash"></i></button>
+    </div>
+  </div>
+
+<div class="row g-3 align-items-end mb-4">
+
+    <!-- HR Filter -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">HR</label>
+        <select id="hrFilter" class="form-select">
+            <option value="" selected disabled>- Select HR -</option>
+            <option value="">All</option>
+            {% for h in hrs %}
+            <option value="{{ h.id }}">{{ h.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Start Date -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">Start Date</label>
+        <input type="date" class="form-control" id="startDate">
+    </div>
+
+    <!-- End Date -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">End Date</label>
+        <input type="date" class="form-control" id="endDate">
+    </div>
+
+    <!-- Lead Status -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">Lead Status</label>
+        <select id="statusFilter" class="form-select">
+            <option value="" selected disabled>- Select Status -</option>
+            <option value="">All</option>
+            <option value="Allocated">Allocated</option>
+            <option value="Opened">Opened</option>
+            <option value="Closed">Closed</option>
+        </select>
+    </div>
+
+    <!-- Followup Status 1 -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">Follow-up Status 1</label>
+        <select id="followupStatusFilter" class="form-select">
+            <option value="" selected disabled>- Select Status -</option>
+            <option value="">All</option>
+            {% for status in followup_statuses %}
+            <option value="{{ status.status_name }}">{{ status.status_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Followup Status 2 -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">Follow-up Status 2</label>
+        <select id="followupStatusFilter2" class="form-select">
+            <option value="" selected disabled>- Select Status -</option>
+            <option value="">All</option>
+            {% for status in followup_statuses %}
+            <option value="{{ status.status_name }}">{{ status.status_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Followup Status 3 -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <label class="form-label text-white small">Follow-up Status 3</label>
+        <select id="followupStatusFilter3" class="form-select">
+            <option value="" selected disabled>- Select Status -</option>
+            <option value="">All</option>
+            {% for status in followup_statuses %}
+            <option value="{{ status.status_name }}">{{ status.status_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Clear Button -->
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <button class="btn btn-outline-light w-100" id="clearFilters">
+            Clear Filters
+        </button>
+    </div>
+
+</div>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <label class="text-white">Show</label>
+      <select id="rowCount" class="form-select d-inline-block w-auto bg-dark text-white">
+        <option>10</option>
+        <option selected>25</option>
+        <option>50</option>
+      </select>
+      <label class="text-white">rows</label>
+    </div>
+    <div class="input-group w-auto">
+      <input type="text" id="searchInput" class="form-control  bg-dark text-white" placeholder="Search...">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-hover" id="followUpTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th class="text-center">Delete <input type="checkbox" id="selectAll"></th>
+          <th>Assign Date</th>
+          <th>Follow Up By</th>
+          <th>Follow Up Status</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in leads %}
+        <tr 
+          data-hr="{{ entry.telecaller.id }}" 
+          data-status="{% if entry.status == 0 %}allocated{% elif entry.status == 1 %}opened{% else %}closed{% endif %}" 
+          data-added="{{ entry.lead.added_date|date:'Y-m-d' }}"
+
+          data-followup="{{ entry.normalized_followup }}"
+        >
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_sm text-center"><input type="checkbox" class="rowCheckbox" value="{{ entry.id }}"></td>
+          <td class="table_en_lsm">{{ entry.assign_date }}</td>
+          <td class="table_en_lsm">{{ entry.telecaller.name }}</td>
+          <td class="table_en_md">{{ entry.response }}</td>
+          <td class="table_en_lsm">{{ entry.lead.name }}</td>
+          <td class="table_en_sm">{{ entry.lead.email }}</td>
+          <td class="table_en_sm">{{ entry.lead.contact }}</td>
+          <td class="table_en_sm">
+            {% if entry.status == 0 %} Allocated
+            {% elif entry.status == 1 %} Opened
+            {% else %} Closed
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="followUpStatusModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Manage Follow Up Status</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" placeholder="Enter new status" id="newStatusInput">
+        <ul class="list-group" id="existingStatusList"></ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" id="saveNewStatus">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+  <div id="followUpToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="followUpToastMessage">
+        Status added successfully!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+
+<script src="{% static 'datamanager/js/followup.js' %}"></script>
+{% endblock %}

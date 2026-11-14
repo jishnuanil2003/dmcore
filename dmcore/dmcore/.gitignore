@@ -1,0 +1,23 @@
+# Google Cloud credentials
+media/google_credentials/
+**/service-account*.json
+**/credentials.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+media/google_credentials/

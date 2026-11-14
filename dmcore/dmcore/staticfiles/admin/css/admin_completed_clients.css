@@ -1,0 +1,13 @@
+.admin-glass {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.table thead th {
+  white-space: nowrap;
+}
+
+#clientsTbody td {
+  vertical-align: middle;
+}

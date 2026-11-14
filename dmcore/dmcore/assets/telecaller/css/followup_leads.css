@@ -1,0 +1,47 @@
+
+
+@media (max-width: 768px) {
+  .offcanvas-end {
+    width: 100vw !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .offcanvas-end {
+    width: 60% !important;
+  }
+}
+
+
+#updateOffcanvas form .form-group {
+  margin-bottom: 1rem;
+}
+
+#updateOffcanvas .form-control,
+#updateOffcanvas .form-select {
+  /* background-color: #1e1e1e; */
+  /* color: white; */
+  border: 1px solid #555;
+}
+
+#updateOffcanvas label {
+  font-weight: 500;
+  color: #ddd;
+}
+
+@media (max-width: 768px) {
+  #updateOffcanvas .btn {
+    width: 100%;
+  }
+}
+
+
+#leadInfo {
+  /* background-color: #000000; */
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #ccc;
+  line-height: 1.5;
+}

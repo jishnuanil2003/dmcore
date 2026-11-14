@@ -1,0 +1,193 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+
+<!-- Styling -->
+
+<style>
+
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+
+    @media (max-width: 576px) {
+        .btn-mobile-margin {
+            margin-top: 5px; /* Adjust as needed */
+        }
+    }
+    
+</style>
+<style>
+    .sort-icons {
+        display: inline-block;
+        font-size: 12px;
+        line-height: 1;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="row mt-4" style="background-color: #333333;border-radius: 15px;">
+    <h4 class="text-white text-center w-100 mt-3">Employees</h4>
+
+    <div class="d-flex justify-content-between align-items-center p-3">
+        <!-- Records Per Page Dropdown -->
+        <div class="text-white">
+            Show
+            <select id="recordsPerPage" class="form-select d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="all">All</option>
+            </select>
+            entries
+        </div>
+
+        <!-- Search Box -->
+        <input type="text" id="searchInput" placeholder="Search..." class="form-control w-25">
+    </div>
+
+    <div class="table-responsive p-3">
+        <table id="employeeTable" class="table table-striped table-bordered table-dark text-white">
+            <thead>
+    <tr>
+        <th onclick="sortTable(0)" style="white-space: nowrap;">
+            No
+            <span class="sort-icons">▲<br>▼</span></th>
+        <th onclick="sortTable(1)" style="white-space: nowrap;">
+            Employee ID
+            <span class="sort-icons">▲<br>▼</span>
+        </th>
+        <th onclick="sortTable(2)" style="white-space: nowrap;">
+            Employee Name
+            <span class="sort-icons">▲<br>▼</span>
+        </th>
+        <th onclick="sortTable(3)" style="white-space: nowrap;">
+            Designation
+            <span class="sort-icons">▲<br>▼</span>
+        </th>
+        <th onclick="sortTable(4)" style="white-space: nowrap;">
+            Department
+            <span class="sort-icons">▲<br>▼</span>
+        </th>
+        <th onclick="sortTable(5)" style="white-space: nowrap;">
+            Contact
+            <span class="sort-icons">▲<br>▼</span>
+        </th>
+    </tr>
+</thead>
+
+            <tbody id="employeeBody">
+                {% for emp in employee_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>EMP0000</td>
+                    <td><i class="fas fa-user me-1 text-secondary"></i>{{ emp.name }}</td>
+                    <td style="white-space: nowrap;">
+    {{ emp.designation.name }}
+    <a href="#" data-bs-toggle="modal" data-bs-target="#editDesignationModal{{ emp.id }}">
+
+        <i class="fa fa-edit text-white ml-2" title="Edit Designation"></i>
+    </a>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editDesignationModal{{ emp.id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ emp.id }}" aria-hidden="true" >
+      <div class="modal-dialog" role="document" style="background-color: #333333;border-radius: 15px;">
+        <form method="POST" action="{% url 'update_designation' emp.id %}">
+            {% csrf_token %}
+            <div class="modal-content text-light" style="background-color: #333333;border-radius: 15px;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel{{ emp.id }}">Edit Designation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                  
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Select New Designation:</label>
+                  <select class="form-control" name="designation_id" required>
+                    {% for des in designations %}
+                      <option value="{{ des.id }}" {% if emp.designation.id == des.id %}selected{% endif %}>{{ des.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+        </form>
+      </div>
+    </div>
+</td>
+
+                    <td>{{ emp.department.name }}</td>
+                    <td>{{ emp.contact_number }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const recordsDropdown = document.getElementById('recordsPerPage');
+    const table = document.getElementById('employeeTable');
+    const tbody = document.getElementById('employeeBody');
+    let originalRows = Array.from(tbody.querySelectorAll('tr'));
+    let currentSortCol = null;
+    let sortAsc = true;
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const perPage = recordsDropdown.value;
+
+        let filtered = originalRows.filter(row => {
+            return Array.from(row.cells).some(cell =>
+                cell.textContent.toLowerCase().includes(searchTerm)
+            );
+        });
+
+        if (perPage !== 'all') {
+            filtered = filtered.slice(0, parseInt(perPage));
+        }
+
+        renderTable(filtered);
+    }
+
+    function renderTable(rows) {
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function sortTable(colIndex) {
+        if (currentSortCol === colIndex) sortAsc = !sortAsc;
+        else {
+            currentSortCol = colIndex;
+            sortAsc = true;
+        }
+
+        originalRows.sort((a, b) => {
+            const aText = a.cells[colIndex].textContent.trim().toLowerCase();
+            const bText = b.cells[colIndex].textContent.trim().toLowerCase();
+            return sortAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+        });
+
+        filterTable(); // Re-filter after sorting
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    recordsDropdown.addEventListener('change', filterTable);
+
+    // Initial load
+    filterTable();
+</script>
+
+
+
+{% endblock content %}

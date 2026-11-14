@@ -1,0 +1,210 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    body {
+        background-color: #12151e; 
+    }
+
+    .card-custom {
+        color: white;
+        border: none;
+        border-radius: 10px;
+       
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .card-custom:hover {
+        background-color: #1f1f1f;
+    }
+
+    .card-title-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-icon {
+        font-size: 46px;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+        color: #cbd5e1;
+    }
+
+    .row > div {
+        margin-bottom: 20px;
+    }
+
+   
+    
+    
+</style>
+<p style="color: white;margin-left: 30px;"><b>Work / Weekly Progress</b></p>
+<div class="container mt-2">
+    
+        <div class="col mt-2">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">List Of Weekly Progress</h5>
+                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#uploadWeeklyModal">
+                            <i class="fa-solid fa-file text-war"></i>&nbsp;Weekly upload
+                        </button>
+
+
+                        <!-- Upload Weekly Modal -->
+                        <div class="modal fade" id="uploadWeeklyModal" tabindex="-1" aria-labelledby="uploadWeeklyModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content bg-dark text-light" style="border-radius: 10px; padding: 20px;">
+                                
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title" id="uploadWeeklyModalLabel">Upload Weekly Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                            style="filter: invert(1);"></button>
+                                </div>
+
+                                <form method="POST" enctype="multipart/form-data" action="{% url 'weekly_pro' %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+
+                                    <!-- Progress Type -->
+                                    <div class="mb-3">
+                                        <label>Check progress type</label><br>
+                                        <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="progressType" id="weeklyProgress" value="weekly" checked>
+                                        <label class="form-check-label" for="weeklyProgress">Weekly Progress</label>
+                                        </div>
+                                        <div class="form-check form-check-inline ms-3">
+                                        <input class="form-check-input" type="radio" name="progressType" id="monthlyProgress" value="monthly" disabled>
+                                        <label class="form-check-label" for="monthlyProgress">Monthly Progress</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- From Date -->
+                                    <div class="mb-3">
+                                        <label for="fromDate">From Date</label>
+                                        <input type="date" class="form-control" id="fromDate" name="from_date" required>
+                                    </div>
+
+                                    <!-- To Date -->
+                                    <div class="mb-3">
+                                        <label for="toDate">To Date</label>
+                                        <input type="date" class="form-control" id="toDate" name="to_date" required>
+                                    </div>
+
+                                    <!-- Progress -->
+                                    <div class="mb-3">
+                                        <label for="progress">Progress</label>
+                                        <input type="number" class="form-control" id="progress" name="progress" min="0" max="100" required>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="mb-3">
+                                        <label for="moreProgress">More about weekly progress</label>
+                                        <textarea class="form-control" id="moreProgress" name="description" rows="3"></textarea>
+                                    </div>
+
+                                    <!-- File Upload -->
+                                    <div class="mb-3">
+                                        <label for="files">Files</label><br>
+                                        <input type="file" class="form-control-file" id="files" name="files" multiple>
+                                    </div>
+
+                                    </div>
+
+                                    <div class="modal-footer border-0">
+                                    <button type="submit" class="btn btn-outline-primary mx-auto"><i class="fa-solid fa-upload"></i>&nbsp;Upload</button>
+                                    </div>
+                                </form>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                    <p style="font-size: 12px;color: gray;">A list of weekly progress that employees work for different clients<p>
+                        <form action="" method="get">
+                            <div class="row gutters-sm mb-5 ">
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                                    <label class="d-flex mb-1">From Date</label>
+                                    <input type="date" name="from_date" class="form-control" value="{{ from_date }}">
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                                    <label class="d-flex mb-1">To Date</label>
+                                    <input type="date" name="to_date" class="form-control" value="{{ to_date }}">
+                                </div>
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-1 mb-4 mb-lg-0 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary btnsearch text-white w-100">
+                                        <i class="fas fa-search" style="font-size:18px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        
+
+
+                        
+                            
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-dark table-striped"  id="progressTable">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>From Date</th>
+                                        <th>To Date</th>
+                                        <th>Description</th>
+                                        <th>Files</th>
+                                        <th>Progress</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for progress in progresses %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ progress.from_date }}</td>
+                                        <td>{{ progress.to_date }}</td>
+                                        <td>{{ progress.description }}</td>
+                                        <td>
+                                            {% if progress.file_list %}
+                                                {% for file in progress.file_list %}
+                                                    <a href="{{ file.url }}" target="_blank" style="border: 1px solid blue; padding: 5px;text-decoration-line: none;" class="rounded" >Download</a><br>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p style="color: blue;">No File</p>
+                                            {% endif %}
+
+                                        </td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-info" style="width: {{ progress.progress }}%;">
+                                                    {{ progress.progress }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{% if progress.status == 0 %}
+                                                <span style="color:yellow;border: 1px solid yellow;padding: 5px;" class="rounded">Pending</span><br>
+                                            {% else %}
+                                                <span style="color:green;border: 1px solid green;padding: 5px;" class="rounded">Verified</span><br>
+                                            {% endif %}
+                                        </td>   
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
+        </div>
+</div>
+
+
+
+
+{% endblock %}

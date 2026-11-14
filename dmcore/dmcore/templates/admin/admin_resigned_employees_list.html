@@ -1,0 +1,193 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+{% block title %}Resigned Employees List{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'admin/css/resigned_employees.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/common.css' %}">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb text-white">
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-white">Dashboard</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a>
+    </li>
+    <li class="breadcrumb-item active text-white-50" aria-current="page">Resigned Employees List</li>
+  </ol>
+</nav>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <div class="mb-3">
+    <input type="text" id="searchInput" class="form-control bg-dark text-white w-100" placeholder="Search here.">
+  </div>
+
+  <div class="table-responsive">
+    <table id="resignedEmployeeTable" class="table table-dark table-bordered table-striped align-middle text-center">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th class="table_en_lsm">Employee ID</th>
+          <th class="table_en_md">Employee Name</th>
+          <th class="table_en_md">Email</th>
+          <th class="table_en_sm">Phone</th>
+          <th class="table_en_sm">Register Date</th>
+          <th class="table_en_lsm">Department</th>
+          <th class="table_en_md">Designation</th>
+          <th class="table_en_sm">Active Status</th>
+          <th class="table_en_sm">Account Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% if resigned_list %}
+          {% for emp in resigned_list %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ emp.employee_code|default:"-" }}</td>
+
+            <td class="text-start">
+              <i class="fa-solid fa-user me-2"></i>
+              {{ emp.name|default:"-" }}
+            </td>
+
+            <td>{{ emp.email|default:"-" }}</td>
+            <td>{{ emp.contact_number|default:"-" }}</td>
+
+            <td>
+              {% if emp.created_at %}
+                {{ emp.created_at|date:"M d, Y" }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+
+            <td>{{ emp.department.name|default:"-" }}</td>
+
+            <td>
+              {% if emp.designation.name == "Digital_Marketing_Head" %}
+                Digital Marketing Head
+              {% elif emp.designation.name == "Team_Lead" %}
+                Team Lead
+              {% elif emp.designation.name == "Data_Manager" %}
+                Data Manager
+              {% else %}
+                {{ emp.designation.name|default:"-" }}
+              {% endif %}
+            </td>
+
+            <td>
+              {% if emp.active_status|lower == "approved" %}
+                <i class="fa-regular fa-circle-check text-success"></i>
+              {% else %}
+                <button type="button" class="btn btn-link p-0 text-danger emp-modal-btn" data-emp-id="{{ emp.id }}" title="Open">
+                <i class="fa-regular fa-circle-xmark text-danger"></i>
+                </button>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if emp.verification_status %}
+                <i class="fa-solid fa-user-plus text-success"></i>
+              {% else %}
+                <i class="fa-solid fa-user-xmark text-danger"></i>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10" class="text-center py-4">No resigned employees found.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="modal fade" id="employeeEditModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content emp-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="employeeEditModalTitle">Employee</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="emp_id">
+
+        <div class="mb-3">
+          <label class="form-label">Employee Name</label>
+          <input type="text" class="form-control emp-input" id="emp_name">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Employee ID</label>
+          <input type="text" class="form-control emp-input" id="emp_employee_code" readonly>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Contact No</label>
+            <input type="text" class="form-control emp-input" id="emp_contact_number">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control emp-input" id="emp_email">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Address Line 1</label>
+            <input type="text" class="form-control emp-input" id="emp_address_line1">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Address Line 2</label>
+            <input type="text" class="form-control emp-input" id="emp_address_line2">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Address Line 3</label>
+            <input type="text" class="form-control emp-input" id="emp_address_line3">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Pincode</label>
+            <input type="text" class="form-control emp-input" id="emp_pin">
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Location</label>
+            <input type="text" class="form-control emp-input" id="emp_location">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">District</label>
+            <input type="text" class="form-control emp-input" id="emp_district">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">State</label>
+            <input type="text" class="form-control emp-input" id="emp_state">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 d-flex justify-content-end">
+        <button type="button" class="btn btn-success" id="btnActivateEmployee">
+          <i class="fa-solid fa-circle-check me-2"></i> Active
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+<script src="{% static 'admin/js/resigned_employees.js' %}"></script>
+{% endblock %}

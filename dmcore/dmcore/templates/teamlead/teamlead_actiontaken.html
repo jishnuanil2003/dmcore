@@ -1,0 +1,731 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+
+{% block content %}
+<style>
+  /* Dark Theme Styles to match admin.html */
+  .card {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card-header {
+    background-color: #333333 !important;
+    border-bottom: 1px solid #444;
+    color: white !important;
+  }
+  
+  .list-group-item {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444;
+  }
+  
+  .table {
+    color: white;
+    background-color: #333333;
+  }
+  
+  .table td {
+    border-color: #444;
+    background-color: #333333 !important;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #3a3a3a !important;
+  }
+  
+  .badge {
+    color: white !important;
+  }
+  
+  .bg-primary {
+    background-color: #4a5568 !important; /* Dark blue-gray */
+  }
+  
+  .bg-success {
+    background-color: #2d6a4f !important; /* Dark green */
+  }
+  
+  .bg-warning {
+    background-color: #b88b4a !important; /* Dark orange */
+    color: white !important;
+  }
+  
+  .form-control, .form-select {
+    background-color: #444;
+    color: white;
+    border: 1px solid #555;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #555;
+    color: white;
+    border-color: #666;
+    box-shadow: 0 0 0 0.25rem rgba(100, 100, 100, 0.25);
+  }
+  
+  .current-date {
+    font-size: 1.1rem; /* Increased font size */
+    opacity: 0.9; /* Increased opacity for better visibility */
+    margin-top: 5px;
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-weight: 500; /* Added slight weight */
+  }
+  
+  .action-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+  }
+  
+  .employee-name {
+    font-weight: bold;
+    color: #b8c2cc;
+  }
+  
+  .action-type {
+    font-weight: bold;
+  }
+  
+  .date-range {
+    font-size: 0.85rem;
+    color: #adb5bd;
+  }
+  
+  .card-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: none;
+  }
+  
+  .equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .equal-height-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .action-icons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-icons button {
+    background: transparent;
+    border: none;
+    color: #adb5bd;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  
+  .action-icons button:hover {
+    color: white;
+  }
+  
+  .status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+  
+  .status-pending {
+    background-color: #b88b4a;
+  }
+  
+  .status-approved {
+    background-color: #2d6a4f;
+  }
+  
+  .status-rejected {
+    background-color: #e74c3c;
+  }
+  
+  /* Hide sections by default */
+  #actionTakenContent, #actionReceivedContent, #takeActionContent, #editActionContent {
+    display: none;
+  }
+  
+  .btn-toggle {
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-toggle:hover {
+    background-color: #5a6678;
+  }
+  
+  .priority-high {
+    color: #e74c3c;
+  }
+  
+  .priority-medium {
+    color: #f39c12;
+  }
+  
+  .priority-low {
+    color: #2ecc71;
+  }
+  
+  .time-ago {
+    font-size: 0.8rem;
+    color: #adb5bd;
+  }
+
+  .btn-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-toggle:hover {
+    background-color: #5a6678;
+    transform: translateY(-2px);
+  }
+
+  /* Edit date styling */
+  .edit-date-btn {
+    background: none;
+    border: none;
+    color: #4a90e2;
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .edit-date-btn:hover {
+    color: #357abd;
+    text-decoration: underline;
+  }
+  
+  .edit-date-btn i {
+    font-size: 0.8em;
+  }
+
+</style>
+
+<div class="row equal-height-row mt-2 p-2">
+  <div class="col-md-4 equal-height-col mb-3">
+    <!-- Take Action Section -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Take Action</h5>
+          <button class="btn-toggle" id="btnShowTakeAction"> <i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Address team issues promptly.</p>
+      </div>
+    </div>
+    
+    <!-- Actions Taken Section -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Actions Taken</h5>
+          <button class="btn-toggle" id="btnShowActionTaken"> <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Actions taken against your team.</p>
+      </div>
+    </div>
+    
+    <!-- Actions Received Section -->
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Actions Received</h5>
+          <button class="btn-toggle" id="btnShowActionReceived"> <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>View actions against to you.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side Content Area -->
+  <div class="col-md-8 equal-height-col mb-3">
+
+    <!-- Take Action Form Section Content -->
+    <div class="card shadow-sm" id="takeActionContent">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Take Action</h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Action Form -->
+<form id="takeActionForm">
+  {% csrf_token %}
+  
+  <!-- ROW: Employee dropdown and date field side-by-side -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="employeeSelector" class="form-label">Select Employee</label>
+      <select class="form-select" id="employeeSelector" name="employee_id" required>
+        <option value="">-- All Employees --</option>
+        {% for e in employee %}
+        <option value="{{ e.id }}">{{ e.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label for="actionDate" class="form-label">Action Date</label>
+      <input type="date" class="form-control" id="actionDate" name="action_date" required>
+    </div>
+  </div>
+
+  <!-- Remaining fields below -->
+  <div class="mb-3">
+    <label for="actionhead" class="form-label">Reason</label>
+    <input type="text" class="form-control" id="actionhead" name="action_head" placeholder="Action Head" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="actionReason" class="form-label">Reason for Action</label>
+    <input type="text" class="form-control" id="actionReason" name="action_reason" placeholder="Brief reason for action" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="actionDetail" class="form-label">What action taken</label>
+    <textarea class="form-control" id="actionDetail" name="action_detail" rows="4" placeholder="Describe the action in detail" required></textarea>
+  </div>
+
+  <div class="d-grid">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-file-check"></i> Action
+    </button>
+  </div>
+</form>
+      </div>
+    </div>
+
+    <!-- Edit Action Form Section Content -->
+    <div class="card shadow-sm" id="editActionContent">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Edit Action</h5>
+          <button class="btn btn-secondary btn-sm" id="btnCancelEdit">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Edit Action Form -->
+<form id="editActionForm">
+  {% csrf_token %}
+  <input type="hidden" id="editActionId" name="action_id">
+  
+  <!-- ROW: Employee dropdown and date field side-by-side -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="editEmployeeSelector" class="form-label">Select Employee</label>
+      <select class="form-select" id="editEmployeeSelector" name="employee_id" required>
+        <option value="">-- All Employees --</option>
+        {% for e in employee %}
+        <option value="{{ e.id }}">{{ e.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label for="editActionDate" class="form-label">Action Date</label>
+      <input type="date" class="form-control" id="editActionDate" name="action_date" required>
+    </div>
+  </div>
+
+  <!-- Remaining fields below -->
+  <div class="mb-3">
+    <label for="editActionhead" class="form-label">Reason</label>
+    <input type="text" class="form-control" id="editActionhead" name="action_head" placeholder="Action Head" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="editActionReason" class="form-label">Reason for Action</label>
+    <input type="text" class="form-control" id="editActionReason" name="action_reason" placeholder="Brief reason for action" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="editActionDetail" class="form-label">What action taken</label>
+    <textarea class="form-control" id="editActionDetail" name="action_detail" rows="4" placeholder="Describe the action in detail" required></textarea>
+  </div>
+
+  <div class="d-grid">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check-circle"></i> Update
+    </button>
+  </div>
+</form>
+      </div>
+    </div>
+
+    <!-- Actions Taken Section Content -->
+    <div class="card shadow-sm" id="actionTakenContent">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Actions Taken</h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive" style='white-space: nowrap;'>
+          <table class="table  table-bordered table-dark text-white">
+            <thead>
+              <tr>
+                <th scope="col" >Date</th>
+                <th scope="col">Action Type</th>
+              </tr>
+            </thead>
+            <tbody  id="actionTakenTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Actions Received Section Content -->
+    <div class="card shadow-sm" id="actionReceivedContent">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Actions Received</h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive" style='white-space: nowrap;'>
+          <table class="table  table-bordered table-dark">
+            <thead >
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Action Type</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function loadActionsTaken() {
+  fetch("/teamlead_view_actions/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      const tbody = document.getElementById("actionTakenTableBody");
+      tbody.innerHTML = "";
+
+      if (data.actions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="text-center">No actions taken</td></tr>';
+      } else {
+        data.actions.forEach(action => {
+          let actionHtml = `
+            <tr>
+              <td class="align-middle text-center" style='white-space: nowrap;'>
+                <button class="edit-date-btn" onclick="editAction(${action.id}, '${action.employee_id}', '${action.date}', '${action.head}', '${action.reason}', '${action.content}')">
+                  <i class="fas fa-pencil-alt"></i> ${action.date}
+                </button>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="me-2">
+                    <button class="btn btn-warning"><i class="fas fa-file-alt fa-2x text-light mt-1"></i></button>
+                  </div>
+                  <div>
+                    <strong>${action.head} (${action.employee_name})</strong><br>
+                    <small>${action.reason}</small><br>
+                  </div>
+                </div>
+                <br>
+                <h6>Action</h6> 
+                Taken by ${action.from_name} on ( ${action.date} )
+                <div>${action.content}</div>
+              </td>
+            </tr>
+          `;
+          tbody.innerHTML += actionHtml;
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error loading actions:', error);
+    });
+}
+
+// Function to edit action
+function editAction(actionId, employeeId, date, head, reason, content) {
+  // Populate the edit form
+  document.getElementById('editActionId').value = actionId;
+  document.getElementById('editEmployeeSelector').value = employeeId;
+  document.getElementById('editActionDate').value = date;
+  document.getElementById('editActionhead').value = head;
+  document.getElementById('editActionReason').value = reason;
+  document.getElementById('editActionDetail').value = content;
+  
+  // Show edit form
+  showOnlySection(document.getElementById('editActionContent'));
+}
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Get references to all buttons and content sections
+  const btnShowTakeAction = document.getElementById('btnShowTakeAction');
+  const btnShowActionTaken = document.getElementById('btnShowActionTaken');
+  const btnShowActionReceived = document.getElementById('btnShowActionReceived');
+  const btnCancelEdit = document.getElementById('btnCancelEdit');
+  
+  const takeActionContent = document.getElementById('takeActionContent');
+  const actionTakenContent = document.getElementById('actionTakenContent');
+  const actionReceivedContent = document.getElementById('actionReceivedContent');
+  const editActionContent = document.getElementById('editActionContent');
+  
+  // Function to show only the selected section
+  function showOnlySection(sectionToShow) {
+    // Hide all sections first
+    takeActionContent.style.display = 'none';
+    actionTakenContent.style.display = 'none';
+    actionReceivedContent.style.display = 'none';
+    editActionContent.style.display = 'none';
+    
+    // Show the selected section
+    sectionToShow.style.display = 'flex';
+    
+    // Load data if switching to Actions Taken section
+    if (sectionToShow === actionTakenContent) {
+      loadActionsTaken();
+    }
+  }
+  
+  // Make showOnlySection available globally
+  window.showOnlySection = showOnlySection;
+  
+  // Set up event listeners for buttons
+  btnShowTakeAction.addEventListener('click', function() {
+    showOnlySection(takeActionContent);
+  });
+  
+  btnShowActionTaken.addEventListener('click', function() {
+    showOnlySection(actionTakenContent);
+  });
+  
+  btnShowActionReceived.addEventListener('click', function() {
+    showOnlySection(actionReceivedContent);
+  });
+  
+  btnCancelEdit.addEventListener('click', function() {
+    showOnlySection(actionTakenContent);
+  });
+  
+  // Show Take Action section by default on page load
+  showOnlySection(takeActionContent);
+  
+  // Load initial actions taken data
+  loadActionsTaken();
+});
+</script>
+
+<!--/////////////////////// action taking ////////////////////////////////////-->
+
+<script>
+document.getElementById('takeActionForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const form = this;
+  const formData = new FormData(form);
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  fetch('/teamlead_submit_action/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Action submitted successfully');
+      form.reset();
+      // Refresh the actions taken table automatically
+      loadActionsTaken();
+    } else {
+      alert('Submission failed: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error submitting action:', error);
+    alert('Something went wrong!');
+  });
+});
+</script>
+
+<!--/////////////////////// Edit action ////////////////////////////////////-->
+
+<script>
+document.getElementById('editActionForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const form = this;
+  const formData = new FormData(form);
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  fetch('/teamlead_edit_action/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Action updated successfully');
+      // Switch back to actions taken view and refresh
+      showOnlySection(document.getElementById('actionTakenContent'));
+      loadActionsTaken();
+    } else {
+      alert('Update failed: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error updating action:', error);
+    alert('Something went wrong!');
+  });
+});
+</script>
+
+<!--////////////////////////// tl action received /////////////////////////-->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // 🔐 CSRF helper function
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Main script logic
+  $(document).ready(function () {
+    function loadActions() {
+      $.ajax({
+        url: '/teamlead_received_actions/',
+        method: 'POST',
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        success: function (response) {
+          const tbody = $('#actionReceivedContent tbody');
+          tbody.empty();
+
+          if (response.actions.length === 0) {
+            tbody.append('<tr><td colspan="3" class="text-center py-4">No actions received.</td></tr>');
+          } else {
+            response.actions.forEach(action => {
+              const row = `
+              <tr>
+                <td class="align-middle text-center" style="width: 120px; white-space: nowrap;">
+                  ${action.date}
+                </td>
+                <td>
+                  <div class="d-flex align-items-start">
+                    <div class="me-3">
+                      <button class="btn btn-warning">
+                        <i class="fas fa-file-alt fa-2x text-light"></i>
+                      </button>
+                    </div>
+                    <div class="w-100">
+                      <strong>${action.action_type}</strong><br>
+                      <small> ${action.act_reason || 'No reason provided'}</small>
+                    </div>
+                  </div>
+
+                  <div class="mt-2 ps-2">
+                    <div class="text-light small mb-1">
+                      <strong>Taken by</strong> ${action.from_name || 'Unknown'} on (${action.date})
+                    </div>
+                    <div><small>${action.act_content || 'No details provided'}</small></div>
+                  </div>
+                </td>
+              </tr>`;
+              tbody.append(row);
+            });
+          }
+        },
+        error: function (xhr) {
+          console.error("Failed to load actions", xhr);
+          $('#actionReceivedContent tbody').html('<tr><td colspan="3" class="text-center text-danger py-4">Failed to load actions. Please try again.</td></tr>');
+        }
+      });
+    }
+
+    // Initial load
+    loadActions();
+
+    // Refresh button
+    $('#btnRefreshActions').click(function () {
+      loadActions();
+    });
+  });
+</script>
+
+{% endblock content %}

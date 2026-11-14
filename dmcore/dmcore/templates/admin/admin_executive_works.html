@@ -1,0 +1,141 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+{% block title %}Executive Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/admin_executive_works.css' %}">
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a> / 
+      <a href="{% url 'admin_works' %}" class="text-decoration-none text-white">Works</a> / Executive Works</p>
+    </div>
+  </div>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="exec-select-wrap">
+        <label class="text-white fw-semibold mb-2">Select <span class="text-danger">Executive</span></label>
+        <select id="executiveSelect" class="form-select bg-dark text-white">
+          <option value="">- Select -</option>
+          {% for e in executives %}
+            <option value="{{ e.id }}">{{ e.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <div class="col-12 col-lg-4">
+      <div class="work-card active" data-section="ongoing">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-white mb-1">Ongoing Works</h6>
+            <p class="text-white-50 mb-0">All ongoing work details of executive</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="work-card mt-3" data-section="completed">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-white mb-1">Completed Works</h6>
+            <p class="text-white-50 mb-0">All completed works of executive</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="table-panel">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <h6 id="panelTitle" class="text-white mb-0">Ongoing Works</h6>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <div>
+              <label class="text-white-50 small mb-1 d-block">From date</label>
+              <input type="date" id="fromDate" class="form-control bg-dark text-white">
+            </div>
+            <div>
+              <label class="text-white-50 small mb-1 d-block">To date</label>
+              <input type="date" id="toDate" class="form-control bg-dark text-white">
+            </div>
+            <div class="d-flex align-items-end">
+              <button id="applyFilterBtn" class="btn btn-outline-light">Apply</button>
+              <button id="resetFilterBtn" class="btn btn-outline-light">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-dark table-bordered table-striped align-middle text-center">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th class="table_en_md">Start Date</th>
+                <th class="table_en_md">End Date</th>
+                <th class="table_en_xl">Task Name</th>
+                <th class="table_en_md">Progress</th>
+                <th class="table_en_md">Daily works</th>
+                <th class="table_en_sm">Status</th>
+              </tr>
+            </thead>
+            <tbody id="worksTbody">
+              <tr>
+                <td colspan="7" class="py-4 text-white-50">Select an executive to load data.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal fade" id="dailyWorksModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable exec-daily-modal">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h6 class="modal-title" id="dailyWorksTitle">Daily Works</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-dark table-bordered table-striped align-middle text-center">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th class="table_en_md">Date</th>
+                <th class="table_en_md">Title</th>
+                <th class="table_en_xl">Description</th>
+                <th class="table_en_sm">Achieved Target</th>
+                <th class="table_en_sm">Verified Targets</th>
+                <th class="table_en_sm">Status</th>
+              </tr>
+            </thead>
+            <tbody id="dailyWorksTbody">
+              <tr><td colspan="7" class="py-4 text-white-50">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.ADMIN_EXEC_WORKS_URLS = {
+    list: "{% url 'executive_works_list' %}",
+    daily: "{% url 'executive_daily_works' %}",
+  };
+</script>
+<script src="{% static 'admin/js/admin_executive_works.js' %}"></script>
+
+{% endblock %}

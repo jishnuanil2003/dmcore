@@ -1,0 +1,94 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+          body {
+      overflow-x: hidden;
+      
+  background-color: #12151e; 
+}
+
+    .card-custom {
+        color: white;
+        border: none;
+        border-radius: 10px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .card-custom:hover {
+        background-color: #1f1f1f;
+    }
+
+    .card-title-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-icon {
+        font-size: 25px;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+        color: #cbd5e1;
+    }
+
+    .row > div {
+        margin-bottom: 20px;
+    }
+
+    a.text-decoration-none {
+        color: inherit;
+    }
+
+    a.text-decoration-none:hover {
+        color: inherit;
+    }
+    
+</style>
+<<h5 class="text-secondary" id="breadcrumb-navigation" style="margin-left: 20px;">
+    <a href="" class="text-secondary" style="text-decoration-line: none;">Dashboard</a> /
+    <a class="text-light" style="text-decoration-line: none;"> Progress Section</a>
+</h5>
+<div class="container mt-2">
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-3 g-4 mt-4">
+        
+
+        <div class="col">
+            <a href="{% url 'tl_week_pro' %}" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">Weekly Progress</h5>
+                        <i class="fa-solid fa-calendar-check card-icon text-success"></i>
+                    </div>
+                    <p class="card-text">Analyses of the weekly progress,and acheivements pertaining to the ongoing projects and activities</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'tl_mon_pro' %}" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">Monthly Progress</h5>
+                        <i class="fa-solid fa-business-time card-icon text-warning"></i>
+                    </div>
+                    <p class="card-text">Analyses of the monthly progress,and acheivements pertaining to the ongoing projects and activities</p>
+                </div>
+            </a>
+        </div>
+
+        
+
+    </div>
+</div>
+
+
+
+{% endblock %}

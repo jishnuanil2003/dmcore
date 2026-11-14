@@ -1,0 +1,224 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}TL Individual Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/tl_individual_works.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+<div class="container-fluid tl_ind_wrap">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb text-white">
+        <li class="breadcrumb-item">
+          <a href="{% url 'dm_work' %}" class="text-decoration-none text-white">Works</a>
+        </li>
+        <li class="breadcrumb-item active text-white-50" aria-current="page">Team Leads Individual Works</li>
+      </ol>
+    </nav>
+
+    <div class="search_box">
+      <input id="searchInput" type="text" class="form-control form-control-sm" placeholder="search here...">
+    </div>
+  </div>
+
+  <div class="card work_card">
+    <div class="table-responsive table_main">
+      <table class="table table-bordered table-striped table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width:60px">#</th>
+            <th class="table_en_lsm">Employee</th>
+            <th class="table_en_lsm">Client Name</th>
+            <th class="table_en_lsm">Task</th>
+            <th class="table_en_sm">Start Date</th>
+            <th class="table_en_sm">Due Date</th>
+            <th class="table_en_lsm">Progress</th>
+            <th class="table_en_sm text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody id="worksTbody">
+          <tr><td colspan="8" class="text-center text-white">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content modal_dark">
+      <div class="modal-header">
+        <h6 class="modal-title">Task Details</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="taskDetailsErr" class="text-white d-none">Unable to load details.</div>
+
+        <div id="taskDetailsBody" class="d-none">
+          <div class="mb-3">
+            <div class="lbl">Client Name</div>
+            <input class="form-control form-control-sm ip_dark" id="tdClient" readonly>
+          </div>
+
+          <div class="mb-3">
+            <div class="lbl">Task Name</div>
+            <div class="box_dark" id="tdTaskName"></div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6 col-sm-12">
+              <div class="lbl">Allocated Date</div>
+              <input class="form-control form-control-sm ip_dark" id="tdAllocated" readonly>
+            </div>
+            <div class="col-md-6 col-sm-12">
+              <div class="lbl">Task Accepted Date</div>
+              <input class="form-control form-control-sm ip_dark" id="tdAccepted" readonly>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="lbl">Description</div>
+            <div class="box_dark" id="tdDesc"></div>
+          </div>
+
+          <div id="promoWrap" class="d-none mb-3">
+            <div class="mini_h">Social media promotion details</div>
+            <div class="mini_sub">Social media promotion details</div>
+            <div class="row g-2" id="promoGrid"></div>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-md-6 col-sm-12">
+              <div class="lbl">Task target</div>
+              <input class="form-control form-control-sm ip_dark" id="tdTarget" readonly>
+            </div>
+            <div class="col-md-6 col-sm-12">
+              <div class="lbl">Achieved target</div>
+              <input class="form-control form-control-sm ip_dark" id="tdAchieved" readonly>
+            </div>
+          </div>
+
+          <div class="mt-3 d-flex justify-content-end gap-2">
+            <button class="btn btn-cstm btn-sm" id="openWorkDetailsBtn">Work Details</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="workDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content modal_dark">
+      <div class="modal-header">
+        <h6 class="modal-title">Work Details</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="table-responsive approve_table_scroll">
+          <table class="table table-striped table-bordered table-dark table-hover align-middle mb-0 text-center">
+            <thead>
+              <tr>
+                <th class="table_en_sm">Date</th>
+                <th class="table_en_sm">Title</th>
+                <th class="table_en_lsm">Description</th>
+                <th class="table_en_sm">File</th>
+                <th class="table_en_sm">Promotion</th>
+                <th class="table_en_sm">Target</th>
+                <th class="table_en_sm">Achieved targets</th>
+                <th class="table_en_sm">Verified targets</th>
+                <th class="table_en_lsm">Verification</th>
+              </tr>
+            </thead>
+            <tbody id="workDetailsTbody">
+              <tr><td colspan="9" class="text-center text-white">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal_dark">
+      <div class="modal-header">
+        <h6 class="modal-title">Verify Target</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-2">
+          <div class="lbl">Target</div>
+          <input class="form-control form-control-sm ip_dark" id="vTarget" readonly>
+        </div>
+
+        <div class="mb-2">
+          <div class="lbl">Achieved Target</div>
+          <input class="form-control form-control-sm ip_dark" id="vAchieved" readonly>
+        </div>
+
+        <div class="mb-3">
+          <div class="lbl">Verified target</div>
+          <input class="form-control form-control-sm ip_dark" id="vVerified">
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-success btn-sm" id="verifySaveBtn">Save</button>
+          <button class="btn btn-danger btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="promotionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content modal_dark">
+      <div class="modal-header">
+        <h6 class="modal-title">Promotion details</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="promoErr" class="text-white d-none">No data found</div>
+        <div id="promoBody" class="d-none">
+          <div id="promoList" class="promo_list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  window.TL_IND_ENDPOINTS = {
+    list: "{% url 'tl_individual_works_data' %}",
+    taskDetails: "{% url 'tl_individual_task_details' 0 %}",
+    workDetails: "{% url 'tl_individual_work_details' 0 %}",
+    promoDetails: "{% url 'tl_individual_promotion_details' 0 %}",
+    verifySave: "{% url 'tl_individual_verify_save' %}",
+    removeTask: "{% url 'tl_individual_remove_task' %}",
+    csrf: "{{ csrf_token }}"
+  };
+</script>
+<script src="{% static 'dm_head/js/tl_individual_works.js' %}"></script>
+
+{% endblock %}

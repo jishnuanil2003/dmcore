@@ -1,0 +1,241 @@
+{% extends "executive/executivesidebar.html" %}  
+{% block content %}
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+
+.dashboard-container {
+    padding: 20px;
+}
+
+
+.target-card {
+    border-radius: 18px;
+    color: #fff;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+}
+
+
+.target-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+
+.card-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+
+.target-count {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+
+.target-label {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background-color: rgba(255,255,255,0.2);
+}
+
+.progress-bar {
+    background-color: #fff;
+}
+
+
+.progress-text {
+    font-size: 12px;
+    text-align: right;
+    margin-top: 5px;
+}
+
+/* Responsive spacing */
+@media (max-width: 576px) {
+    .target-count {
+        font-size: 22px;
+    }
+}
+</style>
+
+<div class="container-fluid dashboard-container">
+
+    <div class="row g-4 align-items-stretch">
+
+        {% if target %}
+
+            {% for t in target %}
+            {% with progress=t.progress %}
+
+  
+            <div class="col-lg-3 col-md-6 col-12 d-flex">
+                <div class="card target-card p-4 shadow-lg bg-primary">
+                    <div class="card-header-custom mb-3">
+                        <span>Current Month Target</span>
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="target-count">{{ t.target_count }}</div>
+                        <div class="target-label">Total Target</div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-lg-3 col-md-6 col-12 d-flex">
+                <div class="card target-card p-4 shadow-lg bg-info">
+                    <div class="card-header-custom mb-3">
+                        <span>Achieved</span>
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="target-count">{{ t.achieved }}</div>
+                        <div class="target-label">Completed</div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-3 col-md-6 col-12 d-flex">
+                <div class="card target-card p-4 shadow-lg"
+                    style="background: linear-gradient(135deg, #6f42c1, #4b0082);">
+                    <div class="card-header-custom mb-3">
+                        <span>Today Leads</span>
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="target-count">{{ t.today_leads }}</div>
+                        <div class="target-label">Today's Added Leads</div>
+                    </div>
+                </div>
+            </div>
+       
+            <div class="col-lg-3 col-md-6 col-12 d-flex">
+                <div class="card target-card p-4 shadow-lg
+                    {% if progress >= 90 %}
+                        bg-success
+                    {% elif progress >= 80 %}
+                        bg-warning
+                    {% else %}
+                        bg-danger
+                    {% endif %}
+                ">
+                    <div class="card-header-custom mb-3">
+                        <span>Progress</span>
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+
+                    <div class="text-center mb-2">
+                        <div class="target-count">{{ progress|floatformat:0 }}%</div>
+                        <div class="target-label">Completion</div>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar"
+                             style="width: {{ progress|floatformat:0 }}%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endwith %}
+            {% endfor %}
+
+        {% else %}
+
+
+        <div class="col-lg-3 col-md-6 col-12 d-flex">
+            <div class="card target-card p-4 shadow-lg "
+                style="background: linear-gradient(135deg, #ff6b6b, #c92a2a);">
+
+                <div class="card-header-custom mb-3">
+                    <span>Current Month Target</span>
+                    <i class="fas fa-bullseye opacity-75"></i>
+                </div>
+
+                <div class="text-center">
+                    <div class="target-count">0</div>
+                    <div class="target-label">No Target Assigned</div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="col-lg-3 col-md-6 col-12 d-flex">
+            <div class="card target-card p-4 shadow-lg"
+                style="background: linear-gradient(135deg, #ff6b6b, #c92a2a);">
+
+                <div class="card-header-custom mb-3">
+                    <span>Achieved</span>
+                    <i class="fas fa-check-circle opacity-75"></i>
+                </div>
+
+                <div class="text-center">
+                    <div class="target-count">0</div>
+                    <div class="target-label">No Activity</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-12 d-flex">
+            <div class="card target-card p-4 shadow-lg"
+                style="background: linear-gradient(135deg, #ff6b6b, #c92a2a);">
+
+                <div class="card-header-custom mb-3">
+                    <span>Today Leads</span>
+                    <i class="fas fa-user-plus opacity-75"></i>
+                </div>
+
+                <div class="text-center">
+                    <div class="target-count">0</div>
+                    <div class="target-label">No Leads Today</div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-lg-3 col-md-6 col-12 d-flex">
+            <div class="card target-card p-4 shadow-lg"
+                style="background: linear-gradient(135deg, #ff6b6b, #c92a2a);">
+
+                <div class="card-header-custom mb-3">
+                    <span>Progress</span>
+                    <i class="fas fa-chart-line opacity-75"></i>
+                </div>
+
+                <div class="text-center mb-2">
+                    <div class="target-count">0%</div>
+                    <div class="target-label">No Progress Yet</div>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+
+{% block title %}Add Daily Work{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'teamlead/css/common.css' %}">
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-dark text-white px-3 py-2 rounded">
+    <li class="breadcrumb-item"><a href="{% url 'individual_work_main' %}" class="text-decoration-none text-white-50">Individual Works</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'tl_ongoing_works' %}" class="text-decoration-none text-white-50">Ongoing Works</a></li>
+    <li class="breadcrumb-item active text-white" aria-current="page">Add Daily Work</li>
+  </ol>
+</nav>
+
+<div class="container mt-4 comn_table_bg text-white">
+  <h5 class="mb-3">Add Daily Work</h5>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+    
+      <input type="hidden" name="task_assign_id" value="{{ task_assign.id|default:'' }}">
+      <input type="hidden" name="work_assign_id" value="{{ work_assign.id|default:'' }}">
+      {% if mode == 'lead' %}
+        <input type="hidden" name="category_assign_id" value="{{ category_assign.id }}">
+      {% endif %}
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label>Task</label>
+          <input type="text" class="form-control" value="{% if mode == 'lead' %}Lead Collection{% else %}{{ task_data.task_name }}{% endif %}" readonly>
+        </div>
+        {% if mode == 'lead' %}
+        <div class="col-md-4 mb-3">
+          <label>Category</label>
+          <input type="text" class="form-control" value="{{ lead_category.collection_for }}" readonly>
+        </div>
+        {% endif %}
+        <div class="col-md-4 mb-3">
+          <label>Date</label>
+          <input type="text" class="form-control" value="{{ today|date:'d-m-Y' }}" readonly>
+        </div>
+
+        <div class="col-12 mb-3">
+          <label>Title</label>
+          <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="col-12 mb-3">
+          <label>Daily Work</label>
+          <textarea name="description" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Target Achieved</label>
+          <input type="number" name="achieved" class="form-control" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>File</label>
+          <input type="file" name="file" class="form-control">
+        </div>
+      </div>
+
+      {% if is_platform %}
+      <hr class="bg-light">
+      <h6 class="mb-3">Platform Promotions</h6>
+
+      {% for p in platforms %}
+      <div class="mb-4 rounded">
+        <span class="text-capitalize">{{ p }} Promotion</span>
+
+        <div class="my-3">
+          <label>Achieved Text</label>
+          <textarea name="{{ p }}_achieved_text" class="form-control" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label>URLs</label>
+          <div id="{{ p }}_url_group" class="d-flex flex-column gap-2">
+            <div class="d-flex">
+              <input type="text" name="{{ p }}_urls[]" class="form-control" required>
+              <button type="button" class="btn btn-outline-light ms-2" onclick="addUrlField('{{ p }}')">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label>Screenshot Upload</label>
+          <input type="file" name="{{ p }}_screenshot" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label>Remarks</label>
+          <textarea name="{{ p }}_remarks" class="form-control" required></textarea>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <div class="mt-4">
+        <button type="submit" class="btn btn-success">Submit</button>
+      </div>
+    </form>
+</div>
+<script>
+function addUrlField(platform) {
+  const group = document.getElementById(platform + '_url_group');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'd-flex mt-1';
+  wrapper.innerHTML = `
+    <input type="text" name="${platform}_urls[]" class="form-control" required>
+    <button type="button" class="btn btn-outline-danger ms-2" onclick="this.parentNode.remove()">-</button>
+  `;
+  group.appendChild(wrapper);
+}
+</script>
+
+{% endblock %}

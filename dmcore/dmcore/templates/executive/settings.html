@@ -1,0 +1,183 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 6px;
+            background: #334155;
+            color: white;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            background: #8b5cf6;
+        }
+
+
+        .btn-save:hover {
+            background: #7c3aed;
+        }
+
+        .btn-edit {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            background: #3b82f6;
+            margin-top: 20px;
+        }
+     
+
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        input:disabled, textarea:disabled {
+            background: rgba(51, 65, 85, 0.4);
+            border: 1px solid transparent;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        button:hover {
+            background: #7c3aed;
+        }
+
+        .success {
+            color: #34d399;
+            background: #064e3b;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+
+    </style>
+
+
+<div class="container">
+        <h2>API & Application Settings</h2>
+
+        {% if success %}<div class="success">{{ success }}</div>{% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>IMAP Server (e.g. imap.gmail.com)</label>
+            <input type="text" name="imap_server" id="inp-server" value="{{ creds.imap_server|default:'' }}">
+
+            <label>IMAP Email Account</label>
+            <input type="email" name="imap_email" value="{{ creds.imap_email|default:'' }}">
+
+            <label>IMAP App Password</label>
+            <input type="password" name="imap_password" value="{{ creds.imap_password|default:'' }}">
+
+            <label>Groq API Key</label>
+            <input type="password" name="groq_api_key" value="{{ creds.groq_api_key|default:'' }}">
+
+            <label>Google Spreadsheet ID (from URL)</label>
+            <input type="text" name="spreadsheet_id" value="{{ creds.spreadsheet_id|default:'' }}">
+
+            <label>Google Service Account Credentials (JSON content)</label>
+            <textarea name="google_credentials_json"
+                placeholder='{ "type": "service_account", ... }' id="inp-json">{{ creds.google_credentials_json|default:'' }}</textarea>
+
+            <div class="action-buttons">
+                <button type="button" id="edit-btn" class="btn-edit hidden">Edit Credentials</button>
+                <button type="submit" id="save-btn" class="btn-save">Save Credentials</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const serverInput = document.getElementById('inp-server');
+            const inputs = document.querySelectorAll('input, textarea');
+            const editBtn = document.getElementById('edit-btn');
+            const saveBtn = document.getElementById('save-btn');
+
+            // If credentials already exist, start in read-only mode
+            if (serverInput && serverInput.value.trim() !== '') {
+                inputs.forEach(inp => {
+                    if(inp.name !== 'csrfmiddlewaretoken') {
+                        inp.disabled = true;
+                    }
+                });
+                editBtn.classList.remove('hidden');
+                saveBtn.classList.add('hidden');
+            }
+
+            // Edit button enables inputs and shows save button
+            editBtn.addEventListener('click', () => {
+                inputs.forEach(inp => inp.disabled = false);
+                editBtn.classList.add('hidden');
+                saveBtn.classList.remove('hidden');
+            });
+        });
+    </script>
+
+{% endblock %}

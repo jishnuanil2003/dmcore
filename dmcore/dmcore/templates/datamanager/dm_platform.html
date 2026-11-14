@@ -1,0 +1,142 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/dashboard.css' %}">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Platform Management</p>
+    </div>
+  </div>
+
+
+<div class="d-flex justify-content-end align-items-center mb-3 mt-2 me-2">
+  <button class="btn btn-sm btn-danger me-2 d-flex align-items-center">
+    <a href="{% url 'dm_platform_report' %}" style="text-decoration: none; color: white;"><i class="bi bi-file-earmark-text-fill me-1"></i> Report</a>
+  </button>
+  <button class="btn btn-sm btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addPlatformModal">
+    <i class="bi bi-plus-circle-fill me-1"></i> Add Platform
+  </button>
+</div>
+
+
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+    {% for src in sources %}
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_platform_lead_details' %}?platform={{ src.platform_name|urlencode }}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">{{ src.platform_name }} - {{src.platform_total_count}}</h5>
+            <i class="fas fa-database text-info"></i>
+          </div>
+          <p>Click to view all leads collected from platform</p>
+        </a>
+      </div>
+    </div>
+
+    {% empty %}
+        <p style="color: red;">No Platforms Found</p>
+    {% endfor %}
+
+  </div>
+</div>
+
+
+<div class="modal fade" id="addPlatformModal" tabindex="-1" aria-labelledby="addPlatformLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white border-secondary rounded-3">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold" id="addPlatformLabel">Add Data Platform</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="addPlatformForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="platformName" class="form-label fw-semibold">Platform Name</label>
+            <input type="text" id="platformName" name="platform_name" class="form-control" placeholder="Enter platform name" required>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer border-secondary d-flex justify-content-center flex-wrap gap-2">
+        <button type="button" id="clearBtn" class="btn btn-secondary">
+          <i class="bi bi-arrow-clockwise me-1"></i> Clear
+        </button>
+        <button type="button" id="saveBtn" class="btn btn-success">
+          <i class="bi bi-check2 me-1"></i> Save
+        </button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+document.getElementById('clearBtn').addEventListener('click', function() {
+    document.getElementById('addPlatformForm').reset();
+});
+
+
+const modalEl = document.getElementById('addPlatformModal');
+modalEl.addEventListener('hidden.bs.modal', function () {
+    document.getElementById('addPlatformForm').reset();
+});
+
+
+document.getElementById('saveBtn').addEventListener('click', function() {
+    const form = document.getElementById('addPlatformForm');
+    const platformName = document.getElementById('platformName').value.trim();
+
+    if (!platformName) {
+        alert("Please enter a platform name.");
+        return;
+    }
+
+    fetch("{% url 'save_dm_platform' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ platform_name: platformName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert(" Platform added successfully!");
+            form.reset();
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            
+            location.reload();
+        } else {
+            alert("⚠️ " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Something went wrong!");
+    });
+});
+</script>
+
+{% endblock content %}

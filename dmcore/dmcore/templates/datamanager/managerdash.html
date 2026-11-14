@@ -1,0 +1,142 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block title %}Data Manager Dashboard{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/dashboard.css' %}">
+
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+    <!-- Card 1: Data Bank -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'data_bank_view' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Data Bank</h5>
+            <i class="fas fa-database text-info"></i>
+          </div>
+          <p>Data bank providing you with real-time insights and seamless information retrival.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Card 2: Lead Allocation -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'allocation_leads_page' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Allocation Lead</h5>
+            <i class="fas fa-share-alt text-success"></i>
+          </div>
+          <p>Data bank providing you with real-time insights and seamless information retrival.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Card 3: Follow Up -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'follow_up_view' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Follow Up</h5>
+            <i class="fas fa-phone-volume text-warning"></i>
+          </div>
+          <p>Data bank providing you with real-time insights and seamless information retrival.</p>
+        </a>
+      </div>
+    </div>
+
+
+        <!-- Card 4: Reports -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'data_reports' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Reports</h5>
+            <i class="fas fa-chart-bar text-xl  card-icon" style="color: rgba(158, 10, 158, 0.516);"></i>
+          </div>
+          <p>Providing the data of allocated, joined and wasted lead counts.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Card 5: Notifications -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_notification_management' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Notifications</h5>
+            <i class="fas fa-bell text-xl text-success card-icon"></i>
+          </div>
+          <p>Timely updates and notifications on new leads.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Card 6: Employees -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_employees' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Employees</h5>
+            <i class="fas fa-users text-xl card-icon"></i>
+          </div>
+          <p>Track and manage allocated lead data of different clients.</p>
+        </a>
+      </div>
+    </div>
+
+
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_clients' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Clients</h5>
+            <i class="fas fa-handshake text-xl text-primary card-icon"></i>
+          </div>
+          <p>Real-time insights and seamless information retrieval.</p>
+        </a>
+      </div>
+    </div>
+
+
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_platform' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Platform Management</h5>
+            <i class="fas fa-cogs text-xl text-success card-icon"></i>
+          </div>
+          <p>Oversight and maintenance of data management strategy.</p>
+        </a>
+      </div>
+    </div>
+
+
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_wastedata' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Waste Datas</h5>
+            <i class="fas fa-trash-alt text-xl text-danger card-icon"></i>
+          </div>
+          <p>Track and manage wasted data with different strategies.</p>
+        </a>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+
+{% endblock content %}

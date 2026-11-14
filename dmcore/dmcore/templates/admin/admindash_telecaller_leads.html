@@ -1,0 +1,111 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<style>
+    .option-card {
+        background-color: #1a1e21;
+        border: 2px solid #2d3238;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none !important;
+    }
+    .option-card:hover {
+        transform: translateY(-10px);
+        border-color: #4e73df;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important;
+    }
+    .icon-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+    .bg-primary-soft { 
+        background: rgba(78, 115, 223, 0.1); 
+        color: #4e73df; 
+    }
+    .bg-warning-soft { 
+        background: rgba(246, 194, 62, 0.1); 
+        color: #f6c23e; 
+    }
+    .bg-success-soft { 
+        background: rgba(28, 200, 138, 0.1); 
+        color: #1cc88a; 
+    }
+    .count-display {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 5px 15px;
+        border-radius: 50px;
+        display: inline-block;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    .header-info {
+        font-size: 0.85rem;
+        color: #6c757d;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 col-lg-4 mb-4">
+            <a href="{% url 'admindash_telecaller_leads_list' telecaller.id client.id %}" class="text-decoration-none"> 
+                <div class="card option-card shadow py-5 text-center">
+                    <div class="card-body">
+                        <div class="icon-box bg-primary-soft">
+                            <i class="fas fa-list-ul fa-2x"></i>
+                        </div>
+                        <h3 class="text-white font-weight-bold">Leads Handled</h3>
+                        <p class="text-light px-3 opacity-75">View all leads collected and assigned to this executive.</p>
+                        <div class="count-display bg-primary-soft">
+                            Total Leads Handled : {{ total_leads_handled|default:0 }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-lg-4 mb-4">
+            <a href="{% url 'admindash_telecaller_meet_details' telecaller.id client.id %}" class="text-decoration-none"> 
+                <div class="card option-card shadow py-5 text-center">
+                    <div class="card-body">
+                        <div class="icon-box bg-warning-soft">
+                            <i class="fas fa-handshake fa-2x"></i>
+                        </div>
+                        <h3 class="text-white font-weight-bold">Meet Details</h3>
+                        <p class="text-light px-3 opacity-75">Check scheduled meetings and interaction history.</p>
+                        <div class="count-display bg-warning-soft">
+                            Total Meets Details : {{ total_meetings|default:0 }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-lg-4 mb-4">
+            <a href="{% url 'admindash_telecaller_joined_leads' telecaller.id client.id %}" class="text-decoration-none"> 
+                <div class="card option-card shadow py-5 text-center">
+                    <div class="card-body">
+                        <div class="icon-box bg-success-soft">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                        <h3 class="text-white font-weight-bold">Joined Leads</h3>
+                        <p class="text-light px-3 opacity-75">View leads that have successfully converted or joined.</p>
+                        <div class="count-display bg-success-soft">
+                            Total Joined Leads : {{ total_joined|default:0 }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,320 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+
+
+        <link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+
+        color: white;
+    }
+
+    .container {
+        max-width: 1300px;
+        margin-top: 60px;
+        background: #333;
+        padding: 50px; /* Default padding */
+        border-radius: 10px;
+    }
+    h2 {
+        color: #4A90E2;
+
+    }
+
+    .card-dark {
+        background-color: #2a2a2a;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        color: white;
+    }
+
+    .section-title {
+        font-weight: bold;
+        color: #cccccc;
+        margin-bottom: 10px;
+    }
+
+    .info-item {
+        margin-bottom: 8px;
+        
+    }
+
+    .timeline {
+        border-left: 2px solid #555;
+        padding-left: 15px;
+        margin-left: 10px;
+    }
+
+    .timeline-item {
+        margin-bottom: 20px;
+    }
+
+    .timeline-item::before {
+        content: "\25CF";
+        color: #4A90E2;
+        font-size: 20px;
+        margin-left: -22px;
+        position: relative;
+        top: 5px;
+    }
+
+    .row-cols {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .col-half {
+        flex: 1 1 calc(50% - 10px);
+    }
+
+    @media (max-width: 768px) {
+        .col-half {
+            flex: 1 1 100%;
+        }
+    }
+
+
+    .main-content {
+    padding: 15px;
+    margin-top: 60px; 
+    overflow-x: auto;
+    overflow-y: auto;
+    width: 100%;
+    transition: margin-left 0.3s ease-in-out;
+}
+   
+    @media (min-width: 992px) {  
+            
+    .main-content {
+    margin-left: 250px;
+    max-width: calc(100% - 250px);
+}
+
+.main-content.collapsed {
+    margin-left: 60px;
+    max-width: calc(100% - 60px);
+}
+
+}
+    
+
+    
+    @media (max-width: 991px) {
+
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
+        margin-top: 56px;
+    }
+    
+
+    }  
+
+
+@media (max-width: 768px) {
+.main-content {
+    padding: 10px;
+    font-size: 14px;
+}
+}
+
+
+@media (max-height: 524px) {
+.main-content {
+    margin-top: 40px;
+    padding: 10px;
+    height: auto;
+}
+}
+
+@media (max-width: 768px) {
+.container {
+    padding: 30px;
+}
+}
+
+@media (max-width: 480px) {
+.container {
+    padding: 20px; 
+}
+.main-content {
+    padding: 8px;
+    font-size: 12px;
+    margin-top: 50px;
+}
+}
+
+
+@media (max-width: 360px) {
+.container {
+    padding: 15px; 
+}
+.main-content {
+    padding: 6px;
+    font-size: 11px;
+    margin-top: 48px;
+}
+}
+
+.fixed-height-card {
+    height: 250px;          
+    overflow-y: auto;       
+    display: flex;
+    flex-direction: column;
+}
+
+.fixed-height-card .section-title {
+    flex-shrink: 0;         
+}
+
+.fixed-height-card > *:not(.section-title) {
+    flex-grow: 1;
+    overflow-y: auto;       
+}
+
+
+@media (max-width: 992px) {
+    .fixed-height-card {
+        height: 150px;      
+    }
+}
+
+
+@media (max-width: 576px) {
+    .fixed-height-card {
+        height: 200px;      
+    }
+}
+
+
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'manager' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Follow Up Details</p>
+    </div>
+  </div>
+
+<div class="container-fluid mt-3 comn_table_bg">
+
+     
+        <div class="row g-3">
+            <div class="col-12 col-lg-4">
+                <div class="card-dark p-3">
+                    <div class="info-item mb-1">
+                        <i class="fas fa-user text-primary me-2"></i>
+                        <strong>{{ assigned_lead.lead.name }}</strong>
+                    </div>
+                    <div class="info-item mb-1">
+                        <i class="fas fa-envelope text-secondary me-2"></i>
+                        {{ assigned_lead.lead.email }}
+                    </div>
+                    <div class="info-item mb-3">
+                        <i class="fas fa-phone text-secondary me-2"></i>
+                        {{ assigned_lead.lead.contact }}
+                    </div><br>
+                    <div class="info-item mb-1">
+                        <i class="fas fa-user-tie text-secondary me-2"></i>
+                        Client : {{ assigned_lead.lead.lead_category.client_task.client.client_name }}
+                    </div>
+                    <div class="info-item mb-3">
+                        <i class="fas fa-folder-open text-secondary me-2"></i>
+                        Lead Collected For : {{ assigned_lead.lead.lead_category.collection_for }}
+                    </div>
+          
+                </div>
+
+                <div class="card-dark">
+                    <div class="section-title">{{ assigned_lead.lead.name }} - Collected Details</div>
+                    {% for field in collected_fields %}
+                        <div class="info-item">{{ field.field_name }}  :  {{ field.field_data }}</div>
+                    {% empty %}
+                        <div class="info-item">No collected data available.</div>
+                    {% endfor %}
+                    <!-- Add scroll if more -->
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <div class="card-dark fixed-height-card">
+                <div class="section-title">FollowUp Details</div>
+                {% if followup_details %}
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div><strong>{{ followup_details.telecaller }}</strong></div>
+                        <div> {{ followup_details.response_date|date:"M d, Y" }}</div>
+                        <div> {{ followup_details.response }}</div>
+                        <div>Next Follow Up on: {{ followup_details.next_followup_date|date:"M d, Y" }}</div>
+                        <div>Status: {{ followup_details.response_status }}</div>
+                    </div>
+                </div>
+                {% else %}
+                    <p>No FollowUp Details Available...</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card-dark fixed-height-card">
+                <div class="section-title">Call Recordings</div>
+                {% if call_records %}
+                    {% for record in call_records %}
+                        <div class="info-item">
+                            <strong>Date:</strong> {{ record.record_date|date:"d M Y" }}
+                            {% if record.record_time %}
+                                {{ record.record_time|time:"H:i" }}
+                            {% endif %}
+                            <br>
+
+                            {% if record.record_file %}
+                                <strong>Recording:</strong>
+                                <a href="{{ record.record_file.url }}" download>Download</a><br>
+                            {% endif %}
+                        </div>
+                        <hr>
+                    {% endfor %}
+                {% else %}
+                    <p>No call record Details Available...</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card-dark">
+                <div class="section-title">FollowUp History</div>
+                {% if followup_history %}
+                    <div class="timeline">
+                        {% for history in followup_history %}
+                            <div class="timeline-item">
+                                <div><strong>{{ history.lead.name }}</strong></div>
+                                <div>Date: {{ history.allocated_date|date:"M d, Y" }}</div>
+                                <div>Allocated To: {{ history.telecaller.emp_name }}</div>
+                                <div>Note: {{ history.note }}</div>
+                                <div>Final Status: {{ history.final_status }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No FollowUp History Available...</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        
+
+</div>
+
+{% endblock %}

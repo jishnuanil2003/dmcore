@@ -1,0 +1,123 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    body {
+        background-color: #12151e; 
+    }
+
+    .card-custom {
+        color: white;
+        border: none;
+        border-radius: 10px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .card-custom:hover {
+        background-color: #1f1f1f;
+    }
+
+    .card-title-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-icon {
+        font-size: 46px;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+        color: #cbd5e1;
+    }
+
+    .row > div {
+        margin-bottom: 20px;
+    }
+
+    a.text-decoration-none {
+        color: inherit;
+    }
+
+    a.text-decoration-none:hover {
+        color: inherit;
+    }
+    
+</style>
+<p style="color: white;margin-left: 30px;"><b>Dashboard / Works</b></p>
+<div class="container mt-2">
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-3 g-4 mt-4">
+        <div class="col">
+            <a href="{% url 'emp_new_works' %}" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">New Works</h5>
+                        <i class="fa-solid fa-folder-plus card-icon" style="color: orangered;"></i>
+                    </div>
+                    <p class="card-text">View all your new assigned works and <br> accept them to start work</p>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col">
+            <a href="{% url 'emp_ongoing_works' %}" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">Ongoing Works</h5>
+                        <i class="fa-solid fa-spinner card-icon text-warning"></i>
+                    </div>
+                    <p class="card-text">Add daily works and view progress, details <br>of your ongoing works</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="#" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">Completed Works</h5>
+                        <i class="fa-solid fa-check-to-slot card-icon text-success"></i>
+                    </div>
+                    <p class="card-text">View details and status of your completed <br>works</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'weekly_pro' %}" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">Weekly Progress</h5>
+                        <i class="fa-solid fa-chart-line card-icon text-secondary"></i>
+                    </div>
+                    <p class="card-text">Add your weekly work progress report and <br>view the deatails and status</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'monthly_pro' %}" class="text-decoration-none">
+                <div class="card card-custom p-3 bg-dark">
+                    <div class="card-title-section mb-2">
+                        <h5 class="card-title mb-0">Monthly Progress</h5>
+                        <i class="fa-solid fa-chart-simple card-icon text-primary"></i>
+                    </div>
+                    <p class="card-text">Add your monthly work progress report and <br>view the deatails and status</p>
+                </div>
+            </a>
+        </div>
+
+        
+
+    </div>
+</div>
+
+
+
+{% endblock %}

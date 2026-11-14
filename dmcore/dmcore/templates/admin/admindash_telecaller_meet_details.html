@@ -1,0 +1,560 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+    .leads-page-wrapper {
+        background-color: #121212;
+        min-height: 100vh;
+        padding: 15px; 
+    }
+
+    .leads-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .page-title { 
+        color: #ffffff; 
+        font-size: 1.5rem; 
+        font-weight: 600; 
+        margin-bottom: 5px; 
+    }
+    .sub-title { 
+        color: #b0b0b0; 
+        font-size: 0.85rem; 
+        margin-bottom: 20px; 
+    }
+
+    .filter-label { 
+        color: #ffffff; 
+        font-size: 0.85rem; 
+        margin-bottom: 8px; 
+        display: block; 
+    }
+
+    .form-control, .form-select {
+        background-color: #ffffff !important;
+        border: 1px solid #ced4da !important;
+        color: #333 !important;
+        border-radius: 4px;
+        height: 38px;
+    }
+
+    .export-container {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .btn-export-icon {
+        height: 38px;
+        flex: 1; 
+        max-width: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        border: 1px solid #444;
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    .btn-excel { 
+        border-color: #1D6F42; 
+        color: #1D6F42; 
+    }
+    .btn-pdf { 
+        border-color: #E01E22; 
+        color: #E01E22; 
+    }
+    .btn-print { 
+        border-color: #FFC107; 
+        color: #FFC107; 
+    }
+
+    .btn-clear-filters {
+        background: transparent;
+        border: 1px solid #ffffff;
+        color: #ffffff;
+        height: 38px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .table-wrapper { 
+        background-color: #262626; 
+        border-radius: 4px; 
+        margin-top: 20px; 
+    }
+    .custom-table { 
+        margin-bottom: 0; 
+        border: 1px solid #333; 
+    }
+    .custom-table thead th { 
+        background-color: #1a1a1a; 
+        color: #ffffff; 
+        padding: 12px; 
+        font-size: 0.9rem; 
+    }
+    .custom-table tbody td { 
+        background-color: #262626; 
+        color: #e0e0e0; 
+        border-bottom: 1px solid #333; 
+        padding: 12px; 
+        font-size: 0.9rem; 
+    }
+
+    .search-box {
+        background: #1a1a1a !important;
+        border: 1px solid #444 !important;
+        color: white !important;
+    }
+    .search-box::placeholder {
+        color: #dfdfdf !important; 
+        opacity: 0.8;                     
+    }
+
+    .detail-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 15px;
+        height: 100%;
+        transition: transform 0.2s;
+    }
+    .detail-card label {
+        display: block;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.7rem;
+    }
+    .text-info {
+        color: #0dcaf0 !important;
+    }
+
+    .timeline-simple { 
+        margin-top: 10px; 
+    }
+    .timeline-item { 
+        border-left: 2px solid #0dcaf0; 
+        padding-left: 20px; 
+        padding-bottom: 20px; 
+        position: relative; 
+    }
+    .timeline-item::before { 
+        content: ''; 
+        position: absolute; 
+        left: -7px; top: 0; 
+        width: 12px; 
+        height: 12px; 
+        background: #0dcaf0; 
+        border-radius: 50%; 
+        box-shadow: 0 0 8px rgba(13, 202, 240, 0.5); 
+    }
+
+    @media (max-width: 768px) {
+        .page-title { font-size: 1.25rem; }
+        .leads-container { padding: 15px; }
+        .btn-export-icon { max-width: none; }
+    }
+
+    @media print {
+        body * { 
+            visibility: hidden; 
+        }
+        .table-wrapper, .table-wrapper * { 
+            visibility: visible; 
+        }
+        .table-wrapper { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+        }
+        body { 
+            background: white !important; 
+        }
+        .custom-table th:last-child, .custom-table td:last-child { 
+            display: none !important; 
+        }
+    }
+
+    .custom-modal-dark { 
+        background-color: #1a1d21 !important; 
+        border: 1px solid #343a40; 
+        border-radius: 12px; 
+    }
+</style>
+
+<div class="leads-container">
+    <h2 class="page-title">Meet Details ({{ total_meetings }})</h2>
+    <p class="sub-title">Telecaller: <strong>{{ telecaller.name }}</strong></p>
+
+    <div class="filter-section mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-4">
+                <form id="filterForm" method="GET" class="row g-2">
+                    <div class="col-6">
+                        <label class="filter-label">From Date</label>
+                        <input type="date" name="from_date" value="{{ from_date|default:'' }}" class="form-control" onchange="this.form.submit()">
+                    </div>
+                    <div class="col-6">
+                        <label class="filter-label">To Date</label>
+                        <input type="date" name="to_date" value="{{ to_date|default:'' }}" class="form-control" onchange="this.form.submit()">
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="filter-label">Status</label>
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Conducted">Conducted</option>
+                    </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="filter-label">Mode</label>
+                <select id="modeFilter" class="form-select">
+                    <option value="">All</option>
+                    <option value="Google Meet">Google Meet</option>
+                    <option value="Direct Meet">Direct Meet</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="filter-label">&nbsp;</label>
+                <button type="button" onclick="clearAllFilters()" class="btn btn-secondary w-100">Clear Filters</button>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="filter-label">Export</label>
+                <div class="export-container">
+                    <button type="button" onclick="exportToExcel()" class="btn-export-icon btn-excel"><i class="fas fa-file-excel"></i></button>
+                    <button type="button" onclick="exportToPDF()" class="btn-export-icon btn-pdf"><i class="fas fa-file-pdf"></i></button>
+                    <button type="button" onclick="window.print()" class="btn-export-icon btn-print"><i class="fas fa-print"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="data-nav-ui d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div class="d-flex search-group w-100" style="max-width: 300px;">
+            <input type="text" id="tableSearch" class="form-control form-control-sm search-box" placeholder="Search...">
+            <button class="btn btn-sm btn-light ms-1" onclick="document.getElementById('tableSearch').value=''; filterTable();">Clear</button>
+        </div>
+
+        <div class="d-flex align-items-center text-white small rows-nav">
+            <span>Show</span>
+            <select name="per_page" form="filterForm" class="form-select form-select-sm mx-2" style="width: 75px; background-color: #fff !important; color: #000 !important;" onchange="document.getElementById('filterForm').submit()">
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            </select>
+            <span>rows</span>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Lead Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="leadTableBody">
+                    {% for meeting in meetings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ meeting.lead.name }}</td>
+                        <td>{{ meeting.lead.email|default:"N/A" }}</td>
+                        <td>{{ meeting.lead.contact }}</td>
+                        <td>{{ meeting.mode }}</td>
+                        <td style="font-size: 1.1rem;">
+                            {% if meeting.status == 1 %}
+                                <span class="text-success font-weight-bold">Conducted</span>
+                            {% elif meeting.status == 0 %}
+                                <span class="text-warning font-weight-bold">Pending</span>
+                            {% else %}
+                                <span class="badge badge-info" style="font-size: 0.9rem; padding: 5px 10px;">Scheduled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-info" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#leadDetailsModal"
+                                    onclick="fillModal(this, '{{ meeting.description|escapejs }}', '{{ meeting.joining_chance }}%')"> 
+                                View 
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No meeting details found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<div class="d-flex justify-content-between align-items-center mt-3 px-3">
+    <div class="text-white small">
+        Showing {{ meetings.start_index|default:0 }} to {{ meetings.end_index|default:0 }} of {{ total_meetings_count }} records
+    </div>
+    <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm mb-0">
+            {% if meetings.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ meetings.previous_page_number }}&per_page={{ per_page }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link">{{ meetings.number }}</span></li>
+
+            {% if meetings.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ meetings.next_page_number }}&per_page={{ per_page }}&from_date={{ from_date|default:'' }}&to_date={{ to_date|default:'' }}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+</div>
+
+<div class="modal fade" id="leadDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg custom-modal-dark" style="border-radius: 20px;" >
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-white fw-bold ps-2 pt-2">Meeting Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="detail-card">
+                            <label class="text-info small fw-bold">Name</label>
+                            <div id="detName" class="text-white fs-5 fw-semibold">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-card">
+                            <label class="text-info small fw-bold">Email</label>
+                            <div id="detEmail" class="text-white fw-semibold">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-card">
+                            <label class="text-info small fw-bold">Contact</label>
+                            <div id="detPhone" class="text-white fw-semibold">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="detail-card">
+                            <label class="text-info small fw-bold">Joining Chance</label>
+                            <div id="detJoining" class="text-white fs-4 fw-bold">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="detail-card">
+                            <label class="text-info small fw-bold">Description</label>
+                            <div id="detDescription" class="text-white-50">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pb-4 justify-content-center">
+                <button type="button" class="btn btn-secondary px-5 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+function fillModal(btn, description, joiningChance) {
+    const row = btn.closest('tr');
+    
+    const name = row.cells[1].innerText;
+    const email = row.cells[2].innerText;
+    const phone = row.cells[3].innerText;
+
+    document.getElementById('detName').innerText = name;
+    document.getElementById('detEmail').innerText = email;
+    document.getElementById('detPhone').innerText = phone;
+    document.getElementById('detJoining').innerText = joiningChance;
+    document.getElementById('detDescription').innerText = description;
+}
+
+function filterTable() {
+    const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
+    const statusValue = document.getElementById('statusFilter').value.toLowerCase();
+    const modeValue = document.getElementById('modeFilter').value.toLowerCase();
+    const rows = document.querySelectorAll('#leadTableBody tr');
+
+    rows.forEach(row => {
+        if (row.cells.length < 2) return; 
+
+        const name = row.cells[1].innerText.toLowerCase();
+        const email = row.cells[2].innerText.toLowerCase();
+        const phone = row.cells[3].innerText.toLowerCase();
+        const rowMode = row.cells[4].innerText.toLowerCase(); 
+        const rowStatus = row.cells[5].innerText.toLowerCase();
+
+        const matchesSearch = name.includes(searchTerm) || 
+                              email.includes(searchTerm) || 
+                              phone.includes(searchTerm) ||
+                              rowMode.includes(searchTerm) ||
+                              rowStatus.includes(searchTerm);
+
+        const matchesStatus = statusValue === "" || rowStatus.includes(statusValue);
+        const matchesMode = modeValue === "" || rowMode.includes(modeValue);
+
+        if (matchesSearch && matchesStatus && matchesMode) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+document.getElementById('modeFilter').addEventListener('change', filterTable);
+document.getElementById('tableSearch').addEventListener('keyup', filterTable);
+
+function clearAllFilters() {
+    document.getElementById('statusFilter').value = "";
+    document.getElementById('modeFilter').value = "";
+    document.getElementById('tableSearch').value = "";
+    
+    const fromDate = document.querySelector('input[name="from_date"]');
+    const toDate = document.querySelector('input[name="to_date"]');
+    if (fromDate) fromDate.value = "";
+    if (toDate) toDate.value = "";
+
+    filterTable(); 
+
+    const url = new URL(window.location.href);
+    url.search = ""; 
+    window.location.href = url.toString();
+}
+</script>
+
+
+<script>
+function getExportTable() {
+    const table = document.querySelector(".custom-table");
+    const clone = table.cloneNode(true);
+    const rows = clone.querySelectorAll('tr');
+
+    const originalRows = table.querySelectorAll('tr');
+
+    rows.forEach((row, index) => {
+        const originalRow = originalRows[index];
+
+        if (originalRow && originalRow.style.display === "none") {
+            row.remove();
+            return; 
+        }
+
+        if (row.cells.length > 0) {
+            row.deleteCell(-1); 
+        }
+    });
+
+    return clone;
+}
+function exportToExcel() {
+    const table = getExportTable();
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Leads" });
+    const ws = wb.Sheets["Leads"];
+
+    const wscols = [
+        { wch: 6 },  
+        { wch: 25 }, 
+        { wch: 30 }, 
+        { wch: 20 }, 
+        { wch: 15 }
+    ];
+    ws['!cols'] = wscols;
+
+    Object.keys(ws).forEach(cell => {
+        if (cell.replace(/[0-9]/g, '') === 'D') { 
+            ws[cell].t = 's'; 
+        }
+    });
+
+    XLSX.writeFile(wb, "Telecaller_Meet_Details.xlsx");
+}
+
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt', 'a4'); 
+    
+    const telecallerName = "{{ telecaller.name }}";
+    const title = "Telecaller Meet Details - Telecaller: " + telecallerName;
+
+    doc.setFontSize(16);
+    doc.setTextColor(40);
+    doc.text(title, 40, 30);
+    
+    doc.autoTable({ 
+        html: getExportTable(), 
+        startY: 50,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 5 },
+        columnStyles: {
+            3: { cellWidth: 'auto' } 
+        }
+    });
+    
+    doc.save("Telecaller_Meet_Details.pdf");
+}
+</script>
+
+<script>
+    function populateLeadModal(name, email, phone, telecaller) {
+    document.getElementById('modalLeadName').innerText = "Details for: " + name;
+    document.getElementById('detName').innerText = name;
+    document.getElementById('detEmail').innerText = email || "N/A";
+    document.getElementById('detPhone').innerText = phone;
+    document.getElementById('detTelecaller').innerText = telecaller;
+    const collapses = document.querySelectorAll('.collapse');
+    collapses.forEach(c => {
+        const bsCollapse = bootstrap.Collapse.getInstance(c);
+        if(bsCollapse) bsCollapse.hide();
+    });
+}
+</script>
+
+
+
+{% endblock content %}

@@ -1,0 +1,19 @@
+@import url(./colour.css);
+
+.modal-content {
+    border: none;
+}
+
+.modal-header, .modal-footer {
+    border: none;
+}
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}
+
+#searchInput::placeholder{
+  color: white !important;
+}

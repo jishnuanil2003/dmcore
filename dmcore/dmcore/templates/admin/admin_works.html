@@ -1,0 +1,94 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+
+{% block title %}Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/admin_works.css' %}">
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-white">Dashboard</a>
+         / <a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a> / Works</p>
+    </div>
+  </div>
+
+<div class="container-fluid admin-works-wrap" data-company-id="{{ company.id }}">
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="works-card" data-card="head">
+        <a href="{% url 'admin_head_works_page' %}" class="text-decoration-none">
+            <div class="works-card-body">
+              <div class="works-card-left">
+                <div class="works-card-title">Head</div>
+                <div class="works-card-count" id="countHead">0</div>
+                <div class="works-card-sub">All Works and task details of Head</div>
+              </div>
+              <div class="works-card-icon works-icon-head">
+                <i class="fa-solid fa-user"></i>
+              </div>
+            </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="works-card" data-card="tl">
+        <a href="{% url 'admin_team_lead_works' %} " class="text-decoration-none">
+            <div class="works-card-body">
+              <div class="works-card-left">
+                <div class="works-card-title">Team Leads</div>
+                <div class="works-card-count" id="countTL">0</div>
+                <div class="works-card-sub">All Works and task details of Team Lead</div>
+              </div>
+              <div class="works-card-icon works-icon-tl">
+                <i class="fa-solid fa-user-group"></i>
+              </div>
+            </div>          
+        </a>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="works-card" data-card="exe">
+        <a href="{% url 'executive_works' %}" class="text-decoration-none">
+            <div class="works-card-body">
+              <div class="works-card-left">
+                <div class="works-card-title">Executives</div>
+                <div class="works-card-count" id="countExe">0</div>
+                <div class="works-card-sub">All Works and task details of Executive</div>
+              </div>
+              <div class="works-card-icon works-icon-exe text-success">
+                <i class="fa-solid fa-users"></i>
+              </div>
+            </div>          
+        </a>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="works-card" data-card="client">
+        <a href="{% url 'admin_clients' %}" class="text-decoration-none">
+          <div class="works-card-body">
+            <div class="works-card-left">
+              <div class="works-card-title">Clients</div>
+              <div class="works-card-count" id="countClient">0</div>
+              <div class="works-card-sub">All Works and task details for a client</div>
+            </div>
+            <div class="works-card-icon works-icon-client text-warning">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+          </div>      
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="{% static 'admin/js/admin_works.js' %}"></script>
+<script>
+  window.ADMIN_WORKS_COUNTS_URL = "{% url 'admin_works_counts' %}";
+</script>
+{% endblock %}

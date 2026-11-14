@@ -1,0 +1,171 @@
+{% extends 'teamlead/teamleadsidebar.html' %}
+{% load static %}
+{% block title %}New Works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'teamlead/css/tl_new_works.css' %}">
+<link rel="stylesheet" href="{% static 'teamlead/css/common.css' %}">
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb bg-dark text-white px-3 py-2 rounded">
+    <li class="breadcrumb-item"><a href="{% url 'individual_work_main' %}" class="text-decoration-none text-white-50">Individual Works</a></li>
+    <li class="breadcrumb-item active text-white" aria-current="page">New Works</li>
+  </ol>
+</nav>
+
+
+<div class="container mt-4 comn_table_bg">
+  <h5 class="text-white mb-3">New Works Assigned</h5>
+
+  <div class="input-group w-auto mb-3 ">
+    <input type="text" class="form-control bg-dark  text-white" placeholder="Search..." id="searchInput">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle text-center" id="newWorksTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Task Name</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Assigned Date</th>
+          <th>Task Detail</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for work in new_works %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_lsm">
+            {% if work.type == 'lead_collection' %}
+              Lead Collection<br><small><li>{{ work.task_name }}</li></small>
+            {% else %}
+              {{ work.task_name }}
+            {% endif %}
+          </td>
+          <td class="table_en_lsm">{{ work.start_date|default:"-" }}</td>
+          <td class="table_en_lsm">{{ work.end_date|default:"-" }}</td>
+          <td class="table_en_lsm">{{ work.assign_date|default:"-" }}</td>
+          <td class="table_en_lsm">
+            <button class="btn btn-outline-info btn-sm view-btn"
+              data-client="{{ work.client_name }}"
+              data-assign="{{ work.assign_date }}"
+              data-accept="{{ work.accept_date }}"
+              data-type="{{ work.type }}"
+              data-name="{{ work.task_name }}"
+              data-target="{{ work.target }}"
+              data-achieved="{{ work.achieved }}"
+              data-start="{{ work.start_date }}"
+              data-end="{{ work.end_date }}"
+              data-description="{{ work.task_description }}"
+              data-file="{{ work.file_url|default:'' }}"
+              data-instagram-show="{{ work.is_instagram|yesno:'1,0' }}"
+              data-facebook-show="{{ work.is_facebook|yesno:'1,0' }}"
+              data-twitter-show="{{ work.is_x|yesno:'1,0' }}"
+              data-instagram="{{ work.instagram_target }}"
+              data-facebook="{{ work.facebook_target }}"
+              data-twitter="{{ work.x_target }}"
+            >View</button>
+          </td>
+          <td class="table_en_lsm">
+            <form method="POST" action="{% url 'tl_new_works' %}" class="accept-form d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="type" value="{{ work.type }}">
+              <input type="hidden" name="id" value="{% if work.type == 'normal' %}{{ work.assign_id }}{% else %}{{ work.team_alloc_id }}{% endif %}">
+              <button type="submit" class="btn btn-success btn-sm">Accept</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No new works assigned</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="taskDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Detail</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label>Client Name</label>
+            <input type="text" class="form-control" id="modalClientName" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Allocated Date</label>
+            <input type="text" class="form-control" id="modalAssignDate" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Task Name</label>
+            <input type="text" class="form-control" id="modalTaskName" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Target</label>
+            <input type="text" class="form-control" id="modalTarget" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Start Date</label>
+            <input type="text" class="form-control" id="modalStartDate" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>End Date</label>
+            <input type="text" class="form-control" id="modalEndDate" readonly>
+          </div>
+          <div class="col-12 mb-3">
+            <label>Description</label>
+            <textarea class="form-control" id="modalDescription" rows="3" readonly></textarea>
+          </div>      
+          <div class="col-md-4 mb-3" style="display: none;">
+            <label>Instagram Target</label>
+            <input type="text" class="form-control" id="v_instagram" readonly>
+          </div>
+          <div class="col-md-4 mb-3" style="display: none;">
+            <label>Facebook Target</label>
+            <input type="text" class="form-control" id="v_facebook" readonly>
+          </div>
+          <div class="col-md-4 mb-3" style="display: none;">
+            <label>Twitter Target</label>
+            <input type="text" class="form-control" id="v_twitter" readonly>
+          </div>
+          <div class="col-12" id="modalFileContainer" style="display:none;">
+            <a id="modalDownloadLink" class="btn btn-outline-info text-decoration-none" target="_blank">Download File</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'teamlead/js/tl_new_works.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearSearch");
+    const rows = document.querySelectorAll("#newWorksTable tbody tr");
+
+    function filterRows() {
+      const searchTerm = searchInput.value.toLowerCase();
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("keyup", filterRows);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      filterRows();
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Lead Fields Management{% endblock %}
+
+{% block content %}
+<div class="container mt-4 text-white comn_table_bg">
+    <h5 class="mb-3">Lead Fields for: <strong>{{ client.client_name }}</strong> <span class="text-white-50 fs-6">(Work #{{ work.id }})</span></h5>
+    <p class="mb-2"><strong>Task:</strong> {{ lead_task.task_name }}</p>
+    <!-- <p class="mb-3"><strong>Description:</strong> {{ lead_task.task_description|default:"N/A" }}</p> -->
+    {% if mapped_field_count == 0 %}
+    <div class="alert alert-warning text-dark py-2 mb-3" role="alert">
+      <strong>No fields are mapped to AI interview questions yet.</strong>
+      {% if unmapped_field_names %}
+      Unmapped fields: <strong>{{ unmapped_field_names|join:", " }}</strong>.
+      {% endif %}
+      Click <strong>Edit</strong> on at least one field below (or add a custom field) and choose an interview question before sending interview links from the Data Bank.
+    </div>
+    {% elif unmapped_field_names %}
+    <div class="alert alert-info py-2 mb-3" role="status">
+      <strong>{{ mapped_field_count }}</strong> field{{ mapped_field_count|pluralize }} mapped to interview questions.
+      Unmapped (skipped in AI interview): <strong>{{ unmapped_field_names|join:", " }}</strong>.
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+      <table class="table table-dark table-striped">
+          <thead>
+              <tr>
+                  <th>No</th>
+                  <th>Client Name</th>
+                  <th>Lead Collection For</th>
+                  <th>Target</th>
+                  <th>Achieved</th>
+                  <th>Progress</th>
+                  <th>Required Fields</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for cat in categories %}
+              <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td class="table_en_md">{{ client.client_name }}</td>
+                  <td class="table_en_lmd">
+                    <div class="d-flex justify-content-center">
+                      {{ cat.collection_for }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-center">
+                      {{ cat.target }}</td>
+                    </div>
+                  <td>
+                    <div class="d-flex justify-content-center">0</div>
+                  </td>
+                  <td class="table_en_sm">
+                      <div class="progress">
+                          <div class="progress-bar bg-success" style="width: 0%;">0%</div>
+                      </div>
+                  </td>
+                  <td class="table_en_lg">
+                      <span>Add fields to collect data</span>
+                      <a href="#" class="btn btn-outline-success btn-sm add-field-category ms-1" style="border-radius: 50%;" data-categoryid="{{ cat.id }}">
+                          <i class="fas fa-plus"></i>
+                      </a>
+  
+                      <div class="mt-2 ps-3">
+                          <span>
+                              Full Name, Email, Contact Number are fixed fields
+                          </span>
+                      
+                          {% if cat.leadfield_register_set.all %}
+                          <ol>
+                              {% for field in cat.leadfield_register_set.all %}
+                              <li class="mb-1">
+                                {{ field.name }} —
+                                {% if field.question_id %}
+                                <span class="badge bg-success">{{ field.question_id }} - {{ field.question_label }}</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Not asked</span>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-light ms-1 edit-lead-field" data-field-id="{{ field.id }}">Edit</button>
+                              </li>
+                              {% endfor %}
+                          </ol>
+                          {% endif %}
+                      </div>
+                  </td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
+</div>
+
+<!-- Add Field Modal -->
+<div class="modal fade" id="addFieldModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Field Add Form</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addFieldForm">
+        <div class="modal-body">
+          <input type="hidden" name="category_id" id="add_field_category_id">
+          <input type="hidden" name="client_id" id="edit_client_id">
+          <input type="hidden" name="work_id" id="edit_work_id">
+
+          <div class="mb-3">
+            <label class="form-label">Client Name *</label>
+            <input type="text" class="form-control" id="add_field_client" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Lead Collection For *</label>
+            <input type="text" class="form-control" id="add_field_category" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Field Name *</label>
+            <input type="text" name="field_name" class="form-control" placeholder="Enter field name" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Any Field Description</label>
+            <textarea name="description" class="form-control" rows="4"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="add_field_question_id">Interview question</label>
+            <select name="question_id" id="add_field_question_id" class="form-select">
+              <option value="">Not asked in interview</option>
+              {% for question_id, field_key, question_label in interview_questions %}
+              <option value="{{ question_id }}">{{ question_id }} - {{ question_label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" id="btnClearAddField">Clear</button>
+          <button type="submit" class="btn btn-outline-success">Save</button>
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Field Modal -->
+<div class="modal fade" id="editFieldModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Lead Field</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="editFieldForm">
+        <div class="modal-body">
+          <input type="hidden" name="field_id" id="edit_field_id">
+          <div class="mb-3">
+            <label class="form-label" for="edit_field_name">Field Name *</label>
+            <input type="text" name="field_name" id="edit_field_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="edit_field_description">Field Description</label>
+            <textarea name="description" id="edit_field_description" class="form-control" rows="4"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="edit_field_question_id">Interview question</label>
+            <select name="question_id" id="edit_field_question_id" class="form-select">
+              <option value="">Not asked in interview</option>
+              {% for question_id, field_key, question_label in interview_questions %}
+              <option value="{{ question_id }}">{{ question_id }} - {{ question_label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-success">Save</button>
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<style>
+
+  /* @media (max-width: 768px) { */
+  .table_en_sm{
+    min-width: 100px;
+  }
+  .table_en_md{
+    min-width: 130px;
+  }
+  .table_en_lmd{
+    min-width: 190px;
+  }
+  .table_en_lg{
+    min-width: 500px;
+  }
+/* } */
+</style>
+
+<script src="{% static 'dm_head/js/field_page.js' %}?v=20261102-1"></script>
+{% endblock %}

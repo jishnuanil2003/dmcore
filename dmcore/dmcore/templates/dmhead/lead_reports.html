@@ -1,0 +1,155 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Lead Reports{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <div class="mb-4 text-white">
+    <h5>Full Report</h5>
+    <div class="border-bottom pb-2 mb-3">
+      Total Leads: {{ report_summary.full.total }} |
+      Transferred: {{ report_summary.full.transferred }} |
+      Pending: {{ report_summary.full.pending }} |
+      Waste: {{ report_summary.full.waste }}
+    </div>
+
+    <h5>Current Month Report</h5>
+    <div class="border-bottom pb-2 mb-4">
+      Total Leads: {{ report_summary.month.total }} |
+      Transferred: {{ report_summary.month.transferred }} |
+      Pending: {{ report_summary.month.pending }} |
+      Waste: {{ report_summary.month.waste }}
+    </div>
+  </div>
+
+  <div class="row text-white mb-3 gx-2 gy-2 print-hide">
+    <div class="col-md-2">
+      <label class="form-label">Client</label>
+      <select class="form-select form-select-sm" id="clientFilter">
+        <option value="">All</option>
+        {% for client in clients %}
+          <option value="{{ client.client_name }}">{{ client.client_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Category</label>
+      <select class="form-select form-select-sm" id="categoryFilter" disabled>
+        <option value="">All</option>
+        {% for cat in categories %}
+          <option value="{{ cat.collection_for }}" data-client="{{ cat.client_task.client.client_name }}">
+            {{ cat.collection_for }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Executive</label>
+      <select class="form-select form-select-sm" id="executiveFilter">
+        <option value="">All</option>
+        {% for emp in employees %}
+          <option value="{{ emp.name }}">{{ emp.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">From Date</label>
+      <input type="date" class="form-control form-control-sm" id="startDateFilter">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">To Date</label>
+      <input type="date" class="form-control form-control-sm" id="endDateFilter">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Status</label>
+      <select class="form-select form-select-sm" id="statusFilter">
+        <option value="">All</option>
+        <option value="waste">Waste</option>
+        <option value="incomplete">Incomplete</option>
+        <option value="repeated">Repeated</option>
+        <option value="transferred">Transferred</option>
+        <option value="verified">Verified</option>
+        <option value="unverified">Unverified</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Source</label>
+      <select class="form-select form-select-sm" id="sourceFilter">
+        <option value="">All</option>
+        {% for source in distinct_sources %}
+          <option value="{{ source }}">{{ source }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2 d-grid">
+      <label class="form-label invisible">Clear</label>
+      <button class="btn btn-outline-light btn-sm" id="clearFilter">Clear</button>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3 print-hide">
+    <div class="d-flex align-items-center gap-2">
+      <label class="text-white">Show</label>
+      <select id="rowLimit" class="form-select form-select-sm" style="width: 80px;">
+        <option>5</option>
+        <option selected>10</option>
+        <option>20</option>
+        <option>50</option>
+        <option>100</option>
+      </select>
+      <span class="text-white">rows</span>
+    </div>
+
+    <div class="input-group w-auto">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-hover align-middle text-center" id="leadReportsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="6" class="text-center text-white py-4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  window.allLeads = JSON.parse('{{ leads_json|safe|escapejs }}');
+</script>
+<script src="{% static 'dm_head/js/lead_reports.js' %}"></script>
+{% endblock %}

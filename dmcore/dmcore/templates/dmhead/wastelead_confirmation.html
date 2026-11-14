@@ -1,0 +1,1296 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/waste_leads.css' %}">
+
+<style>
+.filter-section .form-control,
+.filter-section .form-select{
+    height:38px;
+
+    border-radius:4px;
+}
+
+.filter-section .btn{
+    height:38px;
+}
+
+
+
+.table th{
+    white-space:nowrap;
+   
+}
+
+.table td{
+  
+    vertical-align:middle;
+}
+
+.nowrap-date{
+    white-space:nowrap;
+}
+
+@media (max-width: 991px){
+
+    .filter-section .col-lg-1,
+    .filter-section .col-lg-2,
+    .filter-section .col-lg-3{
+        width:50%;
+    }
+}
+
+@media (max-width: 576px){
+
+    .filter-section .col-lg-1,
+    .filter-section .col-lg-2,
+    .filter-section .col-lg-3{
+        width:100%;
+    }
+
+    .d-flex.justify-content-between{
+        flex-direction:column;
+        gap:10px;
+        align-items:flex-start !important;
+    }
+}
+</style>
+<style>
+
+
+.modal-content {
+  border-radius: 10px;
+}
+
+
+#activityTrackerModal .modal-dialog {
+  max-width: 950px;
+}
+
+#activityTrackerModal .modal-content {
+  background-color: #1e1e2f;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+#activityTrackerModal .modal-title {
+  font-weight: 600;
+}
+
+#activityTrackerContent h5 {
+  font-size: 18px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+#activityTrackerContent h6 {
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+  color: #5bc0de;
+}
+
+#activityTrackerContent p {
+  font-size: 14px;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+#activityTrackerContent .row > div {
+  padding: 10px;
+}
+
+
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+
+.history-item {
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+
+.waste-section i {
+  font-size: 1.1rem;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+
+@media (max-width: 768px) {
+  #activityTrackerModal .modal-dialog {
+    max-width: 95%;
+    margin: 1rem;
+  }
+
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+  
+  .modal-footer {
+    border-top: 1px solid #444;
+    padding-top: 10px;
+    justify-content: flex-end;
+  }
+
+
+
+  #sortIcon{
+    cursor: pointer;
+}
+
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+
+.btn-purple{
+    background: #7c5cff;
+    border-color: #7c5cff;
+    color: #fff;
+}
+
+.btn-purple:hover{
+    background: #6947ff;
+    border-color: #6947ff;
+    color: #fff;
+}
+
+.modal-footer .btn{
+    min-width: 110px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.sortable:hover {
+    background-color: rgba(255,255,255,0.08);
+}
+
+.sort-icon {
+    margin-left: 6px;
+    font-size: 13px;
+    color: #bdbdbd;
+    transition: all 0.2s ease;
+}
+
+.sortable.sort-asc .sort-icon,
+.sortable.sort-desc .sort-icon {
+    color: #ffffff;
+}
+
+
+.pagination .page-link{
+    background:#212529;
+    color:#fff;
+    border:1px solid #495057;
+    cursor:pointer;
+}
+
+.pagination .page-item.active .page-link{
+    background:#0d6efd;
+    border-color:#0d6efd;
+}
+
+.pagination .page-link:hover{
+    background:#343a40;
+    color:#fff;
+}
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-white">
+            Waste Leads - <span>({{ wasteleads.count }})</span>
+        </h5>
+
+        <div>
+            <button class="btn btn-success btn-sm me-2" id="exportExcel">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+
+            <button class="btn btn-danger btn-sm" id="exportPdf">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-2 align-items-end mb-4 filter-section">
+
+        <!-- Entries -->
+        <div class="col-lg-1 col-md-2 col-6 mb-2">
+            <select id="rowCount" class="form-select">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+            </select>
+        </div>
+
+        <!-- Client -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <select id="clientDropdown" class="form-select">
+                <option value="">Client</option>
+                {% for client in clients %}
+                    <option value="{{ client.id }}">
+                        {{ client.client_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Category -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <select id="categoryDropdown" class="form-select">
+                <option value="">Category</option>
+            </select>
+        </div>
+
+        <!-- Employee -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <select id="employee" class="form-select">
+                <option value="">Employee</option>
+                {% for emp in employees %}
+                    <option value="{{ emp.id }}">
+                        {{ emp.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Lead Added From -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <input type="date"
+                id="leadFromDate"
+                class="form-control">
+        </div>
+
+        <!-- Lead Added To -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <input type="date"
+                id="leadToDate"
+                class="form-control">
+        </div>
+
+        <!-- Telecaller -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <select id="telecaller" class="form-select">
+                <option value="">Telecaller</option>
+
+                {% for tc in telecallers %}
+                    <option value="{{ tc.id }}">
+                        {{ tc.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Waste Marked From -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <input type="date"
+                id="wasteFromDate"
+                class="form-control">
+        </div>
+
+        <!-- Waste Marked To -->
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <input type="date"
+                id="wasteToDate"
+                class="form-control">
+        </div>
+
+        <!-- Search -->
+        <div class="col-lg-1 col-md-2 col-6 mb-2">
+            <button class="btn btn-primary w-100" id="filterBtn">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+
+        
+
+    </div>
+
+
+        <div class="col-lg-3 col-md-4 col-12 mb-2 ms-auto">
+            <div class="input-group">
+                <input type="text"
+                    id="tableSearch"
+                    class="form-control"
+                    placeholder="Search leads...">
+            </div>
+        </div>
+
+    
+
+
+    <div class="table-responsive">
+        <table id="wasteLeadTable" class="table table-bordered table-sm mb-0 table-dark table-striped table-hover align-middle text-center">
+            <thead>
+                <tr>
+                    <th class="sortable text-center align-middle" data-column="0">
+                        <span>No</span>
+                        <i class="fa fa-caret-down sort-icon"></i>
+                    </th>
+
+                    <th>History</th>
+
+                    <th class="sortable text-center align-middle" data-column="2">
+                        Marked Date <i class="fa fa-caret-down sort-icon"></i>
+                    </th>
+
+                    <th class="sortable text-center align-middle" data-column="3">
+                        Lead Name <i class="fa fa-caret-down sort-icon"></i>
+                    </th>
+
+                    <th class="sortable text-center align-middle" data-column="4">
+                        Contact Details <i class="fa fa-caret-down sort-icon"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="wasteLeadBody">
+                {% for lead in wasteleads %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                      <button class="btn btn-primary view-activity-btn" data-lead-id="{{ lead.lead.id }}">
+
+                            <i class="bi bi-file-earmark-text"></i>
+
+                      </button>
+                    </td>
+                    <td class="nowrap-date">
+                        {{ lead.waste_marked_date|date:"F d, Y" }}<br>
+                        Collected on : {{ lead.lead.added_date|date:"F d, Y" }}
+                    </td>
+                    <td>
+                        {{ lead.lead.name }}<br>
+                        {{ lead.lead.lead_category.client_task.client }} - {{ lead.lead.lead_category.collection_for }}
+                    </td>
+                    <td class="nowrap-date">
+                        {{ lead.lead.email }} <br>
+                        {{ lead.lead.contact }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No leads available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div class="d-flex justify-content-end mt-3">
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+            </nav>
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+<script>
+    document.getElementById('clientDropdown').addEventListener('change', function() {
+        const clientId = this.value;
+        const categoryDropdown = document.getElementById('categoryDropdown');
+    
+        categoryDropdown.innerHTML = '<option value="">Loading...</option>';
+    
+        if (clientId) {
+            fetch(`/get-lead-categories-dm/${clientId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    categoryDropdown.innerHTML = '<option value="">Select Category</option>';
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        categoryDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                    categoryDropdown.innerHTML = '<option value="">Error loading</option>';
+                });
+        } else {
+            categoryDropdown.innerHTML = '<option value="">Select Category</option>';
+        }
+    });
+    </script>
+
+
+<script>
+document.getElementById("tableSearch").addEventListener("keyup", function() {
+
+    let value = this.value.toLowerCase();
+
+    document.querySelectorAll("#wasteLeadBody tr").forEach(row => {
+
+        let text = row.textContent.toLowerCase();
+
+        row.style.display = text.includes(value) ? "" : "none";
+    });
+});
+</script>
+
+<script>
+    document.getElementById("filterBtn").addEventListener("click", function () {
+
+    const params = new URLSearchParams();
+
+    const client = document.getElementById("clientDropdown").value;
+    const category = document.getElementById("categoryDropdown").value;
+    const employee = document.getElementById("employee").value;
+    const telecaller = document.getElementById("telecaller").value;
+
+    const leadFrom = document.getElementById("leadFromDate").value;
+    const leadTo = document.getElementById("leadToDate").value;
+
+    const wasteFrom = document.getElementById("wasteFromDate").value;
+    const wasteTo = document.getElementById("wasteToDate").value;
+
+    const rowCount = document.getElementById("rowCount").value;
+
+    if(client) params.append("client_id", client);
+    if(category) params.append("category_id", category);
+    if(employee) params.append("employee_id", employee);
+    if(telecaller) params.append("telecaller_id", telecaller);
+
+    if(leadFrom) params.append("lead_from", leadFrom);
+    if(leadTo) params.append("lead_to", leadTo);
+
+    if(wasteFrom) params.append("waste_from", wasteFrom);
+    if(wasteTo) params.append("waste_to", wasteTo);
+
+    params.append("rows", rowCount);
+
+    window.location.href = `${window.location.pathname}?${params.toString()}`;
+});
+</script>
+
+
+
+ <!-- Activity Tracker Modal -->
+ <div class="modal fade" id="activityTrackerModal" tabindex="-1" aria-labelledby="activityTrackerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="activityTrackerModalLabel">Activity Tracker</h5>
+          <button type="button" class="btn p-0 border-0 ms-auto" data-bs-dismiss="modal" aria-label="Close">
+            <span style="color: white; font-size: 2rem;">&times;</span>
+        </button>
+        </div>
+  
+        <div class="modal-body" id="activityTrackerContent">
+          <!-- Dynamic Lead Details will be loaded here -->
+        </div>
+  
+        <div class="modal-footer">
+
+            <!-- PDF Download -->
+            <button type="button" class="btn btn-purple" id="downloadPdfButton">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i>
+                Download PDF
+            </button>
+
+            <!-- Update -->
+            <button type="button" class="btn btn-success text-dark" id="updateLeadBtn">
+                <i class="bi bi-pencil-square me-1"></i>
+                Update
+            </button>
+
+            <!-- Close -->
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                <i class="bi bi-x-circle me-1"></i>
+                Close
+            </button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  
+  <!-- Script to Load Details -->
+  <script>
+    let currentLeadId = null;
+    document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.view-activity-btn').forEach(button => {
+        button.addEventListener('click', function () {
+        const leadId = this.getAttribute('data-lead-id');
+        currentLeadId = leadId;
+
+        fetch(`/lead-details/${leadId}/`)
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+                const lead = data.lead;
+
+                // Followup Track
+                const followupHtml = lead.followup_track.length
+                ? lead.followup_track.map(f => `
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Connected On:</strong> ${f.connected_on}</p>
+                                <p><strong>Response:</strong> ${f.response}</p>
+                                
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Contact By:</strong> ${f.contact_by}</p>
+                                <p><strong>Status:</strong> ${f.status}</p>
+                                
+                            </div>
+                        </div>
+                    </div>
+                `).join('')
+                : `<p>-</p>`;
+
+                // History Track
+        
+                const historyHtml = lead.history_track.length
+                ? `<div class="history-grid">
+                    ${lead.history_track
+                        .map(
+                        (h) => `
+                        <div class="history-item">
+                        <p><strong>Allocated On:</strong> ${h.allocated_on}</p>
+                        <p><strong>Note:</strong> ${h.note}</p>
+                        </div>
+                        <div class="history-item">
+                        <p><strong>Allocated To:</strong> ${h.allocated_to}</p>
+                        <p><strong>Final Status:</strong> ${h.final_status}</p>
+                        </div>
+                    `
+                        )
+                        .join('')}
+                    </div>`
+                : `<p>-</p>`;
+
+
+                // Lead More Details
+                const moreDetails = lead.more_details.map(
+                d => `<p><i class="bi bi-dot"></i> ${d.field_name}: ${d.field_data}</p>`
+                ).join('');
+
+                let wasteLeadHtml = `<p>-</p>`;
+
+                if (lead.waste_data) {
+
+                    const confirmationIcon =
+                        lead.waste_data.confirmation == 1
+                        ? `
+                            <div class="text-center">
+                                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                                <p class="mt-2 mb-0">Confirmed(Head)</p>
+                            </div>
+                        `
+                        : `
+                            <div class="text-center">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <p class="mt-2 mb-0 small">
+                                    Not Confirmed<br>
+                                    (Head)
+                                </p>
+                            </div>
+                        `;
+
+                    wasteLeadHtml = `
+                        <div class="row align-items-center">
+
+                            <div class="col-md-8">
+                                <p><strong>Marked On:</strong> ${lead.waste_data.marked_date}</p>
+                                <p><strong>Marked By:</strong> Telecaller (${lead.waste_data.telecaller_name})</p>
+                                <p><strong>Reason:</strong> ${lead.waste_data.reason}</p>
+                            </div>
+
+                            <div class="col-md-4">
+                                ${confirmationIcon}
+                            </div>
+
+                        </div>
+                    `;
+                }
+
+                // Modal Content
+                const content = `
+                <div class="container-fluid text-light" id="activityContentToExport">
+                    <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-4 border-end">
+                        <h5 class="fw-bold mb-3">Lead Details</h5>
+                        <p><strong>Name:</strong> ${lead.name}</p>
+                        <p><strong>Email:</strong> ${lead.email}</p>
+                        <p><strong>Contact:</strong> ${lead.contact}</p>
+
+                        <h6 class="fw-bold mt-4">Client Details</h6>
+                        <p><strong>Client:</strong> ${lead.client_details.client_name}</p>
+                        <p><strong>Category:</strong> ${lead.client_details.lead_category}</p>
+
+                        <h6 class="fw-bold mt-4">Lead More Details</h6>
+                        ${moreDetails || '<p>-</p>'}
+                    </div>
+
+                    <!-- Middle Column (Activity Panel) -->
+                    <div class="col-md-5">
+                        <h5 class="fw-bold mb-3">Activity Panel</h5>
+
+                        <div class="mb-3">
+                        <h6 class="text-info fw-bold">Followup Track</h6>
+                        ${followupHtml}
+                        </div>
+
+                        <div class="mb-3">
+                        <h6 class="text-info fw-bold">History Track</h6>
+                        <div class="row">
+                            ${lead.history_track.map(h => `
+                            <div class="col-md-6">
+                                <p><strong>Allocated On:</strong> ${h.allocated_on}</p>
+                                <p><strong>Allocated To:</strong> ${h.allocated_to}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Note:</strong> ${h.note}</p>
+                                <p><strong>Final Status:</strong> ${h.final_status}</p>
+                            </div>
+                            `).join('')}
+                        </div>
+                        </div>
+
+                        <div>
+                        <h6 class="text-danger fw-bold">Waste Lead Reason</h6>
+                        ${wasteLeadHtml}
+                        </div>
+                    </div>
+
+
+                    <!-- Right Column (Collected / Allocated Info) -->
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                        <h6 class="text-info fw-bold">Lead Collected By</h6>
+                        <p><strong>${lead.collected_by}</strong></p>
+                        <p>${lead.added_date} - ${lead.added_time}</p>
+                        </div>
+
+                        <div class="mb-3">
+                        <h6 class="text-info fw-bold">Lead Allocated To</h6>
+                        <p><strong>${lead.allocated_to}</strong></p>
+                        <p>${lead.allocated_date} - ${lead.allocated_time}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 border-top pt-3" id="headConfirmationSection">
+
+                        <h6 class="text-warning fw-bold mb-3">
+                            Head Confirmation
+                        </h6>
+
+                        <div class="mb-3">
+
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input"
+                                    type="radio"
+                                    name="headDecision"
+                                    id="confirmLead"
+                                    value="confirm">
+
+                                <label class="form-check-label" for="confirmLead">
+                                    Confirm
+                                </label>
+                            </div>
+
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input"
+                                    type="radio"
+                                    name="headDecision"
+                                    id="rejectLead"
+                                    value="reject">
+
+                                <label class="form-check-label" for="rejectLead">
+                                    Reject
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <textarea
+                                class="form-control"
+                                id="headReason"
+                                rows="3"
+                                placeholder="Enter the reason..." required></textarea>
+                        </div>
+
+                    </div>
+
+                    </div>
+                </div>
+                `;
+
+
+
+                document.getElementById('activityTrackerContent').innerHTML = content;
+                new bootstrap.Modal(document.getElementById('activityTrackerModal')).show();
+            } else {
+                alert('Failed to load lead details.');
+            }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+
+
+
+document.getElementById('downloadPdfButton').addEventListener('click', function () {
+
+    const leadName = document.querySelector('#activityContentToExport p strong')?.parentElement?.innerText.replace('Name:', '').trim() || '-';
+
+    const pdfContent = document.createElement('div');
+
+    pdfContent.innerHTML = `
+        <div style="
+            font-family: Arial, sans-serif;
+            color:#000;
+            background:#fff;
+            padding:20px;
+            width:100%;
+            line-height:1.6;
+            word-wrap:break-word;
+            overflow-wrap:break-word;
+        ">
+
+            <h2 style="
+                text-align:center;
+                margin-bottom:25px;
+                border-bottom:2px solid #000;
+                padding-bottom:10px;
+            ">
+                Lead Details Report
+            </h2>
+
+            ${document.getElementById('activityContentToExport').innerHTML}
+        </div>
+    `;
+
+    // Remove form section
+    const headSection = pdfContent.querySelector('#headConfirmationSection');
+    if(headSection){
+        headSection.remove();
+    }
+
+
+    pdfContent.querySelectorAll('*').forEach(el => {
+        el.style.color = '#000';
+        el.style.background = 'transparent';
+        el.style.boxShadow = 'none';
+
+        // Prevent word breaking
+        el.style.wordBreak = 'keep-all';
+        el.style.overflowWrap = 'break-word';
+        el.style.whiteSpace = 'normal';
+    });
+
+
+    pdfContent.querySelectorAll('.row.align-items-center').forEach(row => {
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.width = '100%';
+
+        const cols = row.querySelectorAll('[class*="col-"]');
+
+        if (cols.length >= 2) {
+            cols[0].style.width = '75%';
+            cols[0].style.display = 'block';
+
+            cols[1].style.width = '25%';
+            cols[1].style.display = 'block';
+            cols[1].style.textAlign = 'center';
+        }
+    });
+
+    // Convert remaining bootstrap columns into stacked blocks
+    pdfContent.querySelectorAll('.row:not(.align-items-center)').forEach(row => {
+        row.style.display = 'block';
+    });
+
+    pdfContent.querySelectorAll('[class*="col-"]').forEach(col => {
+
+        // Skip Waste Lead confirmation columns
+        if (col.closest('.row.align-items-center')) {
+            return;
+        }
+
+        col.style.width = '100%';
+        col.style.display = 'block';
+        col.style.marginBottom = '20px';
+        col.style.border = 'none';
+    });
+
+    pdfContent.querySelectorAll('p').forEach(p => {
+        p.style.margin = '5px 0';
+        p.style.pageBreakInside = 'avoid';
+        p.style.wordBreak = 'keep-all';
+        p.style.overflowWrap = 'break-word';
+    });
+
+    // Avoid section splitting
+    pdfContent.querySelectorAll('div').forEach(div => {
+        div.style.pageBreakInside = 'avoid';
+    });
+
+    html2pdf()
+        .set({
+            margin: [0.4, 0.4, 0.4, 0.4],
+            filename: 'Lead_Details_Report.pdf',
+            image: {
+                type: 'jpeg',
+                quality: 1
+            },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: {
+                unit: 'in',
+                format: 'a4',
+                orientation: 'portrait'
+            },
+            pagebreak: {
+                mode: ['avoid-all', 'css', 'legacy']
+            }
+        })
+        .from(pdfContent)
+        .save();
+
+});
+
+    });
+  </script>
+
+
+  <script>
+    document.getElementById('updateLeadBtn').addEventListener('click', function () {
+
+    const selectedOption =
+        document.querySelector('input[name="headDecision"]:checked');
+
+    const headReason =
+        document.getElementById('headReason').value.trim();
+
+    if (!selectedOption) {
+        alert('Please select Confirm or Reject');
+        return;
+    }
+
+    if (headReason === '') {
+        alert('Please enter  Reason');
+        return;
+    }
+
+    fetch('/update-waste-lead/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            lead_id: currentLeadId,
+            decision: selectedOption.value,
+            head_reason: headReason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        if(data.status === 'success'){
+            alert(data.message);
+            location.reload();
+        }
+        else{
+            alert(data.message);
+        }
+
+    });
+
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== '') {
+
+        const cookies = document.cookie.split(';');
+
+        for (let i = 0; i < cookies.length; i++) {
+
+            const cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+
+                cookieValue =
+                    decodeURIComponent(cookie.substring(name.length + 1));
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+  </script>
+
+
+<script>
+document.getElementById('exportExcel').addEventListener('click', function () {
+
+    const table = document.getElementById('wasteLeadTable');
+
+    let data = [];
+
+    // Headers (skip History column)
+    data.push([
+        'No',
+        'Marked Date',
+        'Lead Name',
+        'Contact Details'
+    ]);
+
+    table.querySelectorAll('tbody tr').forEach(row => {
+
+        const cells = row.querySelectorAll('td');
+
+        if (cells.length >= 5) {
+
+            data.push([
+                cells[0].innerText.trim(), // No
+                cells[2].innerText.trim(), // Marked Date
+                cells[3].innerText.trim(), // Lead Name
+                cells[4].innerText.trim()  // Contact
+            ]);
+        }
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Column widths
+    ws['!cols'] = [
+        { wch: 8 },   // No
+        { wch: 35 },  // Marked Date
+        { wch: 45 },  // Lead Details
+        { wch: 40 }   // Contact
+    ];
+
+    const wb = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        'Waste Leads'
+    );
+
+    XLSX.writeFile(
+        wb,
+        'Waste_Leads.xlsx'
+    );
+
+});
+
+
+document.getElementById('exportPdf').addEventListener('click', function () {
+
+    const table = document.getElementById('wasteLeadTable');
+
+    const clone = table.cloneNode(true);
+
+    // Remove History column
+    clone.querySelectorAll('tr').forEach(row => {
+        if (row.cells.length > 1) {
+            row.deleteCell(1);
+        }
+    });
+
+    clone.style.width = '100%';
+    clone.style.borderCollapse = 'collapse';
+    clone.style.fontSize = '12px';
+
+    // Header styling
+    clone.querySelectorAll('th').forEach(th => {
+
+        th.style.backgroundColor = '#e9ecef';
+        th.style.color = '#000';
+        th.style.border = '1px solid #000';
+        th.style.padding = '8px';
+        th.style.fontWeight = 'bold';
+
+    });
+
+    // Body styling
+    clone.querySelectorAll('td').forEach(td => {
+
+        td.style.backgroundColor = '#fff';
+        td.style.color = '#000';
+        td.style.border = '1px solid #000';
+        td.style.padding = '8px';
+        td.style.verticalAlign = 'top';
+        td.style.textAlign = 'left';
+
+    });
+
+    const wrapper = document.createElement('div');
+
+    wrapper.style.background = '#fff';
+    wrapper.style.color = '#000';
+    wrapper.style.padding = '20px';
+
+    wrapper.innerHTML = `
+        <h2 style="
+            text-align:center;
+            margin-bottom:20px;
+            color:#000;
+        ">
+            Waste Leads Report
+        </h2>
+    `;
+
+    wrapper.appendChild(clone);
+
+    html2pdf()
+        .from(wrapper)
+        .set({
+            margin: 0.3,
+            filename: 'Waste_Leads_Report.pdf',
+            image: {
+                type: 'jpeg',
+                quality: 1
+            },
+            html2canvas: {
+                scale: 3,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: {
+                unit: 'in',
+                format: 'a4',
+                orientation: 'landscape'
+            }
+        })
+        .save();
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const table = document.getElementById("wasteLeadTable");
+    const headers = table.querySelectorAll("th.sortable");
+
+    headers.forEach(header => {
+
+        header.addEventListener("click", function () {
+
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            const column = parseInt(this.dataset.column);
+            const isAsc = !this.classList.contains("sort-asc");
+
+            // Reset all icons
+            headers.forEach(h => {
+                h.classList.remove("sort-asc", "sort-desc");
+
+                const icon = h.querySelector(".sort-icon");
+                if (icon) {
+                    icon.className = "fa fa-caret-down sort-icon";
+                }
+            });
+
+            // Set current icon
+            this.classList.add(isAsc ? "sort-asc" : "sort-desc");
+
+            const currentIcon = this.querySelector(".sort-icon");
+
+            if (currentIcon) {
+                currentIcon.className = isAsc
+                    ? "fa fa-caret-up sort-icon"
+                    : "fa fa-caret-down sort-icon";
+            }
+
+            // Sort rows
+            rows.sort((a, b) => {
+
+                let aText = a.cells[column].innerText.trim();
+                let bText = b.cells[column].innerText.trim();
+
+                // No column
+                if (column === 0) {
+                    return isAsc
+                        ? parseInt(aText) - parseInt(bText)
+                        : parseInt(bText) - parseInt(aText);
+                }
+
+                // Marked Date column
+                if (column === 2) {
+
+                    let aDateText = a.cells[column].innerText.split('\n')[0].trim();
+                    let bDateText = b.cells[column].innerText.split('\n')[0].trim();
+
+                    let aDate = new Date(aDateText);
+                    let bDate = new Date(bDateText);
+
+                    return isAsc
+                        ? aDate - bDate
+                        : bDate - aDate;
+                }
+
+                // Text columns
+                aText = aText.toLowerCase();
+                bText = bText.toLowerCase();
+
+                return isAsc
+                    ? aText.localeCompare(bText)
+                    : bText.localeCompare(aText);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+
+        });
+
+    });
+
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const rowCountSelect = document.getElementById("rowCount");
+    const tableBody = document.getElementById("wasteLeadBody");
+    const pagination = document.getElementById("pagination");
+
+    let currentPage = 1;
+
+    function displayTable(page) {
+
+        const rows = Array.from(tableBody.querySelectorAll("tr"));
+        const rowsPerPage = parseInt(rowCountSelect.value);
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            row.style.display =
+                index >= start && index < end
+                    ? ""
+                    : "none";
+        });
+
+        createPagination(rows.length, rowsPerPage, page);
+    }
+
+    function createPagination(totalRows, rowsPerPage, currentPage) {
+
+        pagination.innerHTML = "";
+
+        const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+
+        // Previous
+        let prev = document.createElement("li");
+        prev.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prev.innerHTML = `<a class="page-link">&laquo;</a>`;
+
+        prev.onclick = () => {
+            if (currentPage > 1) {
+                displayTable(currentPage - 1);
+            }
+        };
+
+        pagination.appendChild(prev);
+
+        // Page Numbers
+        for (let i = 1; i <= pageCount; i++) {
+
+            let li = document.createElement("li");
+
+            li.className = `page-item ${i === currentPage ? "active" : ""}`;
+
+            li.innerHTML = `<a class="page-link">${i}</a>`;
+
+            li.onclick = () => displayTable(i);
+
+            pagination.appendChild(li);
+        }
+
+        // Next
+        let next = document.createElement("li");
+        next.className = `page-item ${currentPage === pageCount ? "disabled" : ""}`;
+
+        next.innerHTML = `<a class="page-link">&raquo;</a>`;
+
+        next.onclick = () => {
+            if (currentPage < pageCount) {
+                displayTable(currentPage + 1);
+            }
+        };
+
+        pagination.appendChild(next);
+    }
+
+    rowCountSelect.addEventListener("change", function(){
+        currentPage = 1;
+        displayTable(currentPage);
+    });
+
+    displayTable(1);
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,539 @@
+{% extends "graphic_designer/graphic_designer_sidebar.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+  background-color: #12151e; 
+}
+    .main-wrapper {
+        padding: 25px 10px;
+        background: #f4f7fb;
+        min-height: 100vh;
+        margin-top: 30px;
+        
+    }
+
+    .main-container {
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 30px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .header-section h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .header-section p {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+
+    .header-section i {
+        color: #6366f1;
+        margin-right: 8px;
+    }
+
+
+    .image-preview {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .image-preview img {
+        width: 100%;
+        max-width: 550px;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        object-fit: cover;
+    }
+
+    .image-preview h4 {
+        margin-top: 18px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+
+    .section-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+
+    .suggestion-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .suggestion-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    }
+
+    .suggestion-card h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #eef2ff;
+        padding-bottom: 10px;
+    }
+
+    .suggestion-card h3 i {
+        color: #6366f1;
+        margin-right: 8px;
+    }
+
+
+    .suggestion-item {
+        background: #f9fafb;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 18px;
+        border-left: 5px solid #6366f1;
+    }
+
+    .suggestion-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .suggestion-item h5 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+
+    .suggestion-item p {
+        margin: 0;
+        color: #4b5563;
+        line-height: 1.7;
+        font-size: 0.96rem;
+    }
+
+
+    .poster-concept {
+        background: #111827;
+        border-radius: 16px;
+        padding: 20px;
+        color: #fff;
+    }
+
+    .concept-text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        color: #e5e7eb;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    .concept-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+
+    .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 35px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: #fff;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(99,102,241,0.3);
+    }
+
+    .back-btn:hover {
+        transform: translateY(-2px);
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(99,102,241,0.35);
+    }
+
+
+    .custom-alert {
+        border-radius: 18px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .custom-alert h3 {
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+ 
+    @media (max-width: 991px) {
+        .main-container {
+            padding: 22px;
+        }
+
+        .header-section h1 {
+            font-size: 1.9rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-wrapper {
+            padding: 15px 5px;
+        }
+
+        .main-container {
+            padding: 18px;
+            border-radius: 16px;
+        }
+
+        .header-section h1 {
+            font-size: 1.6rem;
+        }
+
+        .header-section p {
+            font-size: 0.92rem;
+        }
+
+        .suggestion-card {
+            padding: 18px;
+        }
+
+        .suggestion-card h3 {
+            font-size: 1.1rem;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .back-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .concept-actions {
+            flex-direction: column;
+        }
+
+        .concept-actions .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header-section h1 {
+            font-size: 1.4rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+        }
+
+        .suggestion-item {
+            padding: 14px;
+        }
+
+        .suggestion-item h5 {
+            font-size: 0.95rem;
+        }
+
+        .suggestion-item p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="main-container">
+
+         
+            <div class="header-section">
+                <h1>
+                    <i class="fas fa-magic"></i>
+                    Image Improvement Suggestions
+                </h1>
+                <p>
+                    AI-powered recommendations to enhance your marketing image effectiveness
+                </p>
+            </div>
+
+            {% if marketing_image %}
+
+            <!-- Image Preview -->
+            <div class="image-preview">
+                <img src="{{ marketing_image.image.url }}" alt="{{ marketing_image.title }}">
+                <h4>{{ marketing_image.title }}</h4>
+            </div>
+
+            {% if analysis %}
+
+            <!-- Suggestions -->
+            <div class="suggestions-section">
+
+                <h2 class="section-title">
+                    <i class="fas fa-lightbulb text-warning"></i>
+                    Actionable Improvement Suggestions
+                </h2>
+
+                <!-- Visual Clarity -->
+                <div class="suggestion-card">
+                    <h3><i class="fas fa-eye"></i> Visual Clarity & Readability</h3>
+
+                    <div class="suggestion-item">
+                        <h5>Text Clarity</h5>
+                        <p>{{ analysis.marketing_strategy_insights }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Font Size</h5>
+                        <p>{{ analysis.competitive_positioning }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Font Style</h5>
+                        <p>{{ analysis.psychological_triggers }}</p>
+                    </div>
+                </div>
+
+         
+                <div class="suggestion-card">
+                    <h3><i class="fas fa-palette"></i> Color & Typography</h3>
+
+                    <div class="suggestion-item">
+                        <h5>Font Color & Contrast</h5>
+                        <p>{{ analysis.cultural_considerations }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Text Alignment & Spacing</h5>
+                        <p>{{ analysis.platform_optimization }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Background Color</h5>
+                        <p>{{ analysis.visual_improvements }}</p>
+                    </div>
+                </div>
+
+              
+                <div class="suggestion-card">
+                    <h3><i class="fas fa-th-large"></i> Layout & Composition</h3>
+
+                    <div class="suggestion-item">
+                        <h5>Text Visibility</h5>
+                        <p>{{ analysis.marketing_improvements }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Color Harmony</h5>
+                        <p>{{ analysis.strategic_recommendations }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Element Placement</h5>
+                        <p>{{ analysis.accessibility_compliance }}</p>
+                    </div>
+                </div>
+
+                
+                <div class="suggestion-card">
+                    <h3><i class="fas fa-rocket"></i> Overall Enhancement</h3>
+
+                    <div class="suggestion-item">
+                        <h5>Text-Image Balance</h5>
+                        <p>{{ analysis.legal_considerations }}</p>
+                    </div>
+
+                    <div class="suggestion-item">
+                        <h5>Spacing & White Space</h5>
+                        <p>{{ analysis.platform_guidelines }}</p>
+                    </div>
+                </div>
+
+           
+                {% if analysis.design_improvement_prompt %}
+                <div class="suggestion-card">
+                    <h3><i class="fas fa-paint-brush"></i> Design-Only Improvements</h3>
+
+                    <div class="poster-concept">
+                        <pre class="concept-text">{{ analysis.design_improvement_prompt }}</pre>
+
+                        <div class="concept-actions mt-4">
+                            <button class="btn btn-outline-info"
+                                    onclick="copyDesignPrompt(event)">
+                                <i class="fas fa-copy"></i>
+                                Copy Design Prompt
+                            </button>
+
+                            <button class="btn btn-outline-warning"
+                                    onclick="downloadDesignPrompt()">
+                                <i class="fas fa-download"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+          
+            <div class="button-group">
+
+                {% if marketing_image.analyzed_at %}
+                <a href="{% url 'upload_edited_image' marketing_image.id %}" class="back-btn">
+                    <i class="fas fa-edit"></i>
+                    Upload Edited Version
+                </a>
+                {% endif %}
+
+                <a href="{% url 'image_analyzer_page' %}" class="back-btn">
+                    <i class="fas fa-upload"></i>
+                    Analyze Another Image
+                </a>
+
+                <a href="{% url 'image_history' %}" class="back-btn">
+                    <i class="fas fa-history"></i>
+                    View History
+                </a>
+
+                <a href="{% url 'image_analysis' %}" class="back-btn">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </a>
+
+            </div>
+
+            {% else %}
+
+     
+            <div class="custom-alert alert alert-warning">
+                <h3>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Analysis Not Available
+                </h3>
+
+                <p>
+                    The image was uploaded but analysis failed or is still processing.
+                    Please try analyzing again.
+                </p>
+
+                <a href="{% url 'retry_analysis' marketing_image.id %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-redo"></i>
+                    Retry Analysis
+                </a>
+            </div>
+
+            {% endif %}
+
+            {% else %}
+
+  
+            <div class="custom-alert alert alert-danger">
+                <h3>
+                    <i class="fas fa-image"></i>
+                    Image Not Found
+                </h3>
+
+                <p>
+                    The requested image could not be found.
+                </p>
+
+                <a href="{% url 'image_analysis' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-home"></i>
+                    Go Home
+                </a>
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Copy design prompt
+    function copyDesignPrompt(event) {
+        const designText = document.querySelector('.concept-text').textContent;
+
+        navigator.clipboard.writeText(designText).then(() => {
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.classList.remove('btn-outline-info');
+            btn.classList.add('btn-success');
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-info');
+            }, 2000);
+
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Failed to copy to clipboard');
+        });
+    }
+
+    // Download prompt
+    function downloadDesignPrompt() {
+        const designText = document.querySelector('.concept-text').textContent;
+
+        const blob = new Blob([designText], {
+            type: 'text/plain'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'design-improvements.txt';
+
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+</script>
+
+{% endblock %}

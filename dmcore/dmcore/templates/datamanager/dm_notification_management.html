@@ -1,0 +1,64 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block title %}Data Manager Dashboard{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'datamanager/css/dashboard.css' %}">
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+
+    <div class="col-md-4 mb-4">
+      <div class="card card-common">
+        <a href="{% url 'dm_today_new_lead' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Today New Lead - {{ today_new_leads }} </h5>
+            <i class="fas fa-database text-light"></i>
+          </div>
+          <p>Data bank providing you with real-time insights and seamless information retrival.</p>
+        </a>
+      </div>
+    </div>
+
+ 
+    <div class="col-md-4 mb-4">
+    <div class="card card-common">
+        <a href="{% url 'dm_today_allocated_lead' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Today Allocation - {{ today_allocations }}</h5>
+            <i class="fas fa-user text-primary" style="font-size: 22px;"></i>
+        </div>
+        <p>Data Bank, Providing you with real-time insights and seamless information retrieval.</p>
+        </a>
+    </div>
+    </div>
+
+
+    <div class="col-md-4 mb-4">
+    <div class="card card-common">
+        <a href="{% url 'dm_today_followup' %}" class="text-decoration-none text-white d-flex flex-column justify-content-around h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+            <h5 class="mb-0">Follow Up Leads - {{ today_followups }}</h5>
+            <i class="fas fa-clipboard-check text-warning" style="font-size: 22px;"></i>
+        </div>
+        <p>Data Bank, Providing you with real-time insights and seamless information retrieval.</p>
+        </a>
+    </div>
+    </div>
+
+
+
+
+  </div>
+</div>
+
+
+{% endblock content %}

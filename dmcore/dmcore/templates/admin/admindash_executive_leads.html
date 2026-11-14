@@ -1,0 +1,68 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+
+<style>
+    .option-card {
+        background-color: #1a1e21;
+        border: 2px solid #2d3238;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .option-card:hover {
+        transform: scale(1.03);
+        border-color: #4e73df;
+    }
+    .icon-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .bg-primary-soft { 
+        background: rgba(78, 115, 223, 0.1); 
+        color: #4e73df; 
+    }
+    .bg-warning-soft { 
+        background: rgba(246, 194, 62, 0.1); 
+        color: #f6c23e; 
+        }
+</style>
+
+<div class="container-fluid mt-5">
+
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4 mb-4">
+            <a href="{% url 'admindash_executive_leads_list' executive.id client.id %}" class="text-decoration-none"> 
+                <div class="card option-card shadow py-5 text-center">
+                    <div class="card-body">
+                        <div class="icon-box bg-primary-soft">
+                            <i class="fas fa-list-ul fa-2x"></i>
+                        </div>
+                        <h3 class="text-white font-weight-bold">Total Leads</h3>
+                        <p class="text-light px-3">View all leads collected and assigned to this executive.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-5 col-lg-4 mb-4">
+            <a href="{% url 'admindash_executive_confused_leads' executive.id client.id %}" class="text-decoration-none"> <div class="card option-card shadow py-5 text-center">
+                    <div class="card-body">
+                        <div class="icon-box bg-warning-soft">
+                            <i class="fas fa-question-circle fa-2x"></i>
+                        </div>
+                        <h3 class="text-white font-weight-bold">Confused Leads</h3>
+                        <p class="text-light px-3">Filter and view leads marked as confused/pending status.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}

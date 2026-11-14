@@ -1,0 +1,224 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .messages-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 99999;
+    width: 350px;
+}
+</style>
+
+<!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 350px;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+<div class="container-fluid mt-3 comn_table_bg">
+
+
+    <div class="card shadow-lg p-3" style="background:#2b2b2b; border-radius:12px;">
+        <div class="card-header">
+            <h4 class="mb-0 text-white">
+                <i class="fas fa-file-alt me-2"></i>
+                Google Form Leads
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-end mb-3">
+                <button type="button" class="btn btn-outline-primary" id="transferLeadsBtn">
+                    <i class="fas fa-exchange-alt me-1"></i> Transfer Leads
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark table-bordered table-hover align-middle text-center" style="white-space: nowrap;">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>Created Date</th>
+                            <th>Collected By</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Source</th>
+                            <th>Qualification</th>
+                            <th>Passout Year</th>
+                            <th>Location</th>
+                            <th>Applied For</th>
+                            <th>Internship</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Experience</th>
+                            
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for lead in leads %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <input type="checkbox"
+                                    class="lead-checkbox"
+                                    value="{{ lead.id }}">
+                            </td>
+                            <td>{{ lead.created_at|date:"d-m-Y" }}</td>
+                            <td>{{ lead.collected_by.name|default:"-" }}</td>
+                            <td>{{ lead.name }}</td>
+                            <td>{{ lead.email }}</td>
+                            <td>{{ lead.phone }}</td>
+                            <td>{{ lead.source|default:"-" }}</td>
+                            <td>{{ lead.qualification|default:"-" }}</td>
+                            <td>{{ lead.year_of_passout|default:"-" }}</td>
+                            <td>{{ lead.location|default:"-" }}</td>
+                            <td>{{ lead.applied_for|default:"-" }}</td>
+                            <td>{{ lead.done_any_internship|default:"-" }}</td>
+                            <td>{{ lead.internship_startdate|default:"-" }}</td>
+                            <td>{{ lead.internship_enddate|default:"-" }}</td>
+                            <td>{{ lead.experience|default:"-" }}</td>
+                            
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="16" class="no-data">
+                                No Google Form Leads Found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="modal fade" id="transferLeadModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    Transfer Leads
+                </h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="POST" action="{% url 'transfer_google_form_leads' %}">
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="selected_leads" id="selectedLeadsInput">
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Lead Category <span class="text-danger">*</span>
+                        </label>
+                        
+                        <select name="lead_category" class="form-select" required>
+                            <option value="">Select Lead Category</option>
+
+                            {% for category in lead_categories %}
+                            <option value="{{ category.id }}">
+                                {{ category.collection_for }}
+                            </option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-secondary">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>
+                        Transfer
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.lead-checkbox');
+    const transferBtn = document.getElementById('transferLeadsBtn');
+
+    selectAll.addEventListener('change', function () {
+        checkboxes.forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function () {
+
+            const total = checkboxes.length;
+            const checked = document.querySelectorAll('.lead-checkbox:checked').length;
+
+            selectAll.checked = (total === checked);
+        });
+    });
+
+    transferBtn.addEventListener('click', function () {
+
+        const selected = [];
+
+        document.querySelectorAll('.lead-checkbox:checked').forEach(cb => {
+            selected.push(cb.value);
+        });
+
+        if (selected.length === 0) {
+            alert('Please select at least one lead.');
+            return;
+        }
+
+        document.getElementById('selectedLeadsInput').value =
+            JSON.stringify(selected);
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('transferLeadModal')
+        );
+
+        modal.show();
+    });
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "telecaller/telecallersidebar.html" %}
+{% load static%}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'telecaller/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'telecaller/css/dashboard.css' %}">
+
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'telecaller' %}" class="text-decoration-none text-white">Dashboard</a> / All Leads</p>
+    </div>
+  </div>
+
+
+<div class="container mt-5 comn_table_bg">
+  <div class="filter_main">
+    <h5 class="text-white pg_head">All Leads ({{ lead_count }})</h5>
+  </div>
+
+  <div class="row align-items-end justify-content-end g-2 mb-4">
+    <div class="col-md-2">
+      <select id="statusFilter" class="form-select">
+        <option value="" disabled selected>- Select Status -</option>
+        <option value="0">Allocated</option>
+        <option value="1">Opened</option>
+        <option value="2">Closed</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <input type="date" id="fromDate" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+      <input type="date" id="toDate" class="form-control">
+    </div>
+
+    <div class="mob_max_btn d-flex align-items-end">
+      <button class="btn btn-outline-light w-100" id="clearFilters">Clear</button>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between mb-3 row gap-4">
+    <div class="col-md-4 col-sm-12">
+      <label class="text-white me-2">Show</label>
+      <select id="rowCount" class="form-select d-inline-block w-auto bg-dark text-white">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+      <label class="text-white ms-2">rows</label>
+    </div>
+
+    <div class="input-group w-auto mb-3">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  {% if leads %}
+  <div class="table-responsive">
+    <table class="table table-dark table-hover" id="targetTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Added Date</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th class="d-none">RawStatus</th>
+          <th class="d-none">AllocatedDate</th>
+        </tr>
+      </thead>
+      <tbody id="leadTableBody">
+        {% for alloc in leads %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="table_en_sm">{{ alloc.assign_date }}</td>
+          <td class="table_en_sm">{{ alloc.lead.name }}</td>
+          <td class="table_en_sm">{{ alloc.lead.email }}</td>
+          <td class="table_en_sm">{{ alloc.lead.contact }}</td>
+          <td class="table_en_sm">
+            {% if alloc.status == 0 %}Allocated{% elif alloc.status == 1 %}Opened{% elif alloc.status == 2 %}Closed{% endif %}
+          </td>
+          <td class="d-none">{{ alloc.status }}</td>
+          <td class="d-none">{{ alloc.assign_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-end align-items-center mt-3">
+    <nav><ul class="pagination"></ul></nav>
+  </div>
+  {% else %}
+  <div class="text-center text-white"><h4>No Leads Found</h4></div>
+  {% endif %}
+</div>
+
+<script src="{% static 'telecaller/js/all_leads.js' %}"></script>
+{% endblock %}

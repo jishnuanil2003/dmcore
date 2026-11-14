@@ -1,0 +1,197 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+
+{% block title %}Pending works{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/allocate_work.css' %}">
+
+
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="" class="text-decoration-none text-white">Dashboard</a>
+         / Ongoing Works</p>
+    </div>
+</div>
+
+<div class="container mt-4 comn_table_bg">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="text-white">Ongoing Works Based On Task</h5>
+    
+  </div>
+
+  <div class="card-search my-4">
+        <input type="text" class="form-control bg-dark text-white mt-3 mb-3" placeholder="Search here" id="searchInput">
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped table-dark align-middle text-nowrap" id="pendingTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>No</th>
+                        <th>Client Name</th>
+                        <th>Work Date</th>
+                        <th>Due Date</th>
+                        <th>Progress</th>
+                        <th>Allocated Date</th>
+                        <th>Allocated Team Lead</th>
+                        <th>Work Type</th>
+                        <th>Executive Allocate</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in pending %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+
+                        <td class="td-name">
+                            {% if i.client.client_profile %}
+                                <img src="{{i.client.client_profile.url}}" class="rounded-circle me-2" width="40" height="40">
+                                {{i.client.client_name}}
+                            {% else %}
+                                <i class="fa-solid fa-user"></i>
+                                {{i.client.client_name}}
+                            {% endif %}
+                        </td>
+
+                        <td>{{ i.from_date }}</td>
+                        <td>{{ i.due_date }}</td>
+
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
+                                    style="width: {{i.progress}}%;">
+                                    {{i.progress}}%
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>{{ i.assign_date }}</td>
+
+                        <td>
+                            {% if i.team_lead.profile_picture %}
+                                <img src="{{i.team_lead.profile_picture.url}}" 
+                                    class="rounded-circle me-2" width="40" height="40">
+                                {{i.team_lead.name}}
+                            {% else %}
+                                <i class="fa-solid fa-user"></i>
+                                {{i.team_lead.name}}
+                            {% endif %}
+
+                            <br>
+
+                           
+                        </td>
+
+                        <td>
+                            {% if i.assign_type == 0 %}
+                                Single Work
+                            {% else %}
+                                Group Work
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if i.co_workers %}
+                                {% for coworker in i.co_workers %}
+                                    <p>
+                                        {% if coworker.profile_picture %}
+                                            <img src="{{coworker.profile_picture.url}}" 
+                                                class="rounded-circle me-2" width="40" height="40">
+                                            {{coworker.name}}
+                                        {% else %}
+                                            <i class="fa-solid fa-user"></i>
+                                            {{coworker.name}}
+                                        {% endif %}
+                                    </p>
+                                {% endfor %}
+                            {% else %}
+                                Not Allocated
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+  </div>
+</div>
+
+
+
+
+  
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarToggle = document.getElementById("sidebarToggle");
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.querySelector(".main-content");
+            const textElements = document.querySelectorAll("#sidebar .nav-link span, #sidebar .profile-section p, #sidebar h6");
+        
+            function toggleSidebar() {
+                sidebar.classList.toggle("collapsed");
+                mainContent.classList.toggle("collapsed");
+        
+                if (window.innerWidth >= 992) {
+                    if (sidebar.classList.contains("collapsed")) {
+                        sidebar.style.width = "60px";
+                        textElements.forEach(el => {
+                            el.style.opacity = "0";
+                            el.style.visibility = "hidden"; 
+                        });
+                    } else {
+                        sidebar.style.width = "250px";
+                        textElements.forEach(el => {
+                            el.style.visibility = "visible"; 
+                            el.style.opacity = "1"; 
+                        });
+                    }
+                } else {
+                    if (sidebar.classList.contains("collapsed")) {
+                        sidebar.style.width = "0";
+                    } else {
+                        sidebar.style.width = "250px";
+                    }
+                }
+            }
+        
+            sidebarToggle.addEventListener("click", toggleSidebar);
+        });  
+        
+        
+        
+    </script>
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            var input = this.value.toLowerCase();
+            var table = document.getElementById('pendingTable');
+            var rows = table.getElementsByTagName('tr');
+        
+            for (var i = 1; i < rows.length; i++) { 
+                var clientNameCell = rows[i].getElementsByTagName('td')[1]; 
+                if (clientNameCell) {
+                    var clientName = clientNameCell.textContent || clientNameCell.innerText;
+                    if (clientName.toLowerCase().indexOf(input) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+        </script>
+{% endblock %}

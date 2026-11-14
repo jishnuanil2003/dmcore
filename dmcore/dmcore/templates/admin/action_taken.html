@@ -1,0 +1,80 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+
+{% block content %}
+<form method="get" class="card p-4 bg-dark text-white rounded-xl shadow-lg mb-4">
+  <h4 class="mb-3">Select <span class="text-white">Employee</span></h4>
+  <select name="employee" class="form-control mb-3" onchange="this.form.submit()">
+    <option value="">Select</option>
+    {% for emp in employees %}
+      <option value="{{ emp.id }}"
+        {% if selected_employee_id and emp.id|stringformat:"s" == selected_employee_id %}selected{% endif %}>
+        {{ emp.name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  {% if employee %}
+    <input type="hidden" name="employee" value="{{ selected_employee_id }}">
+
+    <div class="row g-2 align-items-center">
+      <div class="col-md-3 col-12">
+        <input type="date" name="from_date" value="{{ from_date|date:'Y-m-d' }}"
+               class="form-control"
+               style="background: rgba(0,0,0,0.3); color: white; border-color: #444;"
+               placeholder="From date">
+      </div>
+      <div class="col-md-3 col-12">
+        <input type="date" name="to_date" value="{{ to_date|date:'Y-m-d' }}"
+               class="form-control"
+               style="background: rgba(0,0,0,0.3); color: white; border-color: #444;"
+               placeholder="To date">
+      </div>
+
+      <div class="col-md-1 d-none d-md-block">
+  <button type="submit" class="btn w-100"
+          style="padding: 6px; background-color: rgba(0, 0, 0, 0.3); color: white; border: none;">
+    <i class="bi bi-search fs-6"></i>
+  </button>
+</div>
+
+
+<div class="col-12 d-md-none mt-2">
+  <button type="submit" class="btn w-100 py-2"
+          style="background-color: rgba(0, 0, 0, 0.3); font-size: 1.25rem; color: white; border: none;">
+    <i class="bi bi-search"></i>
+  </button>
+</div>
+
+    <h5 class="mb-3 mt-4">All Action Taken Details</h5>
+    <div class="table-responsive">
+      <table class="table table-dark table-bordered mb-0">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Action Date</th>
+            <th>Action Taken By</th>
+            <th>Action Regarding</th>
+            <th>Action Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for action in actions %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ action.action_date }}</td>
+              <td>{{ action.from_name }}</td>
+              <td>{{ action.act_head }}</td>
+              <td>{{ action.act_reason }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">No action taken records found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}

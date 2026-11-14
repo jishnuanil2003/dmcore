@@ -1,0 +1,63 @@
+{% extends "admin/adminsidebar.html" %}
+{% load static %}
+{% block title %}Clients New{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/admin_clients_new.css' %}">
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'admin_employee' %}" class="text-decoration-none text-white">Employees</a> / 
+      <a href="{% url 'admin_works' %}" class="text-decoration-none text-white">Works</a> / 
+    <a href="{% url 'admin_clients' %}" class="text-decoration-none text-white">Clients</a> / New</p>
+    </div>
+  </div>
+
+<div class="container-fluid admin-clients-new-wrap comn_table_bg">
+  <h4 class="text-white m-0 mb-3">Clients <span class="text-danger">(New)</span></h4>
+
+  <!-- Filters (bootstrap flex like you wanted) -->
+  <form id="filtersForm" class="d-flex flex-column flex-md-row align-items-md-end gap-3 mb-4">
+    <div class="d-flex flex-column">
+      <label for="fromDate" class="form-label mb-1 text-white-50 small-label">From date</label>
+      <input type="date" id="fromDate" class="form-control" />
+    </div>
+
+    <div class="d-flex flex-column">
+      <label for="toDate" class="form-label mb-1 text-white-50 small-label">To date</label>
+      <input type="date" id="toDate" class="form-control" />
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" id="applyFilterBtn" class="btn btn-sm btn-light">Apply</button>
+      <button type="button" id="resetFilterBtn" class="btn btn-sm btn-outline-light">Reset</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-bordered table-hover align-middle admin-clients-table">
+      <thead>
+        <tr>
+          <th style="width:60px;">No</th>
+          <th style="width:150px;">Registered Date</th>
+          <th style="min-width:240px;">Name</th>
+          <th style="min-width:220px;">Email</th>
+          <th style="width:150px;">Phone</th>
+          <th style="min-width:260px;">Address</th>
+          <th style="width:120px;">Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="clientsTbody"></tbody>
+    </table>
+  </div>
+
+  <div id="emptyState" class="empty-state d-none">No data found.</div>
+</div>
+
+<script>
+  window.ADMIN_CLIENTS_NEW_DATA_URL = "{% url 'admin_clients_new_data' %}";
+</script>
+<script src="{% static 'admin/js/admin_clients_new.js' %}"></script>
+{% endblock %}

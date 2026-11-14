@@ -1,0 +1,120 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% block content %}
+<style>
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
+<div class="main-content">
+    <div class="container-fluid mt-4 mb-4">
+         <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="/teamlead" class="text-secondary">Dashboard</a> /
+            <a href="{% url 'tl_employees_section' %}" class="text-secondary">Employee Section</a> /
+            <a class="text-light">Employees Complaints</a>
+        </h5>
+        <div class="container-fluid" style="background-color: #333333;padding-top: 22px;padding-bottom: 22px;padding-left: 25px;padding-right: 25px;margin-top: 33px;border-radius: 20px;">
+            <h5 class="text-light"><b>Complaints</b></h5>
+            <form method="GET" class="mt-4">
+                <div class="row">
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="employee-id" class="form-label text-light">Employee</label>
+                            <select name="employee_id" id="employee-id" class="form-control">
+                                <option value="">-- Select Employee --</option>
+                                {% for a in allocation %}
+                                    <option value="{{a.employee.id}}" {% if request.GET.employee_id == a.employee.id|stringformat:"s" %}selected{% endif %}>{{a.employee.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="from-date" class="form-label text-light">From Date</label>
+                            <input type="date" class="form-control" id="from-date" name="from_date" value="{{ request.GET.from_date }}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4">
+                        <div class="form-group">
+                            <label for="to-date" class="form-label text-light">To Date</label>
+                            <input type="date" class="form-control" id="to-date" name="to_date" value="{{ request.GET.to_date }}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mb-4"style="display: flex;align-items: end;">
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-dark"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 11%;">No</th>
+                            <th scope="col" style="width: 12%;min-width: 122px;">Employee Id</th>
+                            <th scope="col" style="width: 11%;min-width: 144px;">Employee Name</th>
+                            <th scope="col" style="width: 11%;">Designation</th>
+                            <th scope="col" style="width: 11%;">Date</th>
+                            <th scope="col" style="width: 11%;">Compliant</th>
+                            <th scope="col" style="width: 11%;">Content</th>
+                            <th scope="col" style="width: 11%;">Action</th>
+                            <th scope="col" style="width: 11%;min-width: 166px;">Action Taken Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if complaint %}
+                            {% for c in complaint %}
+                                <tr>
+                                    <td style="width: 11%;">
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td style="width: 12%;">
+                                        EMP0000
+                                    </td>
+                                    <td style="width: 11%;">
+                                        <i class="fa-solid fa-user" style="margin-right: 10px;"></i>{{ c.employee.name }}
+                                    </td>
+                                    <td style="width: 11%;">
+                                        {{ c.employee.designation.name }}
+                                    </td>
+                                    <td style="width: 11%;min-width: 111px;">
+                                        {{ c.complaint_date }}
+                                    </td>
+                                    <td style="width: 11%;">
+                                        {{ c.compaint_head }}
+                                    </td>
+                                    <td style="width: 11%;min-width: 111px;">
+                                        {{ c.compaint_content }}
+                                    </td>
+                                    <td style="width: 11%;min-width: 144px;">
+                                        {% if c.action %} {{c.action}}
+                                        {% else %} <button class="btn btn-sm btn-outline-warning">No Action Taken</button>
+                                        {% endif %}
+                                    </td>
+                                    <td style="width: 11%;">
+                                        {% if c.action_date %} {{c.action_date}}
+                                        {% else %} <button class="btn btn-sm btn-outline-warning">No Action Taken</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" style="text-align: center;">No complaints found!</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>                        
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

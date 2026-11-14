@@ -1,0 +1,351 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+{% block title %}Head Verify Leads{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/head_verify_leads.css' %}">
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+      body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+
+  <!-- Messages -->
+  <div class="messages-container" style="position: fixed; top: 40px; right: 10px; z-index: 1099;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show mb-2" style="min-width: 280px;" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- /Messages -->
+
+  <!-- Header Row -->
+  <div class="d-flex justify-content-between align-items-center mb-5 print-hide">
+    <div>
+      <h5 class="text-white mb-0">
+        {{ client_name }}
+        <small class="fw-normal">({{ leads|length }} total)</small>
+      </h5>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#dayReportModal">Day Report</button>
+      <button class="btn btn-outline-light btn-sm" id="printBtn"><i class="fas fa-print"></i></button>
+      <button class="btn btn-outline-danger btn-sm" id="pdfBtn"><i class="fa-solid fa-file-pdf"></i></button>
+      <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#shareModal"><i class="fa-solid fa-share"></i></button>
+    </div>
+  </div>
+
+  <div class="lead-page-toolbar mb-2 print-hide" >
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <a href="{% url 'download_lead_excel_format' lead_category_id=lead_category_id %}" class="btn btn-outline-info btn-sm" id="excelBtn">
+        <i class="fas fa-file-download"></i> Download Data Form
+      </a>
+
+
+      <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addLeadModal">
+        <i class="fas fa-plus"></i> Add Lead
+      </button>
+
+      <div class="d-flex align-items-center gap-2">
+        <select id="statusAction" class="form-select form-select-sm">
+          <option disabled selected>Choose Action</option>
+          <option value="unverified">Unverified</option>
+          <option value="verified">Verified</option>
+          <option value="waste">Wasted</option>
+          <option value="not_waste">Not Waste</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="not_incomplete">Not Incomplete</option>
+          <option value="repeated">Repeated</option>
+        </select>
+        <button class="btn btn-outline-success btn-sm" id="statusApplyBtn">
+          <i class="fas fa-check"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="lead-filters p-3 text-white">
+      <div class="row align-items-center justify-content-end">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <select id="rowLimit" class="form-select form-select-sm">
+            <option>10</option><option>20</option><option>50</option><option>100</option>
+          </select>
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <select id="statusFilter" class="form-select form-select-sm">
+            <option disabled selected value="unverified">Status</option>
+            <option value="unverified">Unverified</option>
+            <option value="verified">Verified</option>
+            <option value="waste">Wasted</option>
+            <option value="not_waste">Not Waste</option>
+            <option value="incomplete">Incomplete</option>
+            <option value="not_incomplete">Not Incomplete</option>
+            <option value="repeated">Repeated</option>
+          </select>
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <select id="employeeFilter" class="form-select form-select-sm">
+            <option value="">All Employees</option>
+            {% for emp in employees %}
+            <option value="{{ emp.id }}">{{ emp.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <input type="date" id="startDate" class="form-control form-control-sm" placeholder="Start Date">
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+          <input type="date" id="endDate" class="form-control form-control-sm" placeholder="End Date">
+        </div>
+
+        <!-- <div class="col-xl-1 col-lg-1 col-md-2 col-sm-4 text-end" style="padding-right: 0 !important;">
+          <button id="searchFilter" class="btn btn-outline-light btn-sm w-100">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div> -->
+        <div class="col-xl-1 col-lg-1 col-md-2 col-sm-4 text-end">
+          <button class="btn btn-outline-light btn-sm" id="resetFilters">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="input-group w-auto mb-3 print-hide">
+    <input type="text" id="searchInput" class="form-control bg-dark text-white" placeholder="Search...">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  <!-- Table -->
+    <h5 id="filterHeading" class="text-white mb-3">All Leads</h5>
+    <div class="table-responsive" id="pdfContent">
+      <table id="leadTable" class="table table-dark table-striped table-hover align-middle text-center" id="targetTable">
+        <thead>
+          <tr>
+            <th class="nosort text-center"><input type="checkbox" id="checkAll"></th>
+            <th class="text-center">Collected By | On</th>
+            <th class="text-center">Name & Source</th>
+            <th class="nosort text-center">More</th>
+            <th class="text-center">Contact</th>
+            <th class="nosort text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead, fields, from_date, due_date in leads %}
+          <tr>
+            <td><input type="checkbox" name="selected_leads" value="{{ lead.id }}"></td>
+            <td data-emp-id="{{ lead.collected_by.id }}"
+             data-from="{{ from_date|date:'Y-m-d' }}"
+             data-to="{{ due_date|date:'Y-m-d' }}">
+              {{ lead.collected_by.name }}<br><small>{{ lead.added_date }}</small>
+            </td>
+            <td>{{ lead.name }}<br><small>{{ lead.source }}</small></td>
+            <td><button class="btn btn-sm btn-outline-info show-lead-details" data-id="{{ lead.id }}">+</button></td>
+            <td>{{ lead.email }}<br>{{ lead.contact }}</td>
+            <td>
+              {% if lead.incomplete_status %}
+                <span class="badge bg-secondary">Incomplete</span>
+              {% elif lead.waste_data %}
+                <span class="badge bg-danger">Waste</span>
+              {% elif lead.repeated_status %}
+                <span class="badge bg-warning text-dark">Repeated</span>
+              {% elif lead.status %}
+                <span class="badge bg-success">Verified</span>
+              {% else %}
+                <span class="badge bg-light text-dark">Unverified</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+</div>
+
+<!-- Add Modal & Day Report Offcanvas -->
+
+<!-- Add Lead Modal -->
+<div class="modal fade" id="addLeadModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title">Lead Details Entry</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="mb-3">You can add lead data here</p>
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <button class="btn btn-outline-light btn-sm" id="toggleSingle">Single Entry</button>
+          <button class="btn btn-outline-info btn-sm" id="toggleExcel">Excel Upload</button>
+        </div>
+
+        <!-- Single Entry Form -->
+        <form form id="addLeadForm" method="post" class="mt-3" style="display: none;">
+          {% csrf_token %}
+          <input type="hidden" name="team_alloc_id" value="{{ team_alloc_id }}">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>Name *</label>
+              <input class="form-control" name="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Email *</label>
+              <input class="form-control" name="email" id="lead_email" required>
+              <div id="email_error" class="text-danger small mt-1"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Contact *</label>
+              <input class="form-control" name="contact" id="lead_contact" required>
+              <div id="contact_error" class="text-danger small mt-1"></div>
+            </div>
+
+            {% for field in required_fields %}
+            <div class="col-md-6 mb-3">
+              <label>{{ field }} *</label>
+              <input class="form-control" name="dynamic_{{ field|slugify }}" required>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-success">Add Lead</button>
+          </div>
+        </form>
+
+        <!-- Excel Upload -->
+        <form id="excelUploadForm" method="POST" action="{% url 'upload_leads_excel_dmhead' %}" enctype="multipart/form-data" style="display: none;" class="mt-3">
+          {% csrf_token %}
+          <input type="hidden" name="team_alloc_id" value="{{ team_alloc_id }}">
+          <div class="mb-3">
+            <label>Select Excel File (.xls/.xlsx)</label>
+            <input type="file" name="excel_file" accept=".xls,.xlsx" class="form-control" required>
+          </div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary">Upload</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Day Report Modal -->
+<div class="modal fade" id="dayReportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title">Day Report</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Section 1 -->
+        <h6 class="text-info mb-3">Today’s Total Leads: {{ day_report.total }}</h6>
+
+        <!-- Section 2 -->
+        <h6 class="text-warning border-bottom pb-1">Unverified Leads</h6>
+        <ul class="list-unstyled ms-3 mb-4">
+          <li>Repeated Leads: {{ day_report.repeated }}</li>
+          <li>Waste Leads: {{ day_report.waste }}</li>
+          <li>Unverified (excluding repeated and waste): {{ day_report.unverified }}</li>
+        </ul>
+
+        <!-- Section 3 -->
+        <h6 class="text-success border-bottom pb-1">Verified Leads</h6>
+        <ul class="list-unstyled ms-3">
+          <li>Transferred Leads: {{ day_report.transferred }}</li>
+          <li>Pending to Transfer: {{ day_report.pending_transfer }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title">Share Lead Report</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">Share via:</p>
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-outline-success btn-sm" id="shareViaWhatsApp">WhatsApp</button>
+          <button class="btn btn-outline-primary btn-sm" id="shareViaEmail">Email</button>
+        </div>
+
+        <!-- Email Section (initially hidden) -->
+        <div id="emailSection" style="display: none;">
+          <div class="mb-3">
+            <label for="emailInput">Email Address(es)</label>
+            <input type="text" class="form-control form-control-sm" id="emailInput"
+              placeholder="Enter email ID(s) separated by commas">
+          </div>
+          <div class="mb-3">
+            <label for="emailMessage">Message (optional)</label>
+            <textarea class="form-control form-control-sm" rows="3" id="emailMessage"></textarea>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-primary btn-sm" id="sendEmail">Send Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lead Details Offcanvas -->
+<div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="leadDetailCanvas">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Lead Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+    <h6 class="mb-3 border-bottom pb-1">Basic Details</h6>
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <span class="text-white">Name</span>
+      <span id="ld_name" class="fw-semibold text-white"></span>
+    </div>
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <span class="text-white">Contact</span>
+      <span id="ld_contact" class="text-white"></span>
+    </div>
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+      <span class="text-white">Email</span>
+      <span id="ld_email" class="text-white text-truncate" style="max-width: 60%;"></span>
+    </div>
+    <div class="mb-3">
+      <span id="ld_verified" class="text-danger">Unverified</span>
+      <span id="ld_waste" class="text-secondary">Not a waste</span>
+      <span id="ld_incomplete" class="text-success">Not Marked as incomplete</span>
+    </div>
+    <hr>
+    <h6>More Details</h6>
+    <div id="ld_more"></div>
+  </div>
+</div>
+
+
+<script src="{% static 'dm_head/js/head_verify_leads.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+
+<!-- Styling -->
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+    .table th,
+.table td {
+    white-space: nowrap;
+}
+
+</style>
+
+<div class="row mt-4" style="background-color: #333333;border-radius: 15px;">
+    <h4 class="text-white text-center w-100 mt-3">Action taken</h4>
+    <form method="get" class="row g-3 text-white align-items-end mb-3 px-3">
+    <div class="col-md-4">
+        <label for="employeeSelect" class="form-label">Filter by Employee</label>
+        <select name="employee_id" id="employeeSelect" class="form-select">
+            <option value="">All Employees</option>
+            {% for emp in department_employees %}
+                <option value="{{ emp.id }}" {% if emp.id|stringformat:"s" == selected_employee %}selected{% endif %}>{{ emp.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="fromDate" class="form-label">From Date</label>
+        <input type="date" name="from_date" id="fromDate" class="form-control" value="{{ from_date }}">
+    </div>
+    <div class="col-md-3">
+        <label for="toDate" class="form-label">To Date</label>
+        <input type="date" name="to_date" id="toDate" class="form-control" value="{{ to_date }}">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Filter</button>
+    </div>
+</form>
+
+  <div class="table-responsive p-3">
+            <table class="table table-striped table-bordered table-dark text-white">
+                <thead>
+                    <tr>
+                                    <th>No</th>
+            <th>Employee ID</th>
+            <th>Employee Name</th>
+            <th>Designation</th>
+            <th>Date</th>
+            <th>Reason</th>
+            <th>Action Head</th>
+            <th>Action Content</th>
+            <th>Taken By</th>
+            <th>Status</th>
+                                </tr>
+                </thead>
+                <tbody>
+        {% for l in leave %}
+        <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>EMPOOOO</td>
+                                    <td><i class="fas fa-user me-1 text-secondary"></i>{{ l.employee.name }}</td>
+                                    <td>{{ l.employee.designation.name }}</td>
+                                    <td style="white-space: nowrap;">{{ l.action_date|date:"d-m-Y" }}</td>
+                                    <td>{{ l.act_reason }}</td>
+                                    <td>{{ l.act_head }}</td>
+                                    <td>{{ l.act_content }}</td>
+                                    <td>{{ l.from_name }}</td>
+                                    <td>
+                                        {% if l.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif l.status == 'completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-danger text-dark">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+        {% empty %}
+        <tr>
+            <td colspan="10" class="text-center text-white">No actions found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+            </table>
+        </div>
+</div>
+
+
+{% endblock content %}

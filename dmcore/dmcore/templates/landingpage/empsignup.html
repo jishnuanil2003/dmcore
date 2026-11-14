@@ -1,0 +1,254 @@
+{% extends "landingpage/home.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    body{
+        background: url('static/img/log.jpg') no-repeat center center/cover;
+    }
+    
+    .registration-form {
+  max-width: 800px;
+  margin-top: 7%;
+  margin-bottom: 10px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .registration-form {
+    margin-top: 5rem; /* Adjust as needed */
+  }
+}
+    .registration-form h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+    .form-control {
+      border-radius: 10px;
+    }
+    .btn-custom {
+      border-radius: 10px;
+      background-color: #007bff;
+      color: white;
+      font-weight: 600;
+    }
+    .btn-custom:hover {
+      background-color: #0056b3;
+    }
+   
+    .form-error { color: red; font-size: 0.9em; }
+        
+  </style>
+
+<div class="container registration-form">
+
+
+
+    <h3 class="mb-4">Employee Signup</h3>
+  <form method="POST" enctype="multipart/form-data" id="employeeSignupForm">
+    {% csrf_token %}
+
+    <!-- Company Identifier and Department -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="company_id" class="form-label">Company Identifier</label>
+        <input type="text" class="form-control" id="company_id" name="company_id" required>
+      </div>
+      <div class="col-md-6">
+        <label for="department" class="form-label">Department</label>
+        <select class="form-select" id="department" name="department" disabled required>
+          <option value="" selected disabled>-- Select Department --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Designation -->
+    <div class="mb-3">
+      <label for="designation" class="form-label">Designation</label>
+      <select class="form-select" id="designation" name="designation" disabled required>
+        <option value="" selected disabled>-- Select Designation --</option>
+      </select>
+    </div>
+
+    <!-- Employee Name and Contact Number -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="name" class="form-label">Employee Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <div class="col-md-6">
+        <label for="contact_number" class="form-label">Contact Number</label>
+        <input type="text" class="form-control" id="contact_number" name="contact_number" required>
+        <small id="contact-error" class="text-danger"></small>
+      </div>
+    </div>
+
+    <!-- Email and Username -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+        <div id="email-error" class="form-error"></div>
+      </div>
+      <div class="col-md-6">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" readonly required>
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      <input type="password" class="form-control" id="password" name="password" required>
+      <div id="password-strength" class="form-error"></div>
+    </div>
+
+    <!-- Address -->
+    <div class="mb-3">
+      <label for="address" class="form-label">Address</label>
+      <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" id="submit-btn" class="btn btn-primary">Submit</button>
+
+  </form>
+
+
+
+
+
+  </div>
+ 
+    
+
+  <script>
+    // Live email validation and autofill username
+    $(document).ready(function () {
+      let emailValid = false;
+      let passwordValid = false;
+      let contactValid = false;
+  
+      function toggleSubmit() {
+        if (emailValid && passwordValid && contactValid) {
+          $('#submit-btn').prop('disabled', false);
+        } else {
+          $('#submit-btn').prop('disabled', true);
+        }
+      }
+  
+      // Email validation
+      $('#email').on('input', function () {
+        const email = $(this).val();
+        $('#username').val(email);  // Autofill username
+  
+        if (!email.endsWith('@gmail.com')) {
+          $('#email-error').text("Email must be in proper format.");
+          emailValid = false;
+          toggleSubmit();
+          return;
+        }
+  
+        $.ajax({
+          url: '{% url "validate_email" %}',
+          data: { 'email': email },
+          dataType: 'json',
+          success: function (data) {
+  if (data.is_taken) {
+    $('#email-error').text("This email is already taken.");
+    emailValid = false;
+  } else {
+    $('#email-error').text("");
+    emailValid = true;
+  }
+  toggleSubmit();
+}
+
+        });
+      });
+  
+      // Password validation
+      $('#password').on('input', function () {
+        const password = $(this).val();
+        let message = '';
+  
+        if (password.length < 6) {
+          message = 'Password too short';
+          passwordValid = false;
+        } else if (!/[A-Z]/.test(password)) {
+          message = 'Include at least one uppercase letter';
+          passwordValid = false;
+        } else if (!/[0-9]/.test(password)) {
+          message = 'Include at least one number';
+          passwordValid = false;
+        } else {
+          message = '';
+          passwordValid = true;
+        }
+  
+        $('#password-strength').text(message);
+        toggleSubmit();
+      });
+  
+      // Contact number validation
+      $('#contact_number').on('input', function () {
+        const contact = $(this).val();
+        if (!/^\d{10}$/.test(contact)) {
+          $('#contact-error').text("Enter a valid 10-digit number.");
+          contactValid = false;
+        } else {
+          $('#contact-error').text("");
+          contactValid = true;
+        }
+        toggleSubmit();
+      });
+  
+      // Initially disable submit button
+      $('#submit-btn').prop('disabled', true);
+    });
+  
+    // Load departments when company ID is entered
+    $('#company_id').on('change blur', function () {
+      const companyId = $(this).val();
+      if (companyId) {
+        $.ajax({
+          url: '{% url "ajax_load_departments" %}',
+          data: { 'company_id': companyId },
+          success: function (data) {
+            const deptSelect = $('#department');
+            deptSelect.prop('disabled', false);
+            deptSelect.empty().append('<option value="" disabled selected>-- Select Department --</option>');
+            data.forEach(function (dept) {
+              deptSelect.append('<option value="' + dept.id + '">' + dept.name + '</option>');
+            });
+          }
+        });
+      }
+    });
+  
+    // Load designations based on department
+    $('#department').on('change', function () {
+      const deptId = $(this).val();
+      if (deptId) {
+        $.ajax({
+          url: '{% url "ajax_load_designations" %}',
+          data: { 'department_id': deptId },
+          success: function (data) {
+            const desigSelect = $('#designation');
+            desigSelect.prop('disabled', false);
+            desigSelect.empty().append('<option value="" disabled selected>-- Select Designation --</option>');
+            data.forEach(function (item) {
+              desigSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
+            });
+          }
+        });
+      }
+    });
+  </script>
+  {% endblock content %}

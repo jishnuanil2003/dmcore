@@ -1,0 +1,81 @@
+{% extends "executive/executivesidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+   
+ body {
+      background-color: #12151e; 
+      color: #fff;
+    }
+    .card-custom {
+      background-color: #1e1e1e;
+      border: none;
+      padding: 20px;
+      border-radius: 10px;
+      color: #ccc;
+      transition: 0.3s;
+    }
+    .card-custom:hover {
+      background-color: #2a2a2a;
+    }
+    .card-title {
+      font-weight: bold;
+      color: #fff;
+    }
+    .breadcrumb {
+      background-color: transparent;
+      padding-left: 0;
+      margin-bottom: 1rem;
+    }
+    .breadcrumb-item a {
+      color: #aaa;
+      text-decoration: none;
+    }
+    .breadcrumb-item.active {
+      color: #fff;
+    }
+
+
+
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="success-alert">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+
+<div class="container mt-5">
+  <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href="#">Add Daily Works /</a></li>
+                <li class="breadcrumb-item" aria-current="page">Lead Categories</li>
+            </ol>
+    </nav>
+
+    <div class="row g-4">
+      {% for cat in categories %}
+          <div class="col-md-4">
+              <a href="{% url 'lead_list' cat.id %}" class="text-decoration-none">
+                  <div class="card-custom">
+                      <h5 class="card-title">{{ cat.collection_for }}</h5><br>
+                      <p class="mb-1">From: {{ cat.assign_date|date:"d M, Y" }} &nbsp;&nbsp;&nbsp; To: {{ task.due_date|date:"d M, Y" }}</p>
+                      <p class="mb-1">Target: {{ cat.target }}&nbsp;&nbsp; Achieved Target: {{ cat.target_achieved }}</p>
+                  </div>
+              </a>
+          </div>
+      {% endfor %}
+  </div>
+
+
+
+
+
+
+{% endblock %}

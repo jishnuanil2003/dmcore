@@ -1,0 +1,923 @@
+{% extends "teamlead/teamleadsidebar.html" %}
+{% load static %}
+{% block content %}
+{% csrf_token %}
+<style>
+    .main-content {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    #breadcrumb-navigation a {
+        text-decoration: none;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .clear-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #3f8cff;
+        font-size: 1.2rem;
+    }
+
+    .d-none {
+        display: none;
+    }
+
+    .action-menu {
+        position: relative;
+        display: inline-block;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        color: #aaa;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 0.5rem;
+    }
+
+    .action-btn:hover {
+        color: white;
+    }
+
+    .tble_dropdown-menu {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 100%;
+        z-index: 1000;
+        min-width: 160px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding: 5px 0;
+        background-color: #444;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.175);
+    }
+
+    .tble_dropdown-menu.show {
+        display: block;
+    }
+
+    .tble_dropdown-item {
+        display: block;
+        padding: 5px 10px;
+        font-weight: 400;
+        color: #ddd;
+        text-decoration: none;
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+    }
+
+    .tble_dropdown-item:hover {
+        color: white;
+        background-color: #3f8cff;
+    }
+
+    @media screen and (max-width: 768px) {
+        .table th, .table td {
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.375rem 0.5rem;
+        }
+
+        .search-wrapper input {
+            font-size: 0.9rem;
+        }
+        
+        .task-options-menu {
+            min-width: 120px;
+            font-size: 0.8rem;
+        }
+    }
+
+    .task-modal .modal-content {
+        background-color: #333;
+        color: white;
+        border-radius: 10px;
+    }
+
+    .task-modal .section-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #aaa;
+    }
+
+    .task-box {
+        background-color: #444;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .download-btn {
+        background-color: #3f8cff;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.75rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .download-btn:hover {
+        background-color: #2c7ae7;
+        color: white;
+    }
+
+    .download-btn i {
+        margin-right: 5px;
+    }
+
+    .progress-bar-danger {
+        background-color: #dc3545;
+    }
+
+    .progress-bar-warning {
+        background-color: #ffc107;
+    }
+
+    .progress-bar-success {
+        background-color: #28a745;
+    }
+
+    .task-options-menu {
+        position: absolute;
+        background-color: #1a1a1a;
+        color: #fff;
+        list-style: none;
+        padding: 8px 0;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        z-index: 9999;
+        display: none;
+        min-width: 145px;
+    }
+
+    .task-options-menu li {
+        padding: 8px 16px;
+        cursor: pointer;
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+
+    .task-options-menu li:hover {
+        background-color: #333;
+    }
+
+    .menu-icon {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #aaa;
+        display: inline-block;
+        padding: 5px;
+    }
+
+    .menu-icon:hover {
+        color: white;
+    }
+    
+ 
+    @media (max-width: 576px) {
+        .task-options-menu {
+            right: 0;
+            left: auto !important;
+        }
+    }
+
+
+
+ 
+
+
+
+.modal_dark {
+    background: #1f2937;
+    color: #fff;
+    border: none;
+
+    overflow: hidden;
+}
+
+.modal_dark .modal-header {
+    background: #111827;
+    border-bottom: 1px solid #374151;
+    padding: 15px 20px;
+}
+
+.modal_dark .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.modal_dark .modal-body {
+    padding: 20px;
+}
+
+.modal_dark .btn-close {
+    filter: invert(1);
+}
+
+
+
+
+
+.approve_table_scroll {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.approve_table_scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.approve_table_scroll::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 10px;
+}
+
+#workDetailsModal table {
+    margin-bottom: 0;
+}
+
+#workDetailsModal th {
+    background: #111827;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+#workDetailsModal td {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+#workDetailsModal .badge {
+    padding: 7px 12px;
+    font-size: 12px;
+    border-radius: 30px;
+}
+
+#workDetailsModal .btn-primary {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 6px;
+}
+
+
+
+#verifyModal .modal-dialog {
+    max-width: 450px;
+}
+
+.lbl {
+    font-size: 13px;
+    color: #d1d5db;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.ip_dark {
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.ip_dark:focus {
+    background: #374151;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.15rem rgba(59,130,246,.25);
+}
+
+.ip_dark[readonly] {
+    background: #2d3748;
+    cursor: not-allowed;
+}
+
+#verifySaveBtn {
+    min-width: 100px;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+#verifyModal .btn-danger {
+    min-width: 100px;
+    border-radius: 8px;
+}
+
+
+
+@media (max-width: 991px) {
+
+    #workDetailsModal .modal-dialog {
+        max-width: 98%;
+        margin: 10px auto;
+    }
+
+    #workDetailsModal th,
+    #workDetailsModal td {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .modal_dark .modal-body {
+        padding: 15px;
+    }
+
+    #verifyModal .modal-dialog {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+
+    #verifyModal .btn {
+        width: 100%;
+    }
+
+    #verifyModal .d-flex {
+        flex-direction: column;
+    }
+
+    #workDetailsModal th,
+    #workDetailsModal td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    #workDetailsModal .badge {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .modal_dark .modal-title {
+        font-size: 16px;
+    }
+
+    #workDetailsModal .modal-body {
+        padding: 10px;
+    }
+
+    #workDetailsModal table {
+        min-width: 900px;
+    }
+
+    .ip_dark {
+        font-size: 14px;
+    }
+}
+</style>
+
+<div class="main-content">
+    <div class="container-fluid py-4">
+        <h5 class="text-secondary" id="breadcrumb-navigation">
+            <a href="" class="text-secondary">Work</a> /
+            <span class="text-light">Pending Works View</span>
+        </h5>
+
+        <div class="bg-dark rounded-4 p-4 mt-4">
+            <h5 class="text-light mb-4"><b>Pending Works</b></h5>
+
+            <div class="search-wrapper mb-4">
+                <input type="text" id="employee-search" class="form-control" placeholder="Search here.." onkeyup="filterEmployees()">
+                <span id="clear-search" class="clear-icon d-none" onclick="clearSearch()"><b>&times;</b></span>
+            </div>
+
+            <div class="table-responsive mb-5">
+                <table class="table table-bordered table-striped table-dark align-middle text-nowrap">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;"></th>
+                            <th>Employee Name</th>
+                            <th>Client Name</th>
+                            <th>Task</th>
+                            <th>Start Date</th>
+                            <th>Due Date</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pending_work %}
+                            {% for work in pending_work %}
+                                <tr data-task-id="{{ work.id }}">
+                                    <td>
+                                        <span class="menu-icon" onclick="toggleTaskMenu(event, '{{ work.id }}')">&#8942;</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{% static 'img/default-profile.png' %}" class="rounded-circle" width="40" height="40">
+                                            <span>{{ work.executive.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td><i class="fas fa-id-card"></i> {{ work.client_task.client.client_name }}</td>
+                                    <td><i class="fas fa-file"></i> 
+                                        {{ work.client_task.task_name }}
+                                        <ul class="list-unstyled mb-0">
+                                            {% if work.client_task.task_name|lower == "lead collection" %}
+                                            <ul class="list-unstyled ps-3">
+                                                {% for cat in work.client_task.leadcategory_register_set.all %}
+                                                    <li>• {{ cat.collection_for }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </ul>
+                                    </td>
+                                    
+                                    <td><i class="fas fa-calendar-alt"></i> {{ work.start_date|date:"F j, Y" }}</td>
+                                    <td><i class="fas fa-calendar-alt"></i> {{ work.due_date|date:"F j, Y" }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success"
+                                                role="progressbar" 
+                                                data-progress="{{ work.progress }}" 
+                                                aria-valuemin="0" 
+                                                aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="7" class="text-center">No pending work found!</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <ul id="globalTaskMenu" class="task-options-menu">
+        <input type="hidden" id="selectedTaskId" value="">
+        <li onclick="removeTask()">Remove Task</li>
+        <li onclick="showTaskDetailsModal()">Task Details</li>
+        <li onclick="showWorkDetailsModal()">Work Details</li>
+        <li onclick="closeMenu()" style="color: red;">Close Window</li>
+    </ul>
+</div>
+
+
+<div class="modal fade" id="workDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content modal_dark">
+      <div class="modal-header">
+        <h6 class="modal-title">Work Details</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="table-responsive approve_table_scroll">
+          <table class="table table-striped table-bordered table-dark table-hover align-middle mb-0 text-center">
+            <thead>
+              <tr>
+                <th class="table_en_sm">Date</th>
+                <th class="table_en_sm">Title</th>
+                <th class="table_en_lsm">Description</th>
+                <th class="table_en_sm">File</th>
+                <th class="table_en_sm">Target</th>
+                <th class="table_en_sm">Achieved targets</th>
+                <th class="table_en_sm">Verified targets</th>
+                <th class="table_en_lsm">Verification</th>
+              </tr>
+            </thead>
+            <tbody id="workDetailsTbody">
+              <tr><td colspan="9" class="text-center text-white">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<input type="hidden" id="selectedWorkDetailId">
+<div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal_dark">
+      <div class="modal-header">
+        <h6 class="modal-title">Verify Target</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-2">
+          <div class="lbl">Target</div>
+          <input class="form-control form-control-sm ip_dark" id="vTarget" readonly>
+        </div>
+
+        <div class="mb-2">
+          <div class="lbl">Achieved Target</div>
+          <input class="form-control form-control-sm ip_dark" id="vAchieved" readonly>
+        </div>
+
+        <div class="mb-3">
+          <div class="lbl">Verified target</div>
+          <input class="form-control form-control-sm ip_dark" id="vVerified">
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-success btn-sm" id="verifySaveBtn">Save</button>
+          <button class="btn btn-danger btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% if pending_work %}
+    {% for work in pending_work %}
+        <!-- Task Details Modal -->
+        <div class="modal fade task-modal" id="taskDetailsModal{{ work.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content p-3">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Task Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <h6 class="section-title">Client Name</h6>
+                            <div class="task-box">{{ work.client_task.client.client_name }}</div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="section-title">Task Name</h6>
+                            <div class="task-box">
+                                <strong>{{ work.client_task.task_name }}</strong>
+                                {% if work.client_task.task_name|lower == "lead collection" %}
+                                    {% for cat in work.client_task.leadcategory_register_set.all %}
+                                        <div class="mt-2">{{ cat.collection_for }} (Target: {{ cat.target }})</div>
+                                        {% if cat.file %}
+                                            <a href="{{ cat.file.url }}" class="btn btn-outline-primary mt-2" download>Download File</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h6 class="section-title">Allocated Date</h6>
+                                <div class="task-box">{{ work.start_date|date:"F j, Y" }}</div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h6 class="section-title">Task Accept Date</h6>
+                                <div class="task-box">{{ work.accept_date|date:"F j, Y"|default:"<br>" }}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h6 class="section-title">Target</h6>
+                                <div class="task-box">{{ work.target }}</div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h6 class="section-title">Target Achieved</h6>
+                                <div class="task-box">{{ work.target_achieved }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="section-title">Task Description</h6>
+                            <p class="task-box">{{ work.description }}</p>
+                        </div>
+                        {% if work.file %}
+                            <div class="mb-3">
+                                <h6 class="section-title">File</h6>
+                                <a href="{{ work.file.url }}" class="btn btn-outline-primary" download>Download File</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<script>
+    // Get CSRF token for AJAX requests
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function toggleTaskMenu(event, taskId) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const menu = document.getElementById('globalTaskMenu');
+        document.getElementById('selectedTaskId').value = taskId;
+        
+        // Hide any other open menus
+        document.querySelectorAll('.task-options-menu').forEach(m => {
+            if (m !== menu) m.style.display = 'none';
+        });
+        
+        // Position the menu near the clicked icon
+        const icon = event.target;
+        const rect = icon.getBoundingClientRect();
+        
+        // Check if menu would go off screen (right side)
+        const menuWidth = menu.offsetWidth;
+        const rightEdge = rect.left + menuWidth;
+        
+        if (rightEdge > window.innerWidth) {
+            // Position menu to the left of the icon
+            menu.style.left = 'auto';
+            menu.style.right = `${window.innerWidth - rect.right}px`;
+        } else {
+            // Position menu to the right of the icon
+            menu.style.left = `${rect.left}px`;
+            menu.style.right = 'auto';
+        }
+        
+        menu.style.top = `${rect.bottom}px`;
+        menu.style.display = 'block';
+    }
+
+    function closeMenu() {
+        document.getElementById('globalTaskMenu').style.display = 'none';
+    }
+
+    function removeTask() {
+    const taskId = document.getElementById('selectedTaskId').value;
+    if (confirm("Are you sure you want to remove this task?")) {
+        // Create a form to submit the POST request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/tl_remove_task/${taskId}/`;
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCSRFToken();
+        form.appendChild(csrfInput);
+        
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+    }
+    closeMenu();
+}
+    function showTaskDetailsModal() {
+        const taskId = document.getElementById('selectedTaskId').value;
+        const modalElement = document.getElementById(`taskDetailsModal${taskId}`);
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } else {
+            console.error(`Modal with ID taskDetailsModal${taskId} not found`);
+        }
+        closeMenu();
+    }
+
+
+
+    function filterEmployees() {
+        const input = document.getElementById('employee-search');
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll('table tbody tr');
+        const clearBtn = document.getElementById('clear-search');
+        clearBtn.classList.toggle('d-none', filter === '');
+
+        rows.forEach(row => {
+            let rowContainsText = false;
+            for (let i = 0; i < row.cells.length; i++) {
+                if (row.cells[i].textContent.toLowerCase().includes(filter)) {
+                    rowContainsText = true;
+                    break;
+                }
+            }
+            row.style.display = rowContainsText ? '' : 'none';
+        });
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('employee-search');
+        input.value = '';
+        filterEmployees();
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('globalTaskMenu');
+        if (!event.target.closest('.menu-icon') && !event.target.closest('.task-options-menu')) {
+            menu.style.display = 'none';
+        }
+    });
+
+    // Initialize progress bars on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            const progress = parseFloat(bar.getAttribute('data-progress')) || 0;
+            bar.style.width = progress + '%';
+            bar.setAttribute('aria-valuenow', progress);
+            bar.textContent = progress + '%';
+
+            if (progress <= 10) {
+                bar.classList.add('progress-bar-danger');
+            } else if (progress > 10 && progress <= 80) {
+                bar.classList.add('progress-bar-warning');
+            } else {
+                bar.classList.add('progress-bar-success');
+            }
+        });
+    });
+
+
+
+
+    function showWorkDetailsModal() {
+        const taskId = document.getElementById('selectedTaskId').value;
+
+        loadWorkDetails(taskId); // fetch details
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('workDetailsModal')
+        );
+        modal.show();
+
+        closeMenu();
+    }
+
+
+    function loadWorkDetails(taskId) {
+
+        const tbody = document.getElementById("workDetailsTbody");
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center">
+                    Loading...
+                </td>
+            </tr>
+        `;
+
+        fetch(`/tl_work_details_ajax/${taskId}/`)
+        .then(response => response.json())
+        .then(data => {
+
+            let html = "";
+
+            if (data.length > 0) {
+
+                data.forEach(item => {
+
+                    let verifyHtml = '';
+
+                    if(item.status == 0){
+
+                        verifyHtml = `
+                            <span class="badge bg-warning text-dark"
+                                style="cursor:pointer"
+                                onclick="openVerifyModal(
+                                        ${item.id},
+                                        ${item.target},
+                                        ${item.achieved}
+                                )">
+                                Pending
+                            </span>
+                        `;
+
+                    }else{
+
+                        verifyHtml = `
+                            <span class="badge bg-success">
+                                Verified
+                            </span>
+                        `;
+                    }
+
+                    html += `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${item.title}</td>
+                        <td>${item.description}</td>
+                        <td>
+                            ${
+                                item.file
+                                ? `<a href="${item.file}" target="_blank" class="btn btn-sm btn-primary">View</a>`
+                                : '-'
+                            }
+                        </td>
+
+                        <td>${item.target}</td>
+                        <td>${item.achieved}</td>
+                        <td>${item.verified}</td>
+                        <td>${verifyHtml}</td>
+                    </tr>
+                    `;
+                });
+
+            } else {
+
+                html = `
+                <tr>
+                    <td colspan="9" class="text-center">
+                        No work details found
+                    </td>
+                </tr>
+                `;
+            }
+
+            tbody.innerHTML = html;
+        })
+        .catch(error => {
+            console.error(error);
+
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center text-danger">
+                    Error loading data
+                </td>
+            </tr>
+            `;
+        });
+    }
+
+
+
+
+function openVerifyModal(detailId, target, achieved){
+
+    document.getElementById('selectedWorkDetailId').value = detailId;
+
+    document.getElementById('vTarget').value = target;
+    document.getElementById('vAchieved').value = achieved;
+    document.getElementById('vVerified').value = achieved;
+
+    new bootstrap.Modal(
+        document.getElementById('verifyModal')
+    ).show();
+}
+
+
+
+
+document.getElementById("verifySaveBtn").addEventListener("click", function(){
+
+    const detailId = document.getElementById('selectedWorkDetailId').value;
+
+    const verifiedTarget =
+        document.getElementById('vVerified').value;
+
+    fetch(`/verify-task-detail-tl/${detailId}/`,{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body:JSON.stringify({
+            verified_target: verifiedTarget
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+
+        if(data.status==='success'){
+
+            bootstrap.Modal.getInstance(
+                document.getElementById('verifyModal')
+            ).hide();
+
+            const taskId =
+                document.getElementById('selectedTaskId').value;
+
+            loadWorkDetails(taskId);
+
+            location.reload();
+        }
+    });
+});
+
+</script>
+{% endblock %}

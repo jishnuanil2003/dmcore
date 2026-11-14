@@ -1,0 +1,79 @@
+{% extends "executive/executivesidebar.html" %}
+
+{% block content %}
+<div class="container mt-5 text-white">
+
+    <div class="card bg-dark text-white shadow">
+        <div class="card-body">
+            <h2 class="mb-4">Add Schedule</h2>
+            <form method="POST" action="{% url 'add_employee_schedule' %}">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="schedule_date" class="form-label">Schedule Date:</label>
+                    <input type="date" id="schedule_date" name="schedule_date" class="form-control" required>
+                </div>
+
+     
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_time" class="form-label">Start Time:</label>
+                        <input type="time" id="start_time" name="start_time" class="form-control" onchange="updateTimes()" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_time" class="form-label">End Time:</label>
+                        <input type="time" id="end_time" name="end_time" class="form-control" onchange="updateTimes()" required>
+                    </div>
+                </div>
+
+        
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_time_display" class="form-label">Start Time Selected:</label>
+                        <input type="time" id="start_time_display" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_time_display" class="form-label">End Time Selected:</label>
+                        <input type="time" id="end_time_display" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="schedule_head" class="form-label">Task Heading:</label>
+                    <input type="text" id="schedule_head" name="schedule_head" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="todo_content" class="form-label">Task Description:</label>
+                    <textarea id="todo_content" name="todo_content" class="form-control" rows="3" required></textarea>
+                </div>
+
+       
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-secondary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateTimes() {
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+
+        document.getElementById('start_time_display').value = startTime;
+        document.getElementById('end_time_display').value = endTime;
+
+
+        if (startTime && endTime && startTime >= endTime) {
+            alert('End time must be after start time.');
+            document.getElementById('end_time').value = '';
+            document.getElementById('end_time_display').value = '';
+        }
+    }
+
+
+    window.onload = updateTimes;
+</script>
+{% endblock %}

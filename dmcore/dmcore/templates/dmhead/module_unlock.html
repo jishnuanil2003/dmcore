@@ -1,0 +1,62 @@
+{% extends "dmhead/dmheadsidebar.html" %}
+{% block content %}
+<style>
+          body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+<div class="container-fluid">
+
+  <div class="row mb-3" style="margin-top:20px;">
+    <div class="col-12" >
+      <p class="text-light mb-0" >Dashboard / Module Unlock</p>
+    </div>
+  </div>
+  
+
+  <div class="card" style="background-color: #333333;">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title text-light">Blocked Module Employees</h5>
+      </div>
+     
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-dark text-white text-center">
+          <thead>
+            <tr>
+              <th>SL No</th>
+              <th>Employee Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in employees %}
+            <tr>
+              <td> {{ forloop.counter }} </td>
+              <td>{{i.name}} </td>
+              <td>
+                <a href="{% url 'unlock_employee_dmhead' i.id %}" 
+                    class="btn btn-success btn-sm"
+                    onclick="return confirm('Unlock this account?')">
+                    Unlock
+                </a>
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">Blocked Accounts Not Found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock content %}

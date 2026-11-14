@@ -1,0 +1,20 @@
+
+.upload-btn-custom {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 0.875rem;
+  border-radius: 4px;
+}
+
+
+@media (max-width: 576px) {
+    .buttons-responsive .btn, form {
+        width: 100% !important;
+    }
+    .buttons-responsive {
+        gap: 10px !important;
+    }
+}

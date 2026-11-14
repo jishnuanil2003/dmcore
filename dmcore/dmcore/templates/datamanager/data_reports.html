@@ -1,0 +1,462 @@
+{% extends "datamanager/datamanagersidebar.html" %}
+{% load static %}
+{% block content %}
+
+       <!-- Include Bootstrap Icons (only once in your base template) -->
+        <link rel="stylesheet" href="{% static 'datamanager/css/databank.css' %}">
+        <link rel="stylesheet" href="{% static 'datamanager/css/common.css' %}">
+       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        
+        color: white;
+    }
+
+    
+
+    .container {
+        max-width: 1500px;
+        margin-top: 50px;
+        background: #2e2e2e;
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+
+    h2 {
+  
+        color: white;
+        font-size: 22px;
+        margin-bottom: 30px;
+    }
+
+
+@media (max-width: 768px) {
+    .container {
+            padding: 25px;
+        }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table th, .table td {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+}
+
+@media (max-width: 480px) {
+.container {
+    padding: 20px; 
+}
+
+}
+
+
+@media (max-width: 360px) {
+.container {
+    padding: 15px; 
+}
+
+.table th, .table td {
+        font-size: 10px;
+        padding: 4px;
+    }
+
+}
+
+
+@media (max-width: 576px) {
+
+
+
+    .container {
+        padding: 20px;
+    }
+
+    .table th, .table td {
+        font-size: 12px;
+        padding: 6px;
+    }
+    #leadTable th,
+    #leadTable td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+
+}
+</style>
+
+
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-light mb-0">Dashboard / Allocation Report</p>
+    </div>
+  </div>
+<div class="container-fluid mt-3 comn_table_bg">
+    
+
+
+    <div class="row text-start text-white">
+
+        <div class="col-lg-3 col-md-12 mb-4 bg-dark p-3 rounded">
+            <h5 class="mb-3">Hr List ({{ telecallers.count }})</h5>
+            <input type="text" class="form-control form-control-sm mb-3" placeholder="Search HR..." id="searchHrInput" />
+
+            <div id="hrList" style="max-height: 300px; overflow-y: auto;">
+         
+                <div id="noHrMessage" class="text-center text-danger" style="display: none;">No HR found</div>
+
+                {% for hr in telecallers %}
+                <div class="hr-wrapper">
+                    <div class="d-flex align-items-start mb-3 hr-entry" onclick="fetchTelecallerStats('{{ hr.id }}')" style="cursor: pointer;">
+                        <i class="bi bi-person-fill text-success me-2 fs-4"></i>
+                        <div>
+                            <strong class="hr-name">{{ hr.name }}</strong><br>
+                            <small class="hr-email">{{ hr.email }}</small><br>
+                            <small><i class="bi bi-telephone"></i> {{ hr.contact_number }}</small>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+
+<div class="col-lg-9 col-md-12">
+
+
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-dark rounded p-3 mb-4">
+                <div class="row text-center text-white small">
+                    <div class="col-6 col-md-4 mb-2">Allocated - <strong id="allocatedCount">0</strong></div>
+                    <div class="col-6 col-md-4 mb-2">Accept Pending - <strong id="pendingCount">0</strong></div>
+                    <div class="col-6 col-md-4 mb-2">Followup - <strong id="followupCount">0</strong></div>
+                    <div class="col-6 col-md-4 mb-2">Closed - <strong id="closedCount">0</strong></div>
+                    <div class="col-6 col-md-4 mb-2">Joined - <strong id="joinedCount">0</strong></div>
+                    <div class="col-6 col-md-4 mb-2 text-danger">Wasted - <strong id="wastedCount">0</strong></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row g-3">
+
+       
+        <div class="col-lg-4 col-md-5"> 
+            <div class="p-3 bg-dark rounded mb-4 h-100">
+                <h6 class="mb-3" id="dateListHeading">Date List (0)</h6>
+                <input type="date" id="searchDateInput" class="form-control form-control-sm mb-3" placeholder="Search Date..." />
+                <div id="dateList" class="my-3">
+                    <div id="noDateMessage" class="text-danger text-center" style="display: none;">No Dates Found</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-lg-8 col-md-7">
+            <div class="bg-dark rounded p-3 h-100">
+                <h5 class="mb-3" id="leadHeading">Leads (0)</h5>
+                <div class="table-responsive mt-3" style="max-height: 230px; overflow-y: auto; text-align: center;">
+                    <table class="table table-bordered table-sm mb-0 table-dark table-striped table-hover" id="leadTable">
+                        <thead >
+                            <tr>
+                                <th>No</th>
+                                <th>Assigned Date</th>
+                                <th>Lead Name | Email | Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div> 
+
+
+<div class="container1">
+        <br><br>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+   
+            <h2 class="mb-0">Reports Count - ({{ total_count }})</h2>
+        
+            
+            <div class="lead-action ms-auto">
+                <div class="row g-2">
+                    <div class="col-12 col-md-auto">
+                        <input type="date" id="from_Date" class="form-control form-control-sm w-100">
+                    </div>
+        
+                    <div class="col-12 col-md-auto">
+                        <input type="date" id="to_Date" class="form-control form-control-sm w-100">
+                    </div>
+        
+                    <div class="col-auto">
+                        <button class="btn btn-sm btn-outline-primary" id="filterBtn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+
+        <div class="table-responsive mt-3">
+                <table class="table table-bordered table-dark table-striped table-hover" id="lead_Table">
+                    <thead >
+                        <tr>
+                            <th>HR Name</th>
+                            <th>Allocate Lead</th>
+                            <th>Pending to Accept</th>
+                            <th>Followup</th>
+                            <th>Closed</th>
+                            <th>Joined</th>
+                            <th>Waste</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                    {% if report_data %}
+                        {% for item in report_data %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.allocated }}</td>
+                            <td>{{ item.pending }}</td>
+                            <td>{{ item.followup }}</td>
+                            <td>{{ item.closed }}</td>
+                            <td>{{ item.joined }}</td>
+                            <td>{{ item.waste }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No record available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+                    
+                </table>
+            </div>
+ 
+</div>
+
+
+
+
+    </div>
+
+</div>
+
+<script>
+    document.getElementById('filterBtn').addEventListener('click', function() {
+        var fromDate = document.getElementById('from_Date').value;
+        var toDate = document.getElementById('to_Date').value;
+        
+    
+        var url = new URL(window.location.href);
+        if (fromDate) {
+            url.searchParams.set('from_date', fromDate);
+        }
+        if (toDate) {
+            url.searchParams.set('to_date', toDate);
+        }
+        
+ 
+        window.location.href = url.toString();
+    });
+</script>
+
+<script>
+function loadDateList(telecallerId) {
+    fetch(`/get_telecaller_dates/${telecallerId}/`)
+    .then(response => response.json())
+    .then(data => {
+        let html = '';
+        let totalCount = 0;
+
+        data.dates.forEach(item => {
+            totalCount += item.lead_count;
+            html += `
+                <div class="date-item-wrapper mb-2" data-date="${item.assign_date}">
+                    <button class="btn btn-outline-light w-100 d-flex justify-content-between align-items-center px-3 py-2"
+                            onclick="loadCountsByDate(${telecallerId}, '${item.assign_date}')">
+                        <span><i class="bi bi-calendar-event me-2"></i>${item.assign_date}</span>
+                        <span class="badge bg-primary text-white">${item.lead_count} Leads</span>
+                    </button>
+                </div>`;
+        });
+
+       
+        document.getElementById('dateList').innerHTML = html + `
+            <div id="noDateMessage" class="text-danger text-center" style="display: none;">No Dates Found</div>
+        `;
+
+        document.getElementById('dateListHeading').textContent = `Date List (${totalCount})`;
+
+        attachDateSearchHandler(); 
+    });
+}
+
+function attachDateSearchHandler() {
+    const input = document.getElementById('searchDateInput');
+
+    input.addEventListener('input', function () {
+        const selectedDate = this.value;
+        const items = document.querySelectorAll('.date-item-wrapper');
+        const noMessage = document.getElementById('noDateMessage');
+
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const itemDate = item.getAttribute('data-date');
+            if (!selectedDate || itemDate === selectedDate) {
+                item.style.display = '';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        if (noMessage) {
+            noMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    });
+}
+</script>
+
+
+
+
+<script>
+    function loadCountsByDate(telecallerId, date) {
+    fetch(`/get_telecaller_stats_by_date/${telecallerId}/${date}/`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('allocatedCount').innerText = data.allocated;
+        document.getElementById('pendingCount').innerText = data.pending;
+        document.getElementById('closedCount').innerText = data.closed;
+        document.getElementById('followupCount').innerText = data.followup;
+        document.getElementById('joinedCount').innerText = data.joined;
+        document.getElementById('wastedCount').innerText = data.wasted;
+    });
+}
+
+</script>
+
+
+<script>
+function fetchTelecallerStats(telecallerId) {
+    fetch(`/get_telecaller_stats/${telecallerId}/`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('allocatedCount').innerText = data.allocated;
+        document.getElementById('pendingCount').innerText = data.pending;
+        document.getElementById('followupCount').innerText = data.followup;
+        document.getElementById('closedCount').innerText = data.closed;
+        document.getElementById('joinedCount').innerText = data.joined;
+        document.getElementById('wastedCount').innerText = data.wasted;
+    });
+
+    loadDateList(telecallerId);  
+}
+</script>
+
+<script>
+    
+function fetchTelecallerStats(telecallerId) {
+
+    fetch(`/get_telecaller_leads_by_date/${telecallerId}/latest/`)
+    .then(res => res.json())
+    .then(data => {
+        populateStats(data.stats);
+        populateLeadTable(data.leads);
+        loadDateList(telecallerId); 
+    });
+}
+
+function loadCountsByDate(telecallerId, assignDate) {
+    fetch(`/get_telecaller_leads_by_date/${telecallerId}/${assignDate}/`)
+    .then(res => res.json())
+    .then(data => {
+        populateStats(data.stats);
+        populateLeadTable(data.leads);
+    });
+}
+
+function populateStats(stats) {
+    document.getElementById('allocatedCount').innerText = stats.allocated;
+    document.getElementById('pendingCount').innerText = stats.pending;
+    document.getElementById('closedCount').innerText = stats.final_closed;
+    document.getElementById('followupCount').innerText = stats.followup;
+    document.getElementById('joinedCount').innerText = stats.joined;
+    document.getElementById('wastedCount').innerText = stats.wasted;
+}
+
+function populateLeadTable(leads) {
+    const tbody = document.querySelector('#leadTable tbody');
+    const leadHeading = document.querySelector('#leadHeading');
+    
+    tbody.innerHTML = '';
+
+    if (!leads || leads.length === 0) {
+        leadHeading.innerText = 'Leads (0)';
+        tbody.innerHTML = `<tr><td colspan="3" >No leads available</td></tr>`;
+        return;
+    }
+
+    leadHeading.innerText = `Leads (${leads.length})`;
+
+    leads.forEach((lead, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${lead.assign_date}<br><small>Status: ${lead.status}</small></td>
+                <td>${lead.lead_name}<br>${lead.email}<br>${lead.contact}</td>
+            </tr>`;
+    });
+}
+</script>
+
+<script>
+    document.getElementById('searchHrInput').addEventListener('input', function () {
+        const filter = this.value.toLowerCase();
+        const wrappers = document.querySelectorAll('#hrList .hr-wrapper');
+        let visibleCount = 0;
+
+        wrappers.forEach(wrapper => {
+            const name = wrapper.querySelector('.hr-name').textContent.toLowerCase();
+            const email = wrapper.querySelector('.hr-email').textContent.toLowerCase();
+            const phone = wrapper.querySelector('small i.bi-telephone').parentElement.textContent.toLowerCase(); 
+
+            if (name.includes(filter) || email.includes(filter) || phone.includes(filter)) {
+                wrapper.style.display = '';
+                visibleCount++;
+            } else {
+                wrapper.style.display = 'none';
+            }
+        });
+
+      
+        document.getElementById('noHrMessage').style.display = visibleCount === 0 ? 'block' : 'none';
+    });
+</script>
+{%endblock%}

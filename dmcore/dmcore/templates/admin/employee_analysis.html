@@ -1,0 +1,502 @@
+{% extends "admin/adminsidebar.html" %}
+{% block content %}
+{% load static %}
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+
+
+<style>
+
+  .lead-action .form-label {
+    color: #fff !important;
+    font-weight: 500;
+  }
+
+  .lead-action .form-control {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #444;
+    border-radius: 8px;
+  }
+
+  .lead-action .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: none;
+  }
+
+
+
+
+
+
+
+
+  table.dataTable {
+    color: #fff;
+  }
+
+  table.dataTable th,
+  table.dataTable td {
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+
+
+  .analysis-btn {
+    border: 1px solid #2c2f36;
+    background-color: #121417;
+    color: #ccc;
+    padding: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.analysis-btn:hover {
+    background-color: #1e2228;
+    color: #fff;
+}
+
+.analysis-btn.active {
+    background-color: #1e2228;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+
+.circle-box {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    border: 4px solid;
+}
+
+.circle-value {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+
+.purple { border-color: #9b59b6; }
+.blue   { border-color: #3498db; }
+.yellow { border-color: #f1c40f; }
+.green  { border-color: #2ecc71; }
+.red    { border-color: #e74c3c; }
+.white  { border-color: #ecf0f1; }
+
+
+@media (max-width: 576px) {
+    .circle-box {
+        width: 90px;
+        height: 90px;
+    }
+
+    .circle-value {
+        font-size: 18px;
+    }
+}
+
+
+
+.pagination .page-link {
+    background-color: #1e2228;
+    border: 1px solid #2c2f36;
+    color: #fff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #121417;
+    color: #666;
+}
+
+
+</style>
+
+
+
+
+<div class="container mt-4">
+
+
+  
+    <div class="card p-4 bg-dark text-white rounded-xl shadow-lg">
+        <!-- <h5 class="mb-4"><span class="text-success">Analysis</span></h5> -->
+
+          <form method="get" id="filterForm">
+
+                <div class="row g-3 align-items-end">
+                    
+
+                    <div class="col-md-4">
+                        <label class="form-label">Employee</label>
+                        <select class="form-control" id="employeeSelect" name="employee">
+                            <option value="">-- Select Employee --</option>
+                            {% for i in employee %}
+                                <option value="{{ i.id }}"
+                                {% if i.id|stringformat:"s" == selected_employee %}selected{% endif %}>
+                                {{ i.name }}
+                                </option>
+                            {% empty %}
+                                <option disabled>No Employee found</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Client</label>
+                        <select name="client" class="form-control client-select" id="clientSelect">
+                            <option value="">-- Select --</option>
+                            {% for client in clients %}
+                                <option value="{{ client.id }}"
+                                {% if client.id|stringformat:"s" == selected_client %}selected{% endif %}>
+                                {{ client.client_name }}
+                                </option>
+                            {% empty %}
+                                <option disabled>No Clients found</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+                          
+                    <div class="col-md-4">
+                        <label class="form-label">Lead categories</label>
+                        <select class="form-control" id="categorySelect" name="category">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+
+
+
+
+
+                    <div class="col-md-3">
+                        <label for="fromDate" class="form-label mb-1">From Date</label>
+                        <input type="date" id="fromDate" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="toDate" class="form-label mb-1">To Date</label>
+                        <input type="date" id="toDate" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-primary mt-3">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+            
+                </div>
+            </form>
+
+
+            <hr class="border-secondary my-4">
+
+            <div class="row text-center">
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'admin_hr_analysis' %}" class="btn btn-dark w-100 analysis-btn">
+                        <i class="bi bi-people-fill me-2"></i> HR Employees
+                    </a>
+         
+                </div>
+
+                <div class="col-md-4 mb-2">
+                    <button type="button" class="btn btn-dark w-100 analysis-btn active">
+                        <i class="bi bi-person-fill me-2"></i> Employees
+                    </button>
+                </div>
+
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'admin_comparison_analysis' %}" class="btn btn-dark w-100 analysis-btn">
+                        <i class="bi bi-bar-chart-fill me-2"></i> Comparison
+                    </a>
+
+                </div>
+            </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+<div class="container mt-4">
+  <div class="row g-4">
+
+
+    <div class="col-12 col-lg-9">
+      <div class="card p-4 bg-dark text-white rounded-xl shadow-lg">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Leads – {{ total_leads_count }}</h5>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-12 col-md-auto ms-auto">
+            <input type="text" placeholder="Search here..."
+                   class="form-control w-100"
+                   id="searchInput"
+                   style="color:#000;">
+          </div>
+        </div>
+
+        <hr class="border-secondary">
+
+        {% if leads %}
+        <div class="table-responsive">
+          <table id="hrLeadTable"
+                 class="table table-dark table-striped table-hover align-middle text-center">
+
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Date</th>
+                <th>Client \ Category</th>
+                <th>Lead</th>
+                <th>Details</th>
+                <th>Collected By</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for entry in leads %}
+              <tr>
+                <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                <td>{{ entry.added_date }}</td>
+                <td>
+                  {{ entry.lead_category.client_task.client.client_name }} <br>
+                  ({{ entry.lead_category.collection_for }})
+                </td>
+                <td>
+                  {{ entry.name }} <br>
+                  {{ entry.email }} <br>
+                  Source : {{ entry.source }}
+                </td>
+                <td>
+                  <a href="{% url 'analysis_lead_details' entry.id %}" class="btn btn-outline-light btn-sm">
+                    Lead Details
+                  </a>
+                </td>
+                <td>{{ entry.collected_by }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <p id="noRecords"
+             class="text-danger text-center mt-3 fw-bold"
+             style="display:none;">
+            No records found.
+          </p>
+        </div>
+        {% else %}
+          <h4 class="text-center mt-4">No leads found</h4>
+        {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap">
+
+     
+        <div class=" small">
+            Showing
+            {{ page_obj.start_index }}
+            to
+            {{ page_obj.end_index }}
+            of
+            {{ page_obj.paginator.count }}
+            entries
+        </div>
+
+
+   
+  <nav>
+    <ul class="pagination pagination-sm mb-0">
+
+
+      <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+        <a class="page-link"
+           href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}{% else %}#{% endif %}">
+          Previous
+        </a>
+      </li>
+
+
+      <li class="page-item active">
+        <span class="page-link">{{ page_obj.number }}</span>
+      </li>
+
+ 
+      <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+        <a class="page-link"
+           href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}{% else %}#{% endif %}">
+          Next
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+
+</div>
+
+
+
+      </div>
+    </div>
+
+
+ 
+    <div class="col-12 col-lg-3">
+      <div class="card p-4 bg-dark text-white rounded-xl shadow-lg h-100">
+
+        <h5 class="text-center mb-4">Performance Summary</h5>
+
+        <div class="row g-4 text-center">
+
+          <div class="col-6 col-lg-12">
+            <div class="circle-box blue">
+              <div class="circle-value">{{ collected_count }}</div>
+            </div>
+            <p class="mt-2 small">Collected Leads</p>
+          </div>
+
+          <div class="col-6 col-lg-12">
+            <div class="circle-box red">
+              <div class="circle-value">{{ wasted_count }}</div>
+            </div>
+            <p class="mt-2 small">Waste Leads</p>
+          </div>
+
+          <div class="col-12">
+            <div class="circle-box white">
+              <div class="circle-value">{{ overall_percentage }}%</div>
+            </div>
+            <p class="mt-2 small">Overall Performance</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("searchInput");
+  const table = document.getElementById("hrLeadTable");
+  const rows = table.getElementsByTagName("tr");
+  const noRecords = document.getElementById("noRecords");
+
+  searchInput.addEventListener("keyup", function () {
+    const filter = searchInput.value.toLowerCase();
+    let visibleCount = 0;
+
+
+    for (let i = 1; i < rows.length; i++) {
+      const cells = rows[i].getElementsByTagName("td");
+      let rowMatch = false;
+
+     
+      for (let j = 0; j < cells.length; j++) {
+        const cell = cells[j];
+        if (cell && cell.textContent.toLowerCase().includes(filter)) {
+          rowMatch = true;
+          break;
+        }
+      }
+
+      
+      if (rowMatch) {
+        rows[i].style.display = "";
+        visibleCount++;
+      } else {
+        rows[i].style.display = "none";
+      }
+    }
+
+    
+    if (visibleCount === 0) {
+      noRecords.style.display = "block";
+    } else {
+      noRecords.style.display = "none";
+    }
+  });
+});
+</script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const clientSelect = document.getElementById('clientSelect');
+
+    const categorySelect = document.getElementById('categorySelect');
+
+    if (!clientSelect) {
+        console.error("clientSelect not found");
+        return;
+    }
+
+    clientSelect.addEventListener('change', function () {
+        let clientId = this.value;
+
+
+        categorySelect.innerHTML = '<option value="">Loading...</option>';
+
+        if (clientId) {
+            fetch(`/get-client-data/?client_id=${clientId}`)
+                .then(response => response.json())
+                .then(data => {
+
+
+
+                    categorySelect.innerHTML = '<option value="">Select</option>';
+                    data.categories.forEach(cat => {
+                        categorySelect.innerHTML +=
+                            `<option value="${cat.id}">
+                                ${cat.collection_for}
+                             </option>`;
+                    });
+                });
+
+            const selectedCategory = "{{ selected_category }}";
+
+            data.categories.forEach(cat => {
+                categorySelect.innerHTML += `
+                <option value="${cat.id}" ${cat.id == selectedCategory ? "selected" : ""}>
+                    ${cat.collection_for}
+                </option>`;
+            });
+
+        } else {
+
+            categorySelect.innerHTML = '<option value="">Select</option>';
+        }
+    });
+
+});
+</script>
+
+
+{% endblock content %}

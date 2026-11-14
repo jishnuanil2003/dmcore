@@ -1,0 +1,302 @@
+{% extends "telecaller/telecallersidebar.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.records-container{
+    padding:20px;
+}
+
+/* Main Card */
+.records-card{
+    background:#141b2d;
+    border:1px solid #293246;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,.25);
+}
+
+/* Table Wrapper */
+.table-wrap{
+    overflow-x:auto;
+}
+
+/* Table */
+.records-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1100px;
+}
+
+.records-table thead{
+    background:#1b2438;
+}
+
+.records-table thead th{
+    color:#ffffff;
+    font-size:13px;
+    font-weight:600;
+    padding:18px 15px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    border-bottom:1px solid #293246;
+    white-space:nowrap;
+}
+
+.records-table tbody tr{
+    border-bottom:1px solid rgba(255,255,255,.06);
+    transition:.3s;
+}
+
+.records-table tbody tr:hover{
+    background:#1b2438;
+}
+
+.records-table tbody td{
+    padding:16px 15px;
+    color:#d1d5db;
+    vertical-align:middle;
+}
+
+/* Text */
+.record-id{
+    color:#94a3b8;
+    font-size:13px;
+    font-weight:600;
+}
+
+.file-name{
+    color:#ffffff;
+    font-size:14px;
+    font-weight:500;
+    display:block;
+    max-width:220px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.file-size{
+    color:#94a3b8;
+    font-size:12px;
+    margin-top:4px;
+}
+
+/* Status */
+.status-badge{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* Confidence */
+.confidence-text{
+    color:#00e676;
+    font-weight:600;
+}
+
+/* Keywords */
+.keyword-text{
+    color:#38bdf8;
+    font-weight:600;
+}
+
+/* Buttons */
+.btn-view{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:8px 14px;
+    font-size:13px;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.btn-view:hover{
+    background:#1d4ed8;
+    color:#fff;
+}
+
+/* Empty State */
+.empty-state{
+    text-align:center;
+    padding:70px 20px;
+}
+
+.empty-icon{
+    font-size:60px;
+    margin-bottom:15px;
+}
+
+.empty-title{
+    color:#fff;
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.empty-text{
+    color:#94a3b8;
+    font-size:14px;
+}
+
+.upload-btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:12px 22px;
+    background:#2563eb;
+    color:#fff;
+    border-radius:10px;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.upload-btn:hover{
+    background:#1d4ed8;
+    color:#fff;
+}
+
+/* Mobile Card Layout */
+@media(max-width:768px){
+
+    .records-container{
+        padding:10px;
+    }
+
+    .records-table{
+        min-width:900px;
+    }
+
+}
+
+@media(max-width:576px){
+
+    .records-card{
+        border-radius:14px;
+    }
+
+}
+
+.alert{
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.alert-success{
+    background:#113826;
+    border:1px solid #1f7a4d;
+    color:#b8ffd5;
+}
+
+.alert-danger{
+    background:#3a1218;
+    border:1px solid #842029;
+    color:#ffb3bd;
+}
+</style>
+
+<!-- Table -->
+ {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+<div class="records-container">
+<div class="records-card">
+  {% if records %}
+  <div class="table-wrap">
+    <table class="records-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Caller</th>
+          <th>File</th>
+          <th>Status</th>
+          <th>Career Bucket</th>
+          <th>Keywords</th>
+          <th>Confidence</th>
+          <th>Uploaded</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td><span class="record-id">#{{ r.pk }}</span></td>
+          <td style="color:#ffffff;font-weight:500;">{{ r.caller_name|default:"—" }}</td>
+          <td>
+              <span class="file-name" title="{{ r.file_name }}">
+                  {{ r.file_name }}
+              </span>
+              <div class="file-size">
+                  {{ r.file_size_display }}
+              </div>
+          </td>
+          <td><span class="badge badge-status-{{ r.status }}">{{ r.get_status_display }}</span></td>
+          <td>
+            {% if r.status == 'completed' %}
+            <span class="badge badge-{{ r.career_bucket }}">{{ r.career_bucket.name }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+          {% if r.detected_keywords %}
+              <span class="keyword-text">
+                  {{ r.keyword_count }} Keywords
+              </span>
+          {% else %}
+              <span style="color:#64748b;">—</span>
+          {% endif %}
+          </td>
+          <td>
+          {% if r.confidence_score %}
+              <span class="confidence-text">
+                  {% widthratio r.confidence_score 1 100 %}%
+              </span>
+          {% else %}
+              —
+          {% endif %}
+          </td>
+          <td style="color:#94a3b8;">
+              {{ r.uploaded_at|date:"d M Y, H:i" }}
+          </td>
+          <td>
+              <a href="{% url 'record_detail' r.pk %}" class="btn-view">
+                  View
+              </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+
+      <div class="empty-icon">
+          🎙️
+      </div>
+
+      <div class="empty-title">
+          No Audio Records Found
+      </div>
+
+      <div class="empty-text">
+          Upload an audio file to start transcription and classification.
+      </div>
+
+      <a href="{% url 'upload_audio' %}" class="upload-btn">
+          Upload Audio
+      </a>
+
+  </div>
+  {% endif %}
+</div>
+</div>
+
+{% endblock %}

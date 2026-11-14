@@ -1,0 +1,35 @@
+@import url(./colour.css);
+
+.comn_table_bg{
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+}
+
+table td{
+    align-content: center;
+    justify-content: center;
+}
+
+.table_en_sm{
+  min-width: 100px;
+}
+.table_en_md{
+  min-width: 190px;
+}
+.table_en_lmd{
+  min-width: 250px;
+}
+.table_en_lg{
+  min-width: 500px;
+}
+
+#clearSearch {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#searchInput {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}

@@ -1,0 +1,598 @@
+{% extends "hr/hrsidebar.html" %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'telecaller/css/common.css' %}">
+<link rel="stylesheet" href="{% static 'telecaller/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'telecaller/css/followup_leads.css' %}">
+
+<style>
+  body{
+    background-color: #12151e;
+  }
+</style>
+
+<div class="row mb-3 mt-3">
+    <div class="col-12">
+      <p class="text-white-50 mb-0"><a href="{% url 'hr' %}" class="text-decoration-none text-white">Dashboard</a>
+         / Leads Meeting</p>
+    </div>
+</div>
+
+
+<div class="container mt-5 comn_table_bg">
+    <div class="filter_main d-flex justify-content-between align-items-end">
+      <h5 class="text-white pg_head">Leads Meetings ({{ meetings|length }})</h5>
+    </div>
+    
+    <div class="row align-items-end justify-content-end g-2 mb-4">
+      <div class="col-md-2">
+          <label class="text-white" for="Status">Mode</label>
+            <select  name="mode" class="form-select">
+              <option value="">- Select Mode -</option>
+              <option value="">All</option>
+              <option value="Google Meet" {% if request.GET.mode == 'Google Meet' %}selected{% endif %}>Google Meet</option>
+              <option value="Direct Meet" {% if request.GET.mode == 'Direct Meet' %}selected{% endif %}>Direct Meet</option>
+            </select>
+      </div>
+
+      <div class="col-md-2">
+          <label class="text-white" for="Status">Status</label>
+            <select  name="status" class="form-select">
+              <option value="">- Select Status -</option>
+              <option value="">All</option>
+              <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+              <option value="Conducted" {% if request.GET.status == 'Conducted' %}selected{% endif %}>Conducted</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+          <label class="text-white" for="From Date">From Date</label>
+          <input type="date" id="fromDate2" class="form-control" placeholder="From Date">
+        </div>
+
+        <div class="col-md-2">
+          <label class="text-white" for="To Date">To Date</label>
+          <input type="date" id="toDate2" class="form-control" placeholder="To Date">
+        </div>
+
+
+
+        <div class="mob_max_btn d-flex align-items-end">
+          <label for=""></label>
+          <button class="btn btn-outline-light w-100" id="clearFilters2">Clear</button>
+        </div>
+
+    </div>
+
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div class="text-white">
+      Showing
+      <select id="rowCount" class="form-select form-select-sm bg-dark text-white d-inline-block w-auto">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+      </select>
+      rows
+    </div>
+    <div class="input-group w-auto">
+      <input type="text" class="form-control bg-dark text-white" placeholder="Search..." id="searchInput2">
+      <button class="btn btn-light" id="clearSearch">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+      <table class="table table-dark table-striped text-white text-center" style="white-space: nowrap;">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Date</th>
+            <th>Lead Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Mode</th>
+            <th>Teleccaller</th>
+            <th>Status</th>
+            <th>Details Add</th>
+            
+          </tr>
+        </thead>
+        <tbody id="leadsMeet">
+          {% for i in meetings %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td data-date="{{ i.meet_date|date:'Y-m-d' }}">
+            {{ i.meet_date|date:"d M Y" }}
+            </td>
+            <td>{{ i.lead.name }}</td>
+            <td>{{ i.lead.email }}</td>
+            <td>{{ i.lead.contact }}</td>
+            <td>{{ i.mode }}</td>
+            <td>{{i.created_by }}</td>
+            <td>{% if i.status == 0 %}
+                    <span class="badge bg-secondary">Pending</span>
+                {% else %}
+                    <span class="badge bg-success">Conducted</span>
+                {% endif %}
+            </td>
+            <td>
+              {% if i.status == 0 %}
+                <button class="btn btn-outline-primary btn-sm addBtn"
+                    data-id="{{ i.id }}"
+                    data-name="{{ i.lead.name }}"
+                    data-email="{{ i.lead.email }}"
+                    data-contact="{{ i.lead.contact }}">
+                    Add
+                </button>
+              {% else %}
+                <button class="btn btn-outline-success btn-sm viewBtn"
+                    data-id="{{ i.id }}"
+                    data-name="{{ i.lead.name }}"
+                    data-email="{{ i.lead.email }}"
+                    data-contact="{{ i.lead.contact }}"
+                    data-chance="{{ i.joining_chance }}"
+                    data-description="{{ i.description }}">
+                    View
+                </button>
+              {% endif %}
+            </td>
+        
+
+          </tr>
+          {% endfor %}
+          <tr id="noResultsRow" style="display: none;">
+            <td colspan="9" class="text-center text-warning">
+                No results found
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  </div>
+
+  <div class="d-flex justify-content-end align-items-center mt-3">
+    <nav>
+      <ul class="pagination"></ul>
+    </nav>
+  </div>
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const table = document.getElementById("leadsMeet");
+    const rows = Array.from(table.querySelectorAll("tr:not(#noResultsRow)"));
+
+    const searchInput = document.getElementById("searchInput2");
+    const statusFilter = document.querySelector("select[name='status']");
+    const modeFilter = document.querySelector("select[name='mode']");
+    const fromDate = document.getElementById("fromDate2");
+    const toDate = document.getElementById("toDate2");
+    const rowCountSelect = document.getElementById("rowCount");
+    const pagination = document.querySelector(".pagination");
+
+    let filteredRows = [...rows];
+    let currentPage = 1;
+
+
+    function applyFilters() {
+        const searchValue = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const modeValue = modeFilter.value;
+        const from = fromDate.value;
+        const to = toDate.value;
+
+        filteredRows = rows.filter(row => {
+            const cells = row.getElementsByTagName("td");
+
+            const dateText = cells[1].dataset.date;
+            const name = cells[2].innerText.toLowerCase();
+            const email = cells[3].innerText.toLowerCase();
+            const phone = cells[4].innerText.toLowerCase();
+            const status = cells[7].innerText.trim().toLowerCase();
+
+            
+            const mode = cells[5].innerText.trim().toLowerCase();
+            const statusText = status.toLowerCase();
+
+      
+            const dateFormatted = cells[1].innerText.toLowerCase();   
+            const dateRaw = cells[1].dataset.date;                   
+
+          
+            const matchesSearch =
+                name.includes(searchValue) ||
+                email.includes(searchValue) ||
+                phone.includes(searchValue) ||
+                statusText.includes(searchValue) ||
+                mode.includes(searchValue) ||
+                dateFormatted.includes(searchValue) ||
+                dateRaw.includes(searchValue);
+
+            
+            const matchesStatus =
+                  !statusValue || status === statusValue.toLowerCase();
+
+            const matchesMode =
+                  !modeValue || mode.includes(modeValue.toLowerCase());
+
+            
+          
+            let matchesDate = true;
+            if (from || to) {
+                const rowDate = new Date(dateText);
+
+                if (from) {
+                    matchesDate = matchesDate && (rowDate >= new Date(from));
+                }
+                if (to) {
+                    matchesDate = matchesDate && (rowDate <= new Date(to));
+                }
+            }
+
+            return matchesSearch && matchesStatus && matchesMode && matchesDate;
+        });
+
+        currentPage = 1;
+        displayTable();
+    }
+
+  
+    function displayTable() {
+        const rowsPerPage = parseInt(rowCountSelect.value);
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.forEach(row => row.style.display = "none");
+
+        const visibleRows = filteredRows.slice(start, end);
+
+        
+        visibleRows.forEach(row => {
+            row.style.display = "";
+        });
+
+      
+        const noResultsRow = document.getElementById("noResultsRow");
+
+        if (filteredRows.length === 0) {
+            noResultsRow.style.display = "";
+        } else {
+            noResultsRow.style.display = "none";
+        }
+
+        setupPagination();
+    }
+
+
+    function setupPagination() {
+        pagination.innerHTML = "";
+
+        const pageCount = Math.ceil(filteredRows.length / rowCountSelect.value);
+
+        for (let i = 1; i <= pageCount; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+
+            const a = document.createElement("a");
+            a.className = "page-link";
+            a.href = "#";
+            a.innerText = i;
+
+            a.addEventListener("click", function (e) {
+                e.preventDefault();
+                currentPage = i;
+                displayTable();
+            });
+
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+    }
+
+
+    document.getElementById("clearFilters2").addEventListener("click", function () {
+        searchInput.value = "";
+        statusFilter.value = "";
+        modeFilter.value = "";
+        fromDate.value = "";
+        toDate.value = "";
+        applyFilters();
+    });
+
+
+    document.getElementById("clearSearch").addEventListener("click", function () {
+        searchInput.value = "";
+        applyFilters();
+    });
+
+   
+    searchInput.addEventListener("keyup", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
+    modeFilter.addEventListener("change", applyFilters);
+    fromDate.addEventListener("change", applyFilters);
+    toDate.addEventListener("change", applyFilters);
+    rowCountSelect.addEventListener("change", displayTable);
+
+
+
+  
+    applyFilters();
+});
+</script>
+
+
+
+
+<style>
+  .custom-modal {
+    background: #1e1e2f;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.modal-header,
+.modal-footer {
+    border: none;
+}
+
+
+.info-box {
+    background: #2a2a40;
+    padding: 12px;
+    border-radius: 10px;
+    min-height: 70px;
+}
+
+
+.info-box label {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.info-box div {
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    word-break: break-word;
+}
+
+
+.custom-input {
+    background: #1e1e2f !important;
+    border: 1px solid #444;
+    color: #fff !important;
+}
+
+.custom-input:focus {
+    border-color: #4e73df;
+    box-shadow: none;
+}
+
+
+
+.highlight-box label {
+    color: #e0e0e0;
+}
+
+.highlight-box div {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+@media (max-width: 576px) {
+    .modal-body {
+        padding: 15px;
+    }
+}
+</style>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content custom-modal">
+
+      <!-- HEADER -->
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-white">
+          <i class="bi bi-pencil-square me-2"></i> Add Meeting Details
+        </h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- FORM -->
+      <form id="addForm">
+        {% csrf_token %}
+
+        <div class="modal-body">
+
+          <input type="hidden" id="meet_id" name="meet_id">
+
+          <!-- LEAD INFO -->
+          <div class="row g-3 mb-3">
+
+            <div class="col-md-4 col-12">
+              <div class="info-box">
+                <label>Lead Name</label>
+                <input type="text" id="lead_name" class="form-control custom-input" readonly>
+              </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+              <div class="info-box">
+                <label>Email</label>
+                <input type="text" id="lead_email" class="form-control custom-input" readonly>
+              </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+              <div class="info-box">
+                <label>Contact</label>
+                <input type="text" id="lead_contact" class="form-control custom-input" readonly>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- INPUTS -->
+          <div class="row g-3">
+
+            <div class="col-md-4 col-12">
+              <div class="info-box highlight-box">
+                <label>Joining Chance (%)</label>
+                <input type="number" name="joining_chance" class="form-control custom-input text-center" required>
+              </div>
+            </div>
+
+            <div class="col-md-8 col-12">
+              <div class="info-box">
+                <label>Description</label>
+                <textarea name="description" rows="3" class="form-control custom-input"></textarea>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success px-4">
+            <i class="bi bi-check-circle me-1"></i> Save
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="viewModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content custom-modal">
+
+      <!-- HEADER -->
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-white">
+          <i class="bi bi-eye me-2"></i> Meeting Details
+        </h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <!-- BASIC INFO -->
+        <div class="row g-3 mb-3">
+
+          <div class="col-md-4 col-12">
+            <div class="info-box">
+              <label>Name</label>
+              <div id="v_name"></div>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-12">
+            <div class="info-box">
+              <label>Email</label>
+              <div id="v_email"></div>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-12">
+            <div class="info-box">
+              <label>Contact</label>
+              <div id="v_contact"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DETAILS -->
+        <div class="row g-3">
+
+          <div class="col-md-4 col-12">
+            <div class="info-box highlight-box">
+              <label>Joining Chance</label>
+              <div><span id="v_chance"></span>%</div>
+            </div>
+          </div>
+
+          <div class="col-md-8 col-12">
+            <div class="info-box">
+              <label>Description</label>
+              <div id="v_description"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  
+  document.querySelectorAll(".addBtn").forEach(btn => {
+    btn.addEventListener("click", function () {
+
+      document.getElementById("meet_id").value = this.dataset.id;
+      document.getElementById("lead_name").value = this.dataset.name;
+      document.getElementById("lead_email").value = this.dataset.email;
+      document.getElementById("lead_contact").value = this.dataset.contact;
+
+      new bootstrap.Modal(document.getElementById("addModal")).show();
+    });
+  });
+
+ 
+  document.querySelectorAll(".viewBtn").forEach(btn => {
+    btn.addEventListener("click", function () {
+
+      document.getElementById("v_name").innerText = this.dataset.name;
+      document.getElementById("v_email").innerText = this.dataset.email;
+      document.getElementById("v_contact").innerText = this.dataset.contact;
+      document.getElementById("v_chance").innerText = this.dataset.chance;
+      document.getElementById("v_description").innerText = this.dataset.description;
+
+      new bootstrap.Modal(document.getElementById("viewModal")).show();
+    });
+  });
+
+
+  document.getElementById("addForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("{% url 'save_meeting_details' %}", {
+      method: "POST",
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        location.reload(); 
+      }
+    });
+
+  });
+
+});
+</script>
+
+{% endblock %}

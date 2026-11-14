@@ -1,0 +1,131 @@
+{% extends 'dmhead/dmheadsidebar.html' %}
+{% load static %}
+{% block title %}Transferred Leads{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dm_head/css/common.css' %}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<style>
+    body {
+      overflow-x: hidden;
+      
+      background-color: #12151e; 
+    }
+</style>
+
+<div class="container-fluid mt-4 comn_table_bg">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 print-hide">
+    <h5 class="text-white mb-0">Transferred Leads (<span id="transferredCount">{{ leads|length }}</span>)</h5>
+    <button class="btn btn-outline-light btn-sm" onclick="location.reload()">
+      <i class="fa-solid fa-rotate-right"></i>
+    </button>
+  </div>
+  
+  <!-- Filters -->
+  <div class="row text-white mb-3 gx-2 gy-2 align-items-end print-hide">
+    <div class="col-md-2">
+      <label>Client</label>
+      <select id="clientFilter" class="form-select form-select-sm">
+        <option value="" disabled selected>Select Client</option>
+        <option value="">All</option>
+        {% for c in clients %}
+          <option value="{{ c.id }}">{{ c.client_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label>Category</label>
+      <select id="categoryFilter" class="form-select form-select-sm">
+        <option value="" disabled selected>Select Category</option>
+        <option value="">All</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" class="client-category client-{{ cat.client_task.client.id }}" style="display: none;">
+            {{ cat.collection_for }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label>Employee</label>
+      <select id="employeeFilter" class="form-select form-select-sm">
+        <option value="" disabled selected>Select Employee</option>
+        <option value="">All</option>
+        {% for emp in employees %}
+          <option value="{{ emp.id }}">{{ emp.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label>From</label>
+      <input type="date" id="fromDate" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label>To</label>
+      <input type="date" id="toDate" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-outline-light btn-sm" id="clearFilters">Clear</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="input-group w-auto mb-3 print-hide">
+    <input type="text" id="searchInput" class="form-control bg-dark text-white" placeholder="Search...">
+    <button class="btn btn-light" id="clearSearch">Clear</button>
+  </div>
+
+  <!-- Row limit -->
+  <div class="d-flex justify-content-start mb-2">
+    <label class="text-white me-2">Showing</label>
+    <select id="rowLimit" class="form-select form-select-sm" style="width: 80px;">
+      <option>10</option><option>20</option><option>50</option><option>100</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  {% if leads %}
+  <div class="table-responsive">
+    <table id="leadTable" class="table table-dark table-striped align-middle text-center">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Transfer Date</th>
+          <th>Collected On</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>Client</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead in leads %}
+        <tr data-client="{{ lead.lead_category.client_task.client.id }}" data-category="{{ lead.lead_category.id }}"
+            data-employee="{{ lead.collected_by.id }}" data-date="{{ lead.transfer_date }}">
+          <td>{{ forloop.counter }}</td>
+          <td>{{ lead.transfer_date }}</td>
+          <td>{{ lead.added_date }}</td>
+          <td>{{ lead.name }}</td>
+          <td>{{ lead.email }}</td>
+          <td>{{ lead.contact }}</td>
+          <td>{{ lead.lead_category.client_task.client.client_name }}</td>
+          <td>{{ lead.lead_category.collection_for }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-white">
+    <h5 class="text-white">No transferred leads found.</h5>
+  </div>
+  {% endif %}
+</div>
+
+<script src="{% static 'dm_head/js/transfer_leads.js' %}"></script>
+{% endblock %}
