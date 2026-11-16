@@ -30,8 +30,13 @@ INTERVIEW_QUESTIONS = [
     (24, 'internship_topic', 'What was the internship about and what work did you do?'),
 ]
 
+DEFAULT_MAPPED_QUESTION_IDS = {1, 2, 3, 19}
+
 QUESTION_BY_ID = {question_id: (key, label) for question_id, key, label in INTERVIEW_QUESTIONS}
-QUESTION_CHOICES = tuple((question_id, f'{question_id} - {label}') for question_id, _key, label in INTERVIEW_QUESTIONS)
+MAPPABLE_QUESTIONS = [q for q in INTERVIEW_QUESTIONS if q[0] not in DEFAULT_MAPPED_QUESTION_IDS]
+MAPPABLE_QUESTION_CHOICES = tuple((question_id, f'{question_id} - {label}') for question_id, _key, label in MAPPABLE_QUESTIONS)
+QUESTION_CHOICES = MAPPABLE_QUESTION_CHOICES
+
 MIN_QUESTION_ID = min(QUESTION_BY_ID)
 MAX_QUESTION_ID = max(QUESTION_BY_ID)
 

@@ -85,7 +85,12 @@ from django.db.models import Sum
 from .models import TaskAssign, TaskDetails, LogRegister_Details, EmployeeRegister_Details
 from django.utils.text import slugify
 from .models import Leads, LeadCategory_Register, LeadField_Register, EmployeeRegister_Details, LogRegister_Details
-from .interview_questions import INTERVIEW_QUESTIONS, QUESTION_BY_ID
+from .interview_questions import (
+    DEFAULT_MAPPED_QUESTION_IDS,
+    INTERVIEW_QUESTIONS,
+    MAPPABLE_QUESTIONS,
+    QUESTION_BY_ID,
+)
 from django.db.models.functions import Lower
 import openpyxl # type: ignore
 from .models import Leads, LeadCategory_Register, EmployeeRegister_Details
@@ -1978,6 +1983,16 @@ def field_page(request, work_id):
         mapped_field_count = sum(1 for field in all_fields if field.question_id is not None)
         unmapped_field_names = [field.name or f'Field #{field.id}' for field in all_fields if field.question_id is None]
 
+        assigned_work_questions = {
+            f.question_id: {'field_id': f.id, 'field_name': f.name or f'Field #{f.id}'}
+            for f in all_fields
+            if f.question_id is not None
+        }
+        mapped_qids = set(assigned_work_questions.keys())
+        unmapped_mappable_questions = [
+            f"{qid} - {label}" for qid, _k, label in MAPPABLE_QUESTIONS if qid not in mapped_qids
+        ]
+
         context = {
             'work': work,
             'client': client,
@@ -1988,7 +2003,11 @@ def field_page(request, work_id):
             'logged_in_user': logged_in_user,
             'user_company': user_company,
             'employee_profile': employee_profile,
-            'interview_questions': INTERVIEW_QUESTIONS,
+            'interview_questions': MAPPABLE_QUESTIONS,
+            'assigned_work_questions_json': json.dumps(assigned_work_questions),
+            'total_mappable_count': len(MAPPABLE_QUESTIONS),
+            'mapped_question_count': len(mapped_qids),
+            'unmapped_mappable_questions': unmapped_mappable_questions,
         }
         return render(request, 'dmhead/field_page.html', context)
     except WorkRegister.DoesNotExist:
@@ -2012,6 +2031,8 @@ def add_field(request):
                 question_id = int(question_id_value)
             except (TypeError, ValueError):
                 return JsonResponse({'success': False, 'message': 'Choose a valid interview question.'}, status=400)
+            if question_id in DEFAULT_MAPPED_QUESTION_IDS:
+                return JsonResponse({'success': False, 'message': 'This question is mapped by default. Choose another or leave it as Not asked.'}, status=400)
             if question_id not in QUESTION_BY_ID:
                 return JsonResponse({'success': False, 'message': 'Choose a valid interview question.'}, status=400)
         else:
@@ -2081,6 +2102,8 @@ def edit_field(request):
             question_id = int(question_id_value)
         except (TypeError, ValueError):
             return JsonResponse({'success': False, 'message': 'Choose a valid interview question.'}, status=400)
+        if question_id in DEFAULT_MAPPED_QUESTION_IDS:
+            return JsonResponse({'success': False, 'message': 'This question is mapped by default. Choose another or leave it as Not asked.'}, status=400)
         if question_id not in QUESTION_BY_ID:
             return JsonResponse({'success': False, 'message': 'Choose a valid interview question.'}, status=400)
     else:
@@ -5670,6 +5693,10 @@ def upload_leads_excel_dmhead(request):
 
     result = process_excel_upload(request, team_alloc_id, employee_user)
 
+    if result.get('notices'):
+        for note in result['notices']:
+            messages.info(request, note)
+
     if 'error' in result:
         messages.error(request, result['error'])
     else:
@@ -5801,10 +5828,10 @@ def process_excel_upload(request, team_alloc_id, employee_user, force_save=False
     first_lf = LeadField_Register.objects.filter(lead_category=lead_category).first() if lead_category else None
     work_fk = first_lf.work if first_lf else None
 
-    required_static = ['Name', 'Email', 'Contact Number', 'Course']
+    required_static = ['Name', 'Email', 'Contact Number']
     required_dynamic = list(LeadField_Register.objects.filter(lead_category=lead_category).values_list('name', flat=True))
     expected_columns = required_static + required_dynamic
-    allowed_columns = expected_columns + ['Lead Source']
+    allowed_columns = expected_columns + ['Lead Source', 'Course']
 
     try:
         df = pd.read_excel(excel)
@@ -5819,6 +5846,10 @@ def process_excel_upload(request, team_alloc_id, employee_user, force_save=False
         return {'error': f"Missing required columns: {', '.join(missing_headers)}."}
     if unknown_headers:
         return {'error': f"Unrecognized columns: {', '.join(unknown_headers)}."}
+
+    notices = []
+    if 'Course' in actual_headers:
+        notices.append("The 'Course' column is no longer a standard field and was ignored.")
 
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     phone_pattern = r'^\d{10}$'
@@ -5837,7 +5868,8 @@ def process_excel_upload(request, team_alloc_id, employee_user, force_save=False
             email = str(data.get('Email')).strip().lower() if pd.notna(data.get('Email')) else ''
             raw_contact = data.get('Contact Number')
             contact = re.sub(r'\D', '', str(int(raw_contact))) if pd.notna(raw_contact) and str(raw_contact).strip() != '' else ''
-            source = None
+            raw_source = data.get('Lead Source')
+            source = str(raw_source).strip() if pd.notna(raw_source) and str(raw_source).strip().lower() != 'nan' else None
 
             if not name or not email or not contact:
                 skipped.append(f"Row {row_index}: missing required static fields.")
@@ -5907,15 +5939,6 @@ def process_excel_upload(request, team_alloc_id, employee_user, force_save=False
                     if is_repeated else 0
             )
 
-            # Save Course
-            course_val = str(data.get('Course', '') or '').strip()
-            if course_val and course_val.lower() != 'nan':
-                LeadDetails.objects.create(
-                    lead=lead,
-                    field_name='Course',
-                    field_data=course_val
-                )
-
             for field in required_dynamic:
                 LeadDetails.objects.create(
                     lead=lead,
@@ -5931,6 +5954,7 @@ def process_excel_upload(request, team_alloc_id, employee_user, force_save=False
         'success': True,
         'created_count': created_count,
         'skipped': skipped,
+        'notices': notices,
         'duplicate_leads': duplicate_leads,
         "pending_rows": pending_rows,
         'lead_category_id': lead_category.id,
@@ -6446,14 +6470,7 @@ def lead_list(request, category_id):
         name = request.POST.get('full_name')
         email = request.POST.get('email')
         contact = request.POST.get('contact')
-        course = (request.POST.get('course') or '').strip()
-        source = None
-
-        if not course:
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return JsonResponse({"success": False, "message": "Course is required."}, status=400)
-            messages.error(request, "Course is required.")
-            return redirect('lead_list', category_id)
+        source = (request.POST.get('source') or request.POST.get('lead_source') or '').strip() or None
 
         duplicates = Leads.objects.filter(
             Q(email=email) | Q(contact=contact)
@@ -6489,13 +6506,6 @@ def lead_list(request, category_id):
             collected_by=employee,
             repeated_status=1 if duplicates.exists() else 0
         )
-
-        if course:
-            LeadDetails.objects.create(
-                lead=lead,
-                field_name='Course',
-                field_data=course,
-            )
 
         # Save Dynamic Fields
         for field in lead_fields:
@@ -7693,9 +7703,7 @@ def add_lead_manual(request):
 
             email = request.POST.get('email', '').strip().lower()
             contact = request.POST.get('contact_number', '').strip()
-            course = (request.POST.get('course') or '').strip()
-            if not course:
-                return JsonResponse({'success': False, 'message': 'Course is required.'}, status=400)
+            source = (request.POST.get('source') or request.POST.get('lead_source') or '').strip() or None
 
 
 
@@ -7731,19 +7739,12 @@ def add_lead_manual(request):
                 name=request.POST.get('name'),
                 email=email,
                 contact=contact,
-                source=None,
+                source=source,
                 lead_category=lead_category_fk,
                 work=work_fk,
                 collected_by=employee_fk,
                 repeated_status=1 if is_repeated else 0
             )
-
-            if course:
-                LeadDetails.objects.create(
-                    lead=lead,
-                    field_name='Course',
-                    field_data=course,
-                )
 
             for key, value in request.POST.items():
                 if key.startswith('dynamic_'):
@@ -7780,6 +7781,10 @@ def upload_leads_excel(request):
     team_alloc_id = request.POST.get('team_alloc_id')
 
     result = process_excel_upload(request, team_alloc_id, employee_user)
+
+    if result.get("notices"):
+        for note in result["notices"]:
+            messages.info(request, note)
 
     if result["duplicate_leads"]:
         request.session["duplicate_leads"] = result["duplicate_leads"]
@@ -21302,7 +21307,7 @@ def download_lead_template(request, category_id):
         "Name",
         "Email",
         "Contact",
-        "Course"
+        "Lead Source"
     ]
 
     for field in fields:
@@ -21343,7 +21348,7 @@ def download_lead_template_tl(request, team_alloc_id):
         'Name',
         'Email',
         'Contact Number',
-        'Course'
+        'Lead Source'
     ]
 
     dynamic_columns = list(

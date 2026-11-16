@@ -65,9 +65,13 @@
                       </a>
   
                       <div class="mt-2 ps-3">
-                          <span>
-                              Full Name, Email, Contact Number, Course are fixed fields
-                          </span>
+                          <div class="mb-2">
+                              <span class="text-white-50 small d-block mb-1">Default Fixed Fields (asked automatically when empty, no mapping required):</span>
+                              <span class="badge bg-secondary me-1">Name (1 - default)</span>
+                              <span class="badge bg-secondary me-1">Email (2 - default)</span>
+                              <span class="badge bg-secondary me-1">Mobile Number (3 - default)</span>
+                              <span class="badge bg-secondary me-1">Lead Source (19 - default)</span>
+                          </div>
                       
                           {% if cat.leadfield_register_set.all %}
                           <ol>
@@ -84,6 +88,15 @@
                               {% endfor %}
                           </ol>
                           {% endif %}
+
+                          <div class="small text-white-50 mt-2 p-2 rounded bg-dark border border-secondary">
+                              <strong>{{ mapped_question_count }} of {{ total_mappable_count }}</strong> questions mapped.
+                              {% if unmapped_mappable_questions %}
+                              <span class="text-warning">Still unmapped:</span> {{ unmapped_mappable_questions|join:", " }}
+                              {% else %}
+                              <span class="text-success">All {{ total_mappable_count }} mappable questions are assigned!</span>
+                              {% endif %}
+                          </div>
                       </div>
                   </td>
               </tr>
@@ -132,9 +145,10 @@
             <select name="question_id" id="add_field_question_id" class="form-select">
               <option value="">Not asked in interview</option>
               {% for question_id, field_key, question_label in interview_questions %}
-              <option value="{{ question_id }}">{{ question_id }} - {{ question_label }}</option>
+              <option value="{{ question_id }}" data-original-label="{{ question_id }} - {{ question_label }}">{{ question_id }} - {{ question_label }}</option>
               {% endfor %}
             </select>
+            <div class="form-text text-white-50 small mt-1">Name, Email, Mobile and Lead Source are asked automatically when empty.</div>
           </div>
         </div>
         <div class="modal-footer">
@@ -171,9 +185,10 @@
             <select name="question_id" id="edit_field_question_id" class="form-select">
               <option value="">Not asked in interview</option>
               {% for question_id, field_key, question_label in interview_questions %}
-              <option value="{{ question_id }}">{{ question_id }} - {{ question_label }}</option>
+              <option value="{{ question_id }}" data-original-label="{{ question_id }} - {{ question_label }}">{{ question_id }} - {{ question_label }}</option>
               {% endfor %}
             </select>
+            <div class="form-text text-white-50 small mt-1">Name, Email, Mobile and Lead Source are asked automatically when empty.</div>
           </div>
         </div>
         <div class="modal-footer">
@@ -204,5 +219,8 @@
 /* } */
 </style>
 
-<script src="{% static 'dm_head/js/field_page.js' %}?v=20261102-1"></script>
+<script>
+  window.assignedWorkQuestions = {{ assigned_work_questions_json|safe }};
+</script>
+<script src="{% static 'dm_head/js/field_page.js' %}?v=20261116-1"></script>
 {% endblock %}

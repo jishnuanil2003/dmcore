@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .interview_questions import INTERVIEW_QUESTIONS
+from .interview_questions import INTERVIEW_QUESTIONS, MAPPABLE_QUESTIONS
 from .models import (
     BusinessRegister_Details,
     ClientRegister,
@@ -34,7 +34,7 @@ class LeadField_RegisterAdmin(admin.ModelAdmin):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         if db_field.name == 'question_id' and formfield is not None:
             formfield.choices = [('', 'Not asked in interview')] + [
-                (qid, f'{qid} - {label}') for qid, _key, label in INTERVIEW_QUESTIONS
+                (qid, f'{qid} - {label}') for qid, _key, label in MAPPABLE_QUESTIONS
             ]
         return formfield
 

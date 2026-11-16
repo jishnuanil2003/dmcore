@@ -7,7 +7,14 @@ from django.core.exceptions import ValidationError
 from datetime import date
 from django.core.validators import FileExtensionValidator
 from datetime import timedelta
-from .interview_questions import MAX_QUESTION_ID, MIN_QUESTION_ID, QUESTION_BY_ID, QUESTION_CHOICES
+from .interview_questions import (
+    DEFAULT_MAPPED_QUESTION_IDS,
+    MAPPABLE_QUESTIONS,
+    MAX_QUESTION_ID,
+    MIN_QUESTION_ID,
+    QUESTION_BY_ID,
+    QUESTION_CHOICES,
+)
 
 # Create your models here.
 class LogRegister_Details(models.Model):  
@@ -390,8 +397,11 @@ class LeadField_Register(models.Model):
                 if not self.client_id and cat_task.client_id:
                     self.client_id = cat_task.client_id
         errors = {}
-        if self.question_id is not None and self.question_id not in QUESTION_BY_ID:
-            errors['question_id'] = f'Choose one of the {len(QUESTION_BY_ID)} available interview questions.'
+        if self.question_id is not None:
+            if self.question_id in DEFAULT_MAPPED_QUESTION_IDS:
+                errors['question_id'] = 'This question is mapped by default. Choose another or leave it as Not asked.'
+            elif self.question_id not in QUESTION_BY_ID:
+                errors['question_id'] = f'Choose one of the {len(MAPPABLE_QUESTIONS)} available interview questions.'
         if self.question_id is not None and self.work_id:
             duplicate = type(self).objects.filter(
                 work_id=self.work_id, question_id=self.question_id

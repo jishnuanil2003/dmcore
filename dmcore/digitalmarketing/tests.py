@@ -357,9 +357,6 @@ class HardeningAndMappingTests(TestCase):
 
     def test_map_default_fields_command_maps_client_fields(self):
         names_and_expected = [
-            ('Full Name', 1),
-            ('Email', 2),
-            ('Contact Number', 3),
             ('Highest qualification', 5),
             ('skills', 14),
             ('Notice period', 15),
@@ -441,7 +438,7 @@ class NewRequirementsTests(TestCase):
         q = get_lead_missing_interview_questions(self.lead)
         self.assertEqual(q, [{'question_id': 15, 'field_key': 'notice_period'}])
 
-    def test_questions_default_fields_missing_gives_1_2_3_6_plus_custom(self):
+    def test_questions_default_fields_missing_gives_1_2_3_19_plus_custom(self):
         empty_lead = Leads.objects.create(
             work=self.work, collected_by=self.manager, lead_category=self.category,
             name='', email='', contact='', source=''
@@ -449,7 +446,7 @@ class NewRequirementsTests(TestCase):
         LeadField_Register.objects.create(work=self.work, name='Notice period', question_id=15)
         q = get_lead_missing_interview_questions(empty_lead)
         qids = [item['question_id'] for item in q]
-        self.assertEqual(qids, [1, 2, 3, 6, 15, 19])
+        self.assertEqual(qids, [1, 2, 3, 15, 19])
 
     def test_questions_whitespace_counts_as_empty(self):
         ws_lead = Leads.objects.create(
@@ -459,7 +456,7 @@ class NewRequirementsTests(TestCase):
         LeadDetails.objects.create(lead=ws_lead, field_name='Course', field_data='   ')
         q = get_lead_missing_interview_questions(ws_lead)
         qids = [item['question_id'] for item in q]
-        self.assertEqual(qids, [1, 2, 3, 6, 19])
+        self.assertEqual(qids, [1, 2, 3, 19])
 
     def test_questions_conflict_case_on_id_6(self):
         # Custom field mapped to question_id 6 (e.g. Major)
@@ -641,46 +638,58 @@ class NewRequirementsTests(TestCase):
         # Add confused record directly via update
         LeadConfused.objects.create(lead=self.lead, executive_id=self.manager)
 
-    # --- 5. COURSE REQUIRED TESTS ---
-    def test_course_required_on_manual_add_and_excel(self):
+    # --- 5. COURSE REMOVED AND LEAD SOURCE OPTIONAL TESTS ---
+    def test_course_removed_and_lead_source_saved_on_manual_add_and_excel(self):
         client = Client()
-        # 1. add_lead_manual view requires course
         from .models import LeadCateogry_TeamAllocate
         alloc = LeadCateogry_TeamAllocate.objects.create(lead_category=self.category)
         session = client.session
         session['tid'] = self.login.log_username
         session.save()
+
+        # 1. add_lead_manual view does NOT require course; saves optional lead_source to lead.source
         res1 = client.post('/add-lead/', {
             'team_alloc_id': alloc.id,
-            'name': 'Test TL Lead',
-            'email': 'testtl@test.com',
-            'contact_number': '9876543210',
-            'course': '',
+            'name': 'Test TL Lead Source',
+            'email': 'testtl_src@test.com',
+            'contact_number': '9876543299',
+            'lead_source': 'Walk-in',
         })
-        self.assertEqual(res1.status_code, 400)
-        self.assertIn('Course is required', res1.json()['message'])
+        self.assertEqual(res1.status_code, 200)
+        self.assertTrue(res1.json()['success'])
+        created_tl_lead = Leads.objects.get(email='testtl_src@test.com')
+        self.assertEqual(created_tl_lead.source, 'Walk-in')
+        self.assertFalse(LeadDetails.objects.filter(lead=created_tl_lead, field_name='Course').exists())
 
-        # 2. lead_list view requires course
-        exec_login = LogRegister_Details.objects.create(log_username='exec_course', position='Executive')
-        EmployeeRegister_Details.objects.create(login=exec_login, company=self.company, name='Exec Course')
+        # 2. lead_list view does NOT require course; saves optional lead_source to lead.source
+        exec_login = LogRegister_Details.objects.create(log_username='exec_source', position='Executive')
+        EmployeeRegister_Details.objects.create(login=exec_login, company=self.company, name='Exec Source')
         session['eid'] = exec_login.log_username
         session.save()
         res2 = client.post(f'/lead-list/{self.category.pk}/', {
-            'full_name': 'Test Executive',
-            'email': 'test@test.com',
-            'contact': '9876543210',
-            'course': '',
+            'full_name': 'Test Executive Source',
+            'email': 'testexec_src@test.com',
+            'contact': '9876543211',
+            'lead_source': 'Referral',
         }, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(res2.status_code, 400)
-        self.assertIn('Course is required', res2.json()['message'])
+        self.assertEqual(res2.status_code, 200)
+        self.assertTrue(res2.json()['success'])
+        created_exec_lead = Leads.objects.get(email='testexec_src@test.com')
+        self.assertEqual(created_exec_lead.source, 'Referral')
+        self.assertFalse(LeadDetails.objects.filter(lead=created_exec_lead, field_name='Course').exists())
 
-        # 3. Excel upload missing Course column returns clear missing column error
+        # 3. Excel upload without Course column succeeds and does not error
         from django.core.files.uploadedfile import SimpleUploadedFile
         import pandas as pd
         from .views import process_excel_upload
         from django.test import RequestFactory
 
-        df = pd.DataFrame([{'Name': 'Upload Candidate', 'Email': 'up@test.com', 'Contact Number': '9876543210'}])
+        df = pd.DataFrame([{
+            'Name': 'Upload Candidate',
+            'Email': 'up_new@test.com',
+            'Contact Number': '9876543212',
+            'Lead Source': 'Job Portal',
+        }])
         excel_io = io.BytesIO()
         df.to_excel(excel_io, index=False)
         excel_io.seek(0)
@@ -689,8 +698,32 @@ class NewRequirementsTests(TestCase):
         req = factory.post('/upload-leads-excel/', {'excel_file': excel_file})
         req.FILES['excel_file'] = excel_file
         result = process_excel_upload(req, alloc.id, self.manager)
-        self.assertIn('error', result)
-        self.assertIn('Missing required columns: Course', result['error'])
+        self.assertTrue(result.get('success'))
+        self.assertEqual(result.get('created_count'), 1)
+        up_lead = Leads.objects.get(email='up_new@test.com')
+        self.assertEqual(up_lead.source, 'Job Portal')
+
+        # 4. Older Excel file with legacy 'Course' column uploads successfully, ignores Course, and adds notice
+        df_legacy = pd.DataFrame([{
+            'Name': 'Legacy Candidate',
+            'Email': 'legacy@test.com',
+            'Contact Number': '9876543213',
+            'Course': 'BCA',
+            'Lead Source': 'Newspaper',
+        }])
+        legacy_io = io.BytesIO()
+        df_legacy.to_excel(legacy_io, index=False)
+        legacy_io.seek(0)
+        legacy_file = SimpleUploadedFile("legacy_leads.xlsx", legacy_io.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        req_legacy = factory.post('/upload-leads-excel/', {'excel_file': legacy_file})
+        req_legacy.FILES['excel_file'] = legacy_file
+        result_legacy = process_excel_upload(req_legacy, alloc.id, self.manager)
+        self.assertTrue(result_legacy.get('success'))
+        self.assertEqual(result_legacy.get('created_count'), 1)
+        self.assertTrue(any('Course' in note for note in result_legacy.get('notices', [])))
+        legacy_lead = Leads.objects.get(email='legacy@test.com')
+        self.assertEqual(legacy_lead.source, 'Newspaper')
+        self.assertFalse(LeadDetails.objects.filter(lead=legacy_lead, field_name='Course').exists())
 
 
 @override_settings(
@@ -732,10 +765,14 @@ class TestNewInterviewQuestions19To24(TestCase):
         self.assertEqual(MIN_QUESTION_ID, 1)
         self.assertEqual(MAX_QUESTION_ID, 24)
 
-        # Dropdowns list "id - label"
+        # Dropdowns list 20 mappable "id - label" choices, excluding 1, 2, 3, 19
         choices_dict = dict(QUESTION_CHOICES)
-        self.assertIn(19, choices_dict)
-        self.assertEqual(choices_dict[19], '19 - How did you first come to know about us?')
+        self.assertEqual(len(choices_dict), 20)
+        self.assertNotIn(1, choices_dict)
+        self.assertNotIn(2, choices_dict)
+        self.assertNotIn(3, choices_dict)
+        self.assertNotIn(19, choices_dict)
+
         self.assertIn(20, choices_dict)
         self.assertEqual(choices_dict[20], '20 - Which city or town are you currently living in?')
         self.assertIn(21, choices_dict)
@@ -760,6 +797,52 @@ class TestNewInterviewQuestions19To24(TestCase):
         field0 = LeadField_Register(work=self.work, name='Invalid 0', question_id=0)
         with self.assertRaises(ValidationError):
             field0.full_clean()
+
+    def test_cannot_map_default_questions_1_2_3_19(self):
+        # 1. Model clean rejects mapping 1, 2, 3, 19
+        for qid in (1, 2, 3, 19):
+            field = LeadField_Register(work=self.work, name=f'Field {qid}', question_id=qid)
+            with self.assertRaises(ValidationError) as ctx:
+                field.full_clean()
+            self.assertIn('mapped by default', str(ctx.exception))
+
+        # 2. Views reject mapping 1, 2, 3, 19
+        client = Client()
+
+        res_add = client.post('/add-field/', {
+            'category_id': self.category.id,
+            'field_name': 'My Source',
+            'question_id': '19',
+        })
+        self.assertEqual(res_add.status_code, 400)
+        self.assertIn('mapped by default', res_add.json()['message'])
+
+        valid_field = LeadField_Register.objects.create(work=self.work, name='Valid Field', question_id=20)
+        res_edit = client.post('/edit-field/', {
+            'field_id': valid_field.id,
+            'field_name': 'Updated Field',
+            'question_id': '1',
+        })
+        self.assertEqual(res_edit.status_code, 400)
+        self.assertIn('mapped by default', res_edit.json()['message'])
+
+    def test_clear_default_mapped_fields_command(self):
+        # Create a field directly with question_id=19 bypassing clean()
+        f_default = LeadField_Register.objects.create(work=self.work, name='Direct Source', question_id=19)
+
+        # Dry run does not clear
+        out = io.StringIO()
+        call_command('clear_default_mapped_fields', stdout=out)
+        self.assertIn('DRY RUN', out.getvalue())
+        f_default.refresh_from_db()
+        self.assertEqual(f_default.question_id, 19)
+
+        # --apply clears question_id to None
+        out_apply = io.StringIO()
+        call_command('clear_default_mapped_fields', apply=True, stdout=out_apply)
+        self.assertIn('Successfully cleared question_id on 1 field(s)', out_apply.getvalue())
+        f_default.refresh_from_db()
+        self.assertIsNone(f_default.question_id)
 
     def test_lead_source_19_asked_only_when_source_is_empty(self):
         # 1. Source is filled -> 19 is not asked

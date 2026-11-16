@@ -24,7 +24,6 @@ DEFAULT_FIELD_QUESTION_MAP = {
     'full_name': 1,
     'email': 2,
     'phone': 3,
-    'course': COURSE_QUESTION_ID,
     'lead_source': LEAD_SOURCE_QUESTION_ID,
 }
 
@@ -147,11 +146,11 @@ def get_lead_missing_interview_questions(lead):
     """
     Compute which interview questions must be asked for this candidate.
     Asks only the questions whose value is not already filled on the lead:
-      - Default fields: Full name -> 1, Email -> 2, Phone -> 3, Course -> 6, Lead Source -> 19.
+      - Default fields: Full name -> 1, Email -> 2, Phone -> 3, Lead Source -> 19.
         Include only when lead value is empty (blank or whitespace counts as empty).
       - Custom fields of the lead's work (LeadField_Register rows with a question_id):
         Include only when the lead has no non-empty value for that field in LeadDetails.
-      - If a custom field is mapped to the same ID as a default field (e.g. custom field on 6 or 19):
+      - If a custom field is mapped to the same ID as a default field (e.g. custom field on 19):
         Dedupe, treat the question as needed if EITHER value is empty, and log/report the conflict.
       - Internship dependency: when the lead's internship_done value is "No" (case-insensitive),
         do not ask 22, 23 or 24 even if empty. When it is "Yes" or still empty, ask them as normal.
@@ -163,8 +162,6 @@ def get_lead_missing_interview_questions(lead):
     name_empty = not bool(lead.name and lead.name.strip())
     email_empty = not bool(lead.email and lead.email.strip())
     phone_empty = not bool(lead.contact and lead.contact.strip())
-    course_val = get_lead_course_value(lead)
-    course_empty = not bool(course_val and course_val.strip())
     source_val = getattr(lead, 'source', None) or ""
     source_empty = not bool(source_val and source_val.strip())
 
@@ -172,7 +169,6 @@ def get_lead_missing_interview_questions(lead):
         1: name_empty,
         2: email_empty,
         3: phone_empty,
-        COURSE_QUESTION_ID: course_empty,
         LEAD_SOURCE_QUESTION_ID: source_empty,
     }
 

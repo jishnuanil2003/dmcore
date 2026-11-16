@@ -1,8 +1,33 @@
+function updateQuestionOptions(selectElement, currentFieldId = null) {
+  const assigned = window.assignedWorkQuestions || {};
+  selectElement.querySelectorAll('option').forEach(opt => {
+    const qid = opt.value;
+    const originalLabel = opt.getAttribute('data-original-label') || opt.textContent.replace(/ \(used by: .*\)$/, '');
+    if (!opt.getAttribute('data-original-label')) {
+      opt.setAttribute('data-original-label', originalLabel);
+    }
+    if (!qid) {
+      opt.disabled = false;
+      opt.textContent = originalLabel;
+      return;
+    }
+    const record = assigned[qid];
+    if (record && (!currentFieldId || String(record.field_id) !== String(currentFieldId))) {
+      opt.disabled = true;
+      opt.textContent = `${originalLabel} (used by: ${record.field_name})`;
+    } else {
+      opt.disabled = false;
+      opt.textContent = originalLabel;
+    }
+  });
+}
+
 document.querySelectorAll('.add-field-category').forEach(btn => {
   btn.addEventListener('click', function () {
     const categoryId = this.dataset.categoryid;
     document.getElementById('addFieldForm').reset();
     document.getElementById('add_field_category_id').value = categoryId;
+    updateQuestionOptions(document.getElementById('add_field_question_id'));
 
     fetch(`/get-category/${categoryId}/`)
       .then(res => res.json())
@@ -44,6 +69,7 @@ document.querySelectorAll('.edit-lead-field').forEach(button => {
         document.getElementById('edit_field_id').value = fieldId;
         document.getElementById('edit_field_name').value = data.name || '';
         document.getElementById('edit_field_description').value = data.description || '';
+        updateQuestionOptions(document.getElementById('edit_field_question_id'), fieldId);
         document.getElementById('edit_field_question_id').value = data.question_id || '';
         new bootstrap.Modal(document.getElementById('editFieldModal')).show();
       })
