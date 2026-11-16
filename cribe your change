@@ -1,0 +1,262 @@
+[33mcommit a503bdd7ba93b9c154319cbde608ba1b2cb02265[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: Jishnu Anil <aniljishnu07@gmail.com>
+Date:   Sat Nov 14 14:59:00 2026 +0530
+
+    fixed lead collection issue
+
+ dmcore/dmcore                                      |     1 [31m-[m
+ dmcore/dmcore/.gitignore                           |    23 [32m+[m
+ dmcore/dmcore/README.md                            |   Bin [31m0[m -> [32m22[m bytes
+ dmcore/dmcore/__init__.py                          |     0
+ dmcore/dmcore/asgi.py                              |    16 [32m+[m
+ dmcore/dmcore/assets/admin/css/admin_clients.css   |    54 [32m+[m
+ .../dmcore/assets/admin/css/admin_clients_new.css  |    29 [32m+[m
+ .../assets/admin/css/admin_completed_clients.css   |    13 [32m+[m
+ .../assets/admin/css/admin_executive_works.css     |    53 [32m+[m
+ .../dmcore/assets/admin/css/admin_head_works.css   |   125 [32m+[m
+ .../assets/admin/css/admin_ongoing_clients.css     |    51 [32m+[m
+ .../assets/admin/css/admin_team_lead_works.css     |    53 [32m+[m
+ dmcore/dmcore/assets/admin/css/admin_works.css     |    63 [32m+[m
+ dmcore/dmcore/assets/admin/css/colour.css          |    10 [32m+[m
+ dmcore/dmcore/assets/admin/css/common.css          |    46 [32m+[m
+ .../dmcore/assets/admin/css/resigned_employees.css |    42 [32m+[m
+ dmcore/dmcore/assets/admin/js/admin_clients_new.js |   107 [32m+[m
+ .../assets/admin/js/admin_completed_clients.js     |   163 [32m+[m
+ .../assets/admin/js/admin_executive_works.js       |   251 [32m+[m
+ dmcore/dmcore/assets/admin/js/admin_head_works.js  |   366 [32m+[m
+ .../assets/admin/js/admin_ongoing_clients_base.js  |    86 [32m+[m
+ .../assets/admin/js/admin_team_lead_works.js       |   313 [32m+[m
+ dmcore/dmcore/assets/admin/js/admin_works.js       |    60 [32m+[m
+ dmcore/dmcore/assets/admin/js/oc_assigned_works.js |   140 [32m+[m
+ dmcore/dmcore/assets/admin/js/oc_client_tasks.js   |   137 [32m+[m
+ .../dmcore/assets/admin/js/oc_completed_works.js   |   140 [32m+[m
+ dmcore/dmcore/assets/admin/js/oc_ongoing_works.js  |   140 [32m+[m
+ .../dmcore/assets/admin/js/oc_registered_works.js  |   123 [32m+[m
+ .../dmcore/assets/admin/js/resigned_employees.js   |   116 [32m+[m
+ .../assets/datamanager/css/allocationleads.css     |    27 [32m+[m
+ dmcore/dmcore/assets/datamanager/css/colour.css    |    10 [32m+[m
+ dmcore/dmcore/assets/datamanager/css/common.css    |    46 [32m+[m
+ dmcore/dmcore/assets/datamanager/css/dashboard.css |    41 [32m+[m
+ dmcore/dmcore/assets/datamanager/css/databank.css  |     5 [32m+[m
+ .../assets/datamanager/js/allocationleads.js       |   284 [32m+[m
+ dmcore/dmcore/assets/datamanager/js/databank.js    |   152 [32m+[m
+ dmcore/dmcore/assets/datamanager/js/followup.js    |   306 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/allocate_work.css |    35 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/colour.css        |    10 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/common.css        |    46 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/dmwork.css        |    42 [32m+[m
+ .../assets/dm_head/css/head_verify_leads.css       |    21 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/leads_tracker.css |     7 [32m+[m
+ .../dmcore/assets/dm_head/css/register_client.css  |    40 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/register_work.css |    60 [32m+[m
+ .../assets/dm_head/css/resigned_employees.css      |    19 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/task_list.css     |    51 [32m+[m
+ .../assets/dm_head/css/tl_individual_works.css     |   124 [32m+[m
+ .../dmcore/assets/dm_head/css/transfer_leads.css   |    11 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/waste_leads.css   |     7 [32m+[m
+ dmcore/dmcore/assets/dm_head/css/works.css         |    60 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/add_work.js        |    91 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/allocate_work.js   |   166 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/assign_exec.js     |   214 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/dmBase.js          |    23 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/field_page.js      |    68 [32m+[m
+ .../dmcore/assets/dm_head/js/head_verify_leads.js  |   529 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/lead_reports.js    |   117 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/leads.js           |    31 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/leads_tracker.js   |   343 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/register_client.js |   169 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/register_work.js   |   339 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/repeated_leads.js  |   402 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/task_list.js       |    13 [32m+[m
+ .../dmcore/assets/dm_head/js/teamleader_tasks.js   |   249 [32m+[m
+ .../assets/dm_head/js/tl_individual_works.js       |   456 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/transfer_leads.js  |   555 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/waste_leads.js     |   429 [32m+[m
+ dmcore/dmcore/assets/dm_head/js/works.js           |   166 [32m+[m
+ .../dmcore/assets/executive/js/resume_extract.js   |    90 [32m+[m
+ dmcore/dmcore/assets/img/ab1.jpg                   |   Bin [31m0[m -> [32m432080[m bytes
+ dmcore/dmcore/assets/img/ab2.jpg                   |   Bin [31m0[m -> [32m538157[m bytes
+ dmcore/dmcore/assets/img/b1.jpg                    |   Bin [31m0[m -> [32m33123[m bytes
+ dmcore/dmcore/assets/img/b2.jpg                    |   Bin [31m0[m -> [32m29400[m bytes
+ dmcore/dmcore/assets/img/banner.jpg                |   Bin [31m0[m -> [32m3023302[m bytes
+ dmcore/dmcore/assets/img/blog1.jpg                 |   Bin [31m0[m -> [32m351563[m bytes
+ dmcore/dmcore/assets/img/blog2.jpg                 |   Bin [31m0[m -> [32m2790629[m bytes
+ dmcore/dmcore/assets/img/blog3.jpg                 |   Bin [31m0[m -> [32m2153426[m bytes
+ dmcore/dmcore/assets/img/default-logo.png          |   Bin [31m0[m -> [32m16217[m bytes
+ dmcore/dmcore/assets/img/default-profile.png       |   Bin [31m0[m -> [32m16217[m bytes
+ dmcore/dmcore/assets/img/empty.png                 |   Bin [31m0[m -> [32m430671[m bytes
+ dmcore/dmcore/assets/img/f1.jpg                    |   Bin [31m0[m -> [32m585100[m bytes
+ dmcore/dmcore/assets/img/f2.jpg                    |   Bin [31m0[m -> [32m2633076[m bytes
+ dmcore/dmcore/assets/img/f3.jpg                    |   Bin [31m0[m -> [32m1996130[m bytes
+ dmcore/dmcore/assets/img/hero.jpg                  |   Bin [31m0[m -> [32m739889[m bytes
+ dmcore/dmcore/assets/img/log.jpg                   |   Bin [31m0[m -> [32m358496[m bytes
+ dmcore/dmcore/assets/img/login.jpg                 |   Bin [31m0[m -> [32m284095[m bytes
+ dmcore/dmcore/assets/img/sem.png                   |   Bin [31m0[m -> [32m26689[m bytes
+ dmcore/dmcore/assets/img/seo.png                   |   Bin [31m0[m -> [32m13431[m bytes
+ dmcore/dmcore/assets/img/sm.webp                   |   Bin [31m0[m -> [32m38398[m bytes
+ dmcore/dmcore/assets/teamlead/css/colour.css       |    10 [32m+[m
+ dmcore/dmcore/assets/teamlead/css/common.css       |    41 [32m+[m
+ dmcore/dmcore/assets/teamlead/css/manage_leads.css |    20 [32m+[m
+ dmcore/dmcore/assets/teamlead/css/teamleadwork.css |    41 [32m+[m
+ .../assets/teamlead/css/tl_employees_works.css     |    16 [32m+[m
+ dmcore/dmcore/assets/teamlead/css/tl_new_works.css |    19 [32m+[m
+ .../assets/teamlead/css/tl_ongoing_works.css       |    53 [32m+[m
+ .../dmcore/assets/teamlead/js/completed_works.js   |    27 [32m+[m
+ .../teamlead/js/daily_work_lead_collection.js      |    16 [32m+[m
+ dmcore/dmcore/assets/teamlead/js/manage_leads.js   |   138 [32m+[m
+ .../assets/teamlead/js/tl_employees_works.js       |   241 [32m+[m
+ dmcore/dmcore/assets/teamlead/js/tl_new_works.js   |    40 [32m+[m
+ .../dmcore/assets/teamlead/js/tl_ongoing_works.js  |    61 [32m+[m
+ dmcore/dmcore/assets/telecaller/css/colour.css     |    10 [32m+[m
+ dmcore/dmcore/assets/telecaller/css/common.css     |    57 [32m+[m
+ dmcore/dmcore/assets/telecaller/css/dashboard.css  |    53 [32m+[m
+ .../assets/telecaller/css/followup_leads.css       |    47 [32m+[m
+ .../dmcore/assets/telecaller/css/leads_report.css  |     0
+ dmcore/dmcore/assets/telecaller/js/all_leads.js    |   106 [32m+[m
+ dmcore/dmcore/assets/telecaller/js/closed_leads.js |   201 [32m+[m
+ dmcore/dmcore/assets/telecaller/js/hr_dashboard.js |   130 [32m+[m
+ .../assets/telecaller/js/telecaller_followup.js    |   327 [32m+[m
+ .../telecaller/js/telecaller_leads_report.js       |   256 [32m+[m
+ dmcore/dmcore/assets/telecaller/js/waste_leads.js  |    95 [32m+[m
+ dmcore/dmcore/db.sqlite3                           |   Bin [31m0[m -> [32m1150976[m bytes
+ dmcore/dmcore/digitalmarketing/__init__.py         |     0
+ dmcore/dmcore/digitalmarketing/admin.py            |   119 [32m+[m
+ dmcore/dmcore/digitalmarketing/apps.py             |    15 [32m+[m
+ dmcore/dmcore/digitalmarketing/email_service.py    |    79 [32m+[m
+ dmcore/dmcore/digitalmarketing/forms.py            |    75 [32m+[m
+ dmcore/dmcore/digitalmarketing/google_form_sync.py |   118 [32m+[m
+ .../digitalmarketing/google_sheets_service.py      |    63 [32m+[m
+ dmcore/dmcore/digitalmarketing/groq_service.py     |   197 [32m+[m
+ .../dmcore/digitalmarketing/interview_questions.py |    30 [32m+[m
+ .../dmcore/digitalmarketing/management/__init__.py |     1 [32m+[m
+ .../management/commands/__init__.py                |     1 [32m+[m
+ .../management/commands/make_interview_link.py     |    34 [32m+[m
+ .../management/commands/map_default_fields.py      |   173 [32m+[m
+ .../digitalmarketing/migrations/0001_initial.py    |   224 [32m+[m
+ .../migrations/0002_auto_20250513_0925.py          |   129 [32m+[m
+ .../digitalmarketing/migrations/0003_workassign.py |    43 [32m+[m
+ ..._assign_leadcateogry_teamallocate_taskassign.py |    69 [32m+[m
+ .../migrations/0005_auto_20250522_0858.py          |    45 [32m+[m
+ .../migrations/0006_taskdetails_tl.py              |    31 [32m+[m
+ .../migrations/0007_auto_20250526_0529.py          |    32 [32m+[m
+ .../migrations/0008_leaddetails_leads.py           |    47 [32m+[m
+ .../migrations/0009_workprogress.py                |    29 [32m+[m
+ .../migrations/0010_socialmediapromotion.py        |    29 [32m+[m
+ .../0011_databank_platformdata_platforms.py        |    48 [32m+[m
+ .../0012_followupstatus_leadassignedtotc.py        |    40 [32m+[m
+ .../migrations/0013_alter_databank_lead_status.py  |    18 [32m+[m
+ .../0014_alter_leadassignedtotc_response.py        |    18 [32m+[m
+ ...ils_followuphistory_leadcallrecord_wastelead.py |    66 [32m+[m
+ .../migrations/0016_auto_20260410_0629.py          |    23 [32m+[m
+ .../digitalmarketing/migrations/0017_leadmeet.py   |    33 [32m+[m
+ .../migrations/0018_auto_20260425_0700.py          |    61 [32m+[m
+ .../migrations/0019_leadconfused.py                |    24 [32m+[m
+ ...argetassign_date_targetassign_month_and_more.py |   126 [32m+[m
+ ...fig_bottleadd_audiorecord_candidate_and_more.py |   134 [32m+[m
+ ...22_executivegoogleform_googleformapplication.py |    46 [32m+[m
+ ...3_leadconfused_interview_email_sent_and_more.py |    18 [32m+[m
+ .../migrations/0024_leadfield_question_mapping.py  |    26 [32m+[m
+ ...sinessregister_details_company_code_and_more.py |    23 [32m+[m
+ .../dmcore/digitalmarketing/migrations/__init__.py |     0
+ dmcore/dmcore/digitalmarketing/models.py           |  1162 [32m+[m
+ dmcore/dmcore/digitalmarketing/resume_parser.py    |   465 [32m+[m
+ dmcore/dmcore/digitalmarketing/scheduler.py        |    87 [32m+[m
+ dmcore/dmcore/digitalmarketing/serializers.py      |    56 [32m+[m
+ dmcore/dmcore/digitalmarketing/tasks.py            |   124 [32m+[m
+ dmcore/dmcore/digitalmarketing/tests.py            |   733 [32m+[m
+ dmcore/dmcore/digitalmarketing/urls.py             |   585 [32m+[m
+ dmcore/dmcore/digitalmarketing/utils.py            |   107 [32m+[m
+ dmcore/dmcore/digitalmarketing/views.py            | 21675 [32m+++++[m
+ dmcore/dmcore/dmcore/__init__.py                   |     0
+ dmcore/dmcore/dmcore/asgi.py                       |    16 [32m+[m
+ dmcore/dmcore/dmcore/settings.py                   |   198 [32m+[m
+ dmcore/dmcore/dmcore/urls.py                       |    25 [32m+[m
+ dmcore/dmcore/dmcore/wsgi.py                       |    16 [32m+[m
+ dmcore/dmcore/manage.py                            |    22 [32m+[m
+ .../media/client/files/IMG-20260612-WA0152.jpg     |   Bin [31m0[m -> [32m161328[m bytes
+ dmcore/dmcore/media/client/files/Screenshot_11.png |   Bin [31m0[m -> [32m206342[m bytes
+ .../media/client/files/Screenshot_11_6OfCikY.png   |   Bin [31m0[m -> [32m206342[m bytes
+ dmcore/dmcore/media/client/files/Screenshot_12.png |   Bin [31m0[m -> [32m186777[m bytes
+ .../media/client/files/Screenshot_12_ZSxKRKb.png   |   Bin [31m0[m -> [32m186777[m bytes
+ dmcore/dmcore/media/client/files/Screenshot_13.png |   Bin [31m0[m -> [32m175758[m bytes
+ .../media/client/files/Screenshot_13_IfLzHQy.png   |   Bin [31m0[m -> [32m175758[m bytes
+ dmcore/dmcore/media/client/files/Screenshot_14.png |   Bin [31m0[m -> [32m192027[m bytes
+ dmcore/dmcore/media/client/files/a1.jpg            |   Bin [31m0[m -> [32m33155[m bytes
+ dmcore/dmcore/media/client/files/a1_akoCiZD.jpg    |   Bin [31m0[m -> [32m33155[m bytes
+ .../client/files/component_issue_details_6.pdf     |    74 [32m+[m
+ dmcore/dmcore/media/client/logo/405239.jpg         |   Bin [31m0[m -> [32m905552[m bytes
+ .../media/client/logo/IMG-20260612-WA0152.jpg      |   Bin [31m0[m -> [32m161328[m bytes
+ dmcore/dmcore/media/client/logo/SUN.jpg            |   Bin [31m0[m -> [32m71726[m bytes
+ dmcore/dmcore/media/client/logo/Screenshot_12.png  |   Bin [31m0[m -> [32m186777[m bytes
+ dmcore/dmcore/media/client/logo/Screenshot_13.png  |   Bin [31m0[m -> [32m175758[m bytes
+ dmcore/dmcore/media/client/logo/Screenshot_14.png  |   Bin [31m0[m -> [32m192027[m bytes
+ .../media/client/logo/Screenshot_14_DwpASZb.png    |   Bin [31m0[m -> [32m192027[m bytes
+ .../media/client/logo/Screenshot_14_ZiYelij.png    |   Bin [31m0[m -> [32m192027[m bytes
+ dmcore/dmcore/media/client/logo/Screenshot_45.png  |   Bin [31m0[m -> [32m1236077[m bytes
+ .../WhatsApp_Image_2026-08-30_at_5.05.56_PM.jpeg   |   Bin [31m0[m -> [32m108838[m bytes
+ dmcore/dmcore/media/client/logo/amazonlogo.jpeg    |   Bin [31m0[m -> [32m6282[m bytes
+ .../logo/beautiful-domestic-cat-laying-fence.jpg   |   Bin [31m0[m -> [32m3435928[m bytes
+ dmcore/dmcore/media/client/logo/bmw.jpg            |   Bin [31m0[m -> [32m1964000[m bytes
+ dmcore/dmcore/media/client/logo/ikealogo.png       |   Bin [31m0[m -> [32m2557[m bytes
+ .../client/logo/nature-flowers-garden-863963.jpg   |   Bin [31m0[m -> [32m1624175[m bytes
+ .../media/client/profile/IMG-20260612-WA0156.jpg   |   Bin [31m0[m -> [32m183268[m bytes
+ .../dmcore/media/client/profile/Screenshot_11.png  |   Bin [31m0[m -> [32m206342[m bytes
+ .../media/client/profile/Screenshot_11_5SlCEjY.png |   Bin [31m0[m -> [32m206342[m bytes
+ .../media/client/profile/Screenshot_11_kAo73DD.png |   Bin [31m0[m -> [32m206342[m bytes
+ .../dmcore/media/client/profile/Screenshot_12.png  |   Bin [31m0[m -> [32m186777[m bytes
+ .../media/client/profile/Screenshot_12_OOJ9TeN.png |   Bin [31m0[m -> [32m186777[m bytes
+ .../media/client/profile/Screenshot_12_aQ6rjM3.png |   Bin [31m0[m -> [32m186777[m bytes
+ .../dmcore/media/client/profile/Screenshot_14.png  |   Bin [31m0[m -> [32m192027[m bytes
+ .../WhatsApp_Image_2026-08-30_at_5.05.56_PM.jpeg   |   Bin [31m0[m -> [32m108838[m bytes
+ dmcore/dmcore/media/client/profile/avatar.jpg      |   Bin [31m0[m -> [32m1249[m bytes
+ .../dmcore/media/client/profile/avatar_UWpVjRz.jpg |   Bin [31m0[m -> [32m1249[m bytes
+ .../client/profile/component_issue_details_6.pdf   |    74 [32m+[m
+ dmcore/dmcore/media/client/profile/g1.jpg          |   Bin [31m0[m -> [32m34158[m bytes
+ dmcore/dmcore/media/client/profile/m1.jpg          |   Bin [31m0[m -> [32m24674[m bytes
+ dmcore/dmcore/media/client/profile/m1_FkeTojs.jpg  |   Bin [31m0[m -> [32m24674[m bytes
+ dmcore/dmcore/media/client/profile/m1_vv7JLZW.jpg  |   Bin [31m0[m -> [32m24674[m bytes
+ .../media/client/profile/playground_safety.jpg     |   Bin [31m0[m -> [32m115824[m bytes
+ dmcore/dmcore/media/client/profile/profile.jpg     |   Bin [31m0[m -> [32m20652[m bytes
+ .../client/profile/view-bicycle-silhouette.jpg     |   Bin [31m0[m -> [32m1823078[m bytes
+ .../profile/view-bicycle-silhouette_7P58yx0.jpg    |   Bin [31m0[m -> [32m1823078[m bytes
+ .../dmcore/media/daily_work/files/03_June_2025.png |   Bin [31m0[m -> [32m54593[m bytes
+ .../media/daily_work/files/19_December_2025.png    |   Bin [31m0[m -> [32m61525[m bytes
+ .../daily_work/files/19_December_2025_frhFQCb.png  |   Bin [31m0[m -> [32m61525[m bytes
+ .../daily_work/files/19_December_2025_knqx1tN.png  |   Bin [31m0[m -> [32m61525[m bytes
+ .../media/daily_work/files/21_November_2025.png    |   Bin [31m0[m -> [32m64845[m bytes
+ .../daily_work/files/21_November_2025_DFFApNi.png  |   Bin [31m0[m -> [32m64845[m bytes
+ .../media/daily_work/files/22_april_2025.png       |   Bin [31m0[m -> [32m57369[m bytes
+ dmcore/dmcore/media/daily_work/files/CAP.jpg       |   Bin [31m0[m -> [32m18271[m bytes
+ .../dmcore/media/daily_work/files/CAP_k3kBfI8.jpg  |   Bin [31m0[m -> [32m18271[m bytes
+ .../media/daily_work/files/Client111_27_1.xlsx     |   Bin [31m0[m -> [32m7121[m bytes
+ .../daily_work/files/Lead_Details_2026-06-13.pdf   |   Bin [31m0[m -> [32m215388[m bytes
+ .../media/daily_work/files/Lead_Report_1.pdf       |   Bin [31m0[m -> [32m73099[m bytes
+ .../dmcore/media/daily_work/files/Leads_List.pdf   |   527 [32m+[m
+ .../media/daily_work/files/Leads_List_1.xlsx       |   Bin [31m0[m -> [32m17076[m bytes
+ .../daily_work/files/Leads_List_1_BI5UKRO.xlsx     |   Bin [31m0[m -> [32m17076[m bytes
+ .../media/daily_work/files/Screenshot_1306.png     |   Bin [31m0[m -> [32m441801[m bytes
+ .../media/daily_work/files/TL_part_1_submit.png    |   Bin [31m0[m -> [32m44732[m bytes
+ .../daily_work/files/TL_part_1_submit_V7R1VDK.png  |   Bin [31m0[m -> [32m44732[m bytes
+ .../daily_work/files/TL_part_1_submit_esBfKcd.png  |   Bin [31m0[m -> [32m44732[m bytes
+ .../daily_work/files/TL_part_1_submit_tzMJwXn.png  |   Bin [31m0[m -> [32m44732[m bytes
+ .../daily_work/files/Waste_Leads_2026-06-13.pdf    |   Bin [31m0[m -> [32m56022[m bytes
+ dmcore/dmcore/media/daily_work/files/a1.jpg        |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_3uxBBAm.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_QAIfdv4.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_V0IbjWE.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_Xofc5FO.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_YAaazS7.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_coSpbwt.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_iGJYXhz.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_qdMVGyX.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ .../dmcore/media/daily_work/files/a1_sC6rJGY.jpg   |   Bin [31m0[m -> [32m33155[m bytes
+ dmcore/dmcore/media/daily_work/files/b2.jpg        |   Bin [31m0[m -> [32m36448[m bytes
+ .../daily_work/files/chokking_and_suffocation.jpg  |   Bin [31m0[m -> [32m7960[m bytes
+ .../files/component_issue_details_6_IhJtcvw.pdf    |    74 [32m+[m
+ .../component_issue_details_6_IhJtcvw_z59y1yk.pdf  |    74 [32m+[m
+ .../daily_work/files/consultant_register_4.pdf     |    92 [32m+[m
+ dmcore/dmcore/media/daily_work/files/d1.jpeg       |   Bin [31m0[m -> [32m9847[m bytes
+ .../dmcore/media/daily_work/files/lead-details.pdf |   Bin [31m0[m -> [32m174287[m bytes
+ dmcore/dmcore/media/daily_work/files/submit.png    |   Bin [31m0[m -> [32m50714[m bytes
+ .../media/leave/files/03.06.2025_11.58.19_REC.png  |   Bin [31m0[m -> [32m20500[m bytes
+ dmcore/dmc
