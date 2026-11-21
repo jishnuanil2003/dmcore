@@ -1,0 +1,13 @@
+Hello {{ candidate_name }},
+
+You have been invited to complete your interview with {{ company_name }}.
+
+Please access your interview using the following link:
+{{ link }}
+
+This interview link is valid for 7 days.
+
+If you have any questions or require support, please reply directly to this email.
+
+Best regards,
+{{ company_name }}

@@ -9893,6 +9893,7 @@ def send_lead_interview(request, pk):
     from datetime import timedelta
     from django.core.exceptions import ValidationError
     from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
     from django.db import transaction
     from django.utils.html import escape
     from django.utils import timezone
@@ -10013,33 +10014,41 @@ def send_lead_interview(request, pk):
             success_msg = f'SMS sent to {masked_dest}'
 
         else:  # email
-            subject = 'Interview Invitation'
-            candidate_name = lead.name or ''
-            body = f'Hello {candidate_name},\n\nConduct your interview by clicking the link below:\n{link}'
-            html_body = (
-                f'<p>Hello {escape(candidate_name)},</p>'
-                f'<p>Conduct your interview by clicking <a href="{escape(link)}">this link</a>.</p>'
-            )
+            candidate_name = (lead.name or '').strip() or 'Candidate'
+            company_name = getattr(settings, 'COMPANY_NAME', 'Altos Technologies')
+            subject = f"Your interview invitation from {company_name}"
+            context = {
+                'candidate_name': candidate_name,
+                'company_name': company_name,
+                'link': link,
+            }
+            body = render_to_string('emails/interview_invite.txt', context)
+            html_body = render_to_string('emails/interview_invite.html', context)
             email = EmailMultiAlternatives(
-                subject,
-                body,
-                settings.DEFAULT_FROM_EMAIL,
-                [lead.email],
+                subject=subject,
+                body=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[lead.email],
+                reply_to=[settings.DEFAULT_FROM_EMAIL],
             )
             email.attach_alternative(html_body, 'text/html')
             try:
                 sent_count = email.send(fail_silently=False)
             except Exception as exc:
-                logger.exception(
-                    'Interview invitation email failed for lead_id=%s', lead.pk
+                logger.error(
+                    'Interview invitation email failed for lead_id=%s with error type: %s',
+                    lead.pk,
+                    type(exc).__name__,
                 )
-                if isinstance(exc, socket.gaierror):
-                    error_message = 'Could not resolve the Gmail SMTP server. Check DNS and network access to smtp.gmail.com.'
-                elif isinstance(exc, smtplib.SMTPAuthenticationError):
-                    error_message = 'Gmail rejected the SMTP credentials. Check the sender address and Google App Password.'
+                if isinstance(exc, smtplib.SMTPAuthenticationError):
+                    error_message = 'Email could not be sent. Mail login failed.'
                 elif isinstance(exc, smtplib.SMTPServerDisconnected):
-                    error_message = 'Gmail closed the SMTP session during login. Check the Gmail sender address, Google App Password, and account SMTP access.'
-                elif isinstance(exc, (OSError, TimeoutError)):
+                    error_message = 'Email could not be sent. SMTP server disconnected unexpectedly.'
+                elif isinstance(exc, socket.gaierror):
+                    error_message = 'Could not resolve the Gmail SMTP server. Check DNS and network access to smtp.gmail.com.'
+                elif isinstance(exc, (TimeoutError, socket.timeout)):
+                    error_message = 'Email could not be sent. Connection to the mail server timed out.'
+                elif isinstance(exc, (socket.error, OSError)):
                     error_message = 'Could not connect to the Gmail SMTP server. Check network access to smtp.gmail.com:587.'
                 else:
                     error_message = 'The email provider failed to send the interview invitation.'

@@ -1,3 +1,4 @@
+from django.conf import settings
 import base64
 import hashlib
 import hmac
@@ -291,11 +292,11 @@ class SendInterviewTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
         self.assertEqual(message.to, ['candidate@example.test'])
-        self.assertEqual(message.subject, 'Interview Invitation')
-        link = message.body.splitlines()[-1]
-        self.assertIn('?token=', link)
-        self.assertNotIn('?data=', link)
-        self.assertNotIn('&sig=', link)
+        company_name = getattr(settings, 'COMPANY_NAME', 'Altos Technologies')
+        self.assertEqual(message.subject, f"Your interview invitation from {company_name}")
+        self.assertIn('?token=', message.body)
+        self.assertNotIn('?data=', message.body)
+        self.assertNotIn('&sig=', message.body)
 
         # 10-minute resend guard
         self.assertEqual(self.csrf_post(self.path).status_code, 409)
@@ -1014,3 +1015,114 @@ class TestNewInterviewQuestions19To24(TestCase):
         # Location (20) is asked; 21 is filled; 22, 23, 24 are suppressed by "No"
         self.assertEqual(qids, [20])
         self.assertEqual(questions[0]['field_key'], 'location')
+
+
+@override_settings(
+    AI_HR_API_KEY='test-api-key',
+    AI_HR_URL='https://interviews.example.test/',
+    INTERVIEW_LINK='https://interviews.example.test/',
+    INTERVIEW_LINK_SIGN=True,
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    DEFAULT_FROM_EMAIL='career@altostechnologies.in',
+    COMPANY_NAME='Altos Technologies',
+    SMS_BACKEND='locmem',
+)
+class InterviewInvitationEmailTests(TestCase):
+    def setUp(self):
+        LocmemSMSBackend.reset()
+        self.company = BusinessRegister_Details.objects.create(company_code='INV001', company_name='Inv Co')
+        self.login = LogRegister_Details.objects.create(log_username='inv_mgr', position='Data_Manager')
+        self.manager = EmployeeRegister_Details.objects.create(login=self.login, company=self.company, name='Inv Manager')
+        self.work = WorkRegister.objects.create(company=self.company)
+        self.client_task = ClientTask_Register.objects.create(company=self.company, work=self.work, task_name='Inv Task')
+        self.category = LeadCategory_Register.objects.create(client_task=self.client_task, collection_for='Inv Hiring')
+        self.lead = Leads.objects.create(
+            collected_by=self.manager, work=self.work, lead_category=self.category,
+            name='Jane Candidate', email='jane@example.test', contact='9876543211',
+        )
+        LeadConfused.objects.create(lead=self.lead, executive_id=self.manager)
+        LeadField_Register.objects.create(
+            work=self.work, lead_category=self.category,
+            name='Experience', description='Describe experience', question_id=5
+        )
+        self.path = f'/api/leads/{self.lead.pk}/send-interview/'
+        self.client = Client(enforce_csrf_checks=True)
+        session = self.client.session
+        session['did'] = 'inv_mgr'
+        session.save()
+
+    def csrf_post(self, path):
+        self.client.get('/databank/')
+        token = self.client.cookies['csrftoken'].value
+        return self.client.post(path, HTTP_X_CSRFTOKEN=token)
+
+    def test_interview_invitation_email_details_in_outbox(self):
+        from django.core import mail
+        mail.outbox.clear()
+
+        response = self.csrf_post(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+
+        msg = mail.outbox[0]
+        company_name = getattr(settings, 'COMPANY_NAME', 'Altos Technologies')
+
+        # 1. Subject
+        self.assertEqual(msg.subject, f"Your interview invitation from {company_name}")
+
+        # 2. From & To & Reply-To
+        self.assertEqual(msg.from_email, settings.DEFAULT_FROM_EMAIL)
+        self.assertEqual(msg.to, ['jane@example.test'])
+        self.assertEqual(msg.reply_to, [settings.DEFAULT_FROM_EMAIL])
+
+        # 3. Multipart: both text and HTML present
+        self.assertTrue(msg.body)
+        self.assertEqual(len(msg.alternatives), 1)
+        html_content, mimetype = msg.alternatives[0]
+        self.assertEqual(mimetype, 'text/html')
+
+        # 4. Candidate name and link in both parts
+        self.assertIn('Jane Candidate', msg.body)
+        self.assertIn('Jane Candidate', html_content)
+        self.assertIn('?token=', msg.body)
+        self.assertIn('?token=', html_content)
+
+        # 5. "valid for 7 days" in both parts
+        self.assertIn('valid for 7 days', msg.body.lower())
+        self.assertIn('valid for 7 days', html_content.lower())
+
+        # 6. No password or secret in output
+        pw = settings.EMAIL_HOST_PASSWORD or ''
+        if pw:
+            self.assertNotIn(pw, msg.body)
+            self.assertNotIn(pw, html_content)
+            self.assertNotIn(pw, msg.subject)
+
+    def test_smtp_auth_error_returns_actionable_message(self):
+        with patch('django.core.mail.EmailMultiAlternatives.send', side_effect=smtplib.SMTPAuthenticationError(535, b'BadCredentials')):
+            response = self.csrf_post(self.path)
+        self.assertEqual(response.status_code, 502)
+        self.assertIn('Mail login failed', response.json()['message'])
+
+    def test_smtp_server_disconnected_returns_actionable_message(self):
+        with patch('django.core.mail.EmailMultiAlternatives.send', side_effect=smtplib.SMTPServerDisconnected('Connection unexpectedly closed')):
+            response = self.csrf_post(self.path)
+        self.assertEqual(response.status_code, 502)
+        self.assertIn('SMTP server disconnected unexpectedly', response.json()['message'])
+
+    def test_smtp_timeout_returns_actionable_message(self):
+        with patch('django.core.mail.EmailMultiAlternatives.send', side_effect=TimeoutError('timed out')):
+            response = self.csrf_post(self.path)
+        self.assertEqual(response.status_code, 502)
+        self.assertIn('Connection to the mail server timed out', response.json()['message'])
+
+    def test_send_test_email_management_command(self):
+        from django.core.management import call_command
+        from django.core import mail
+        import io
+        mail.outbox.clear()
+        out = io.StringIO()
+        call_command('send_test_email', 'testcmd@example.test', stdout=out)
+        self.assertIn('Successfully sent test email', out.getvalue())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['testcmd@example.test'])

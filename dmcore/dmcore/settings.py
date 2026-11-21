@@ -144,19 +144,61 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Email
+# Helper functions for robust environment variable normalization
+def _clean_env_val(key, default=''):
+    raw = os.environ.get(key, default)
+    if raw is None:
+        return ''
+    val = str(raw).strip()
+    if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+        val = val[1:-1].strip()
+    return val
 
-EMAIL_BACKEND = os.environ.get(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend',
-)
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() in ('1', 'true', 'yes')
-EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'false').lower() in ('1', 'true', 'yes')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', os.environ.get('EMAIL_PASSWORD', ''))
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+def _clean_env_bool(key, default=False):
+    val = _clean_env_val(key, 'true' if default else 'false').lower()
+    return val in ('1', 'true', 'yes', 'on')
+
+
+# Email Configuration
+EMAIL_HOST = _clean_env_val('EMAIL_HOST', 'smtp.gmail.com')
+
+_email_port_raw = _clean_env_val('EMAIL_PORT', '587')
+try:
+    EMAIL_PORT = int(_email_port_raw)
+except ValueError:
+    EMAIL_PORT = 587
+
+EMAIL_USE_TLS = _clean_env_bool('EMAIL_USE_TLS', default=True)
+EMAIL_USE_SSL = _clean_env_bool('EMAIL_USE_SSL', default=False)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    import logging
+    logging.getLogger('django.mail').warning(
+        "Both EMAIL_USE_TLS and EMAIL_USE_SSL are set to True. Mutually exclusive: EMAIL_USE_SSL takes precedence; setting EMAIL_USE_TLS to False."
+    )
+    EMAIL_USE_TLS = False
+
+EMAIL_HOST_USER = _clean_env_val('EMAIL_HOST_USER', '')
+
+_raw_password = _clean_env_val('EMAIL_HOST_PASSWORD', '')
+if not _raw_password:
+    _raw_password = _clean_env_val('EMAIL_PASSWORD', '')
+EMAIL_HOST_PASSWORD = _raw_password.replace(' ', '')
+
+DEFAULT_FROM_EMAIL = _clean_env_val('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+COMPANY_NAME = _clean_env_val('COMPANY_NAME', 'Altos Technologies')
+EMAIL_TIMEOUT = 20
+
+_configured_backend = _clean_env_val('EMAIL_BACKEND', '')
+if EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = _configured_backend or 'django.core.mail.backends.smtp.EmailBackend'
+elif DEBUG:
+    EMAIL_BACKEND = _configured_backend or 'django.core.mail.backends.console.EmailBackend'
+else:
+    import logging
+    logging.getLogger('django.mail').error(
+        "Email configuration missing: EMAIL_HOST, EMAIL_HOST_USER, or EMAIL_HOST_PASSWORD is not set in production."
+    )
+    EMAIL_BACKEND = _configured_backend or 'django.core.mail.backends.smtp.EmailBackend'
 
 
 # AI HR interview integration
